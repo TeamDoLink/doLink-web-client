@@ -29,7 +29,7 @@ export default {
         'display-2xl': ['22px', { lineHeight: '30px', fontWeight: '600' }],
 
         // heading
-        'heading-xl': ['20px', { lineHeight: '24px', fontWeight: '600' }],
+        'heading-xl': ['20px', { lineHeight: '28px', fontWeight: '600' }],
         'heading-lg': ['18px', { lineHeight: '24px', fontWeight: '600' }],
         'heading-md': ['16px', { lineHeight: '20px', fontWeight: '600' }],
         'heading-sm': ['16px', { lineHeight: '20px', fontWeight: '500' }],
