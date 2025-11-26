@@ -237,13 +237,22 @@ function CommonTestComponent() {
     {
       id: 1,
       title: '타이틀(Title)14pt/SB',
-      subtitle: '1일 전 · Instagram',
+      time: '1일 전',
+      platform: 'Instagram',
       checked: false,
     },
     {
       id: 2,
       title: '또 다른 할일',
-      subtitle: '2시간 전 · Twitter',
+      time: '2시간 전',
+      platform: 'Twitter',
+      checked: false,
+    },
+    {
+      id: 3,
+      title: '가나다라마바사아자차카타파하ABCDEFG',
+      time: '2시간 전',
+      platform: 'Twitter',
       checked: false,
     },
   ]);
@@ -898,7 +907,7 @@ function CommonTestComponent() {
             <List.TodoItem
               key={item.id}
               title={item.title}
-              subtitle={item.subtitle}
+              subtitle={`${item.time} · ${item.platform}`}
               checked={item.checked}
               onChange={(checked) => {
                 setTodoItems(
@@ -973,18 +982,26 @@ function CommonTestComponent() {
           </div>
 
           <div className='border-t border-grey-200 pt-4'>
-            <p className='mb-3 text-sm font-semibold'>Edit Type - 이미지 1개</p>
+            <p className='mb-3 text-sm font-semibold'>
+              ✨ 터치 상호작용 테스트 (포인터/터치 환경)
+            </p>
+            <p className='mb-4 text-sm text-grey-600'>
+              "..." 버튼을 클릭하면 edit/delete 버튼이 나타나고, 카드 외부를
+              클릭하면 다시 default로 돌아갑니다.
+            </p>
             <List.ArchiveCard
-              type='edit'
-              title='편집 가능한 보관함'
-              category='취미'
-              itemCount={2}
-              width='w-[335px]'
+              type='default'
+              title='터치 상호작용 테스트'
+              category='터치 테스트'
+              itemCount={5}
               images={[
                 'https://www.figma.com/api/mcp/asset/2653ef1d-ae33-425b-87f8-26e361b2e09e',
+                'https://www.figma.com/api/mcp/asset/2653ef1d-ae33-425b-87f8-26e361b2e09e',
               ]}
-              onEditClick={() => alert('Edit clicked!')}
-              onDeleteClick={() => alert('Delete clicked!')}
+              onMoreClick={() => console.log('More button clicked!')}
+              onTypeChange={(type) => console.log(`Type changed to: ${type}`)}
+              onEditClick={() => alert('✏️ Edit clicked!')}
+              onDeleteClick={() => alert('🗑️ Delete clicked!')}
             />
           </div>
         </div>
