@@ -16,6 +16,7 @@ export default function AlertDialog({
   onSecondary,
 }: AlertDialogProps) {
   return (
+    // TODO 근사값으로 맞춰놓음 디자이너분들과 논의 후 수정 예정
     <div className='flex w-96 flex-col gap-7 rounded-2xl bg-white px-5 py-6 shadow-xl'>
       {/* Text Section */}
       <div className='flex w-full flex-col gap-2'>
@@ -30,7 +31,7 @@ export default function AlertDialog({
         {/* Primary CTA Button */}
         <button
           onClick={onPrimary}
-          className='flex h-11 w-full items-center justify-center rounded-lg bg-point font-semibold text-white transition-colors hover:bg-blue-600 active:bg-blue-700'
+          className='flex h-11 w-full items-center justify-center rounded-lg bg-point text-body-lg text-white'
         >
           {primaryLabel}
         </button>
@@ -38,7 +39,7 @@ export default function AlertDialog({
         {/* Secondary Text Button with Underline */}
         <button
           onClick={onSecondary}
-          className='w-full text-center text-body-md text-grey-800 underline transition-colors hover:text-grey-900'
+          className='w-full text-center text-body-lg text-grey-800 underline'
         >
           {secondaryLabel}
         </button>

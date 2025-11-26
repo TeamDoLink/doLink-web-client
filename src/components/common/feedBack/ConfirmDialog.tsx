@@ -1,21 +1,22 @@
 export type ConfirmDialogProps = {
   title: string;
   subtitle?: string;
-  positiveLabel?: string;
-  negativeLabel?: string;
-  onPositive?: () => void;
-  onNegative?: () => void;
+  positiveLabel: string;
+  negativeLabel: string;
+  onPositive: () => void;
+  onNegative: () => void;
 };
 
 export default function ConfirmDialog({
   title,
   subtitle,
-  positiveLabel = 'Positive',
-  negativeLabel = 'Negative',
+  positiveLabel,
+  negativeLabel,
   onPositive,
   onNegative,
 }: ConfirmDialogProps) {
   return (
+    // TODO 근사값으로 맞춰놓음 디자이너분들과 논의 후 수정 예정
     <div className='flex w-96 flex-col gap-7 rounded-2xl bg-white px-5 py-6'>
       {/* Text Section */}
       <div className='flex w-full flex-col gap-2'>
@@ -24,13 +25,12 @@ export default function ConfirmDialog({
           <p className='w-full text-body-md text-grey-500'>{subtitle}</p>
         )}
       </div>
-
       {/* Button Section */}
       <div className='flex w-full flex-col items-center gap-3'>
         {/* Primary CTA Button */}
         <button
           onClick={onPositive}
-          className='flex h-11 w-full items-center justify-center rounded-lg bg-point font-semibold text-white transition-colors hover:bg-blue-600 active:bg-blue-700'
+          className='flex h-11 w-full items-center justify-center rounded-lg bg-point text-body-lg text-white'
         >
           {positiveLabel}
         </button>
@@ -38,7 +38,7 @@ export default function ConfirmDialog({
         {/* Secondary Text Button */}
         <button
           onClick={onNegative}
-          className='w-full text-center text-body-md text-grey-800 transition-colors hover:text-grey-900'
+          className='w-full text-center text-body-md text-grey-800'
         >
           {negativeLabel}
         </button>

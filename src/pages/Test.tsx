@@ -548,8 +548,8 @@ function CommonTestComponent() {
           <FeedBack.ConfirmDialog
             title='제목이 들어갑니다'
             subtitle='부제목이 들어갑니다'
-            positiveLabel='동의합니다'
-            negativeLabel='취소'
+            positiveLabel='Positive'
+            negativeLabel='Negative'
             onPositive={() => {
               alert('Positive action!');
               setShowConfirmDialog(false);
@@ -578,8 +578,8 @@ function CommonTestComponent() {
           <FeedBack.AlertDialog
             title='알림 제목'
             subtitle='알림 내용이 여기에 들어갑니다'
-            primaryLabel='확인'
-            secondaryLabel='취소'
+            primaryLabel='Postive'
+            secondaryLabel='텍스트버튼'
             onPrimary={() => {
               alert('Primary action!');
               setShowAlertDialog(false);
