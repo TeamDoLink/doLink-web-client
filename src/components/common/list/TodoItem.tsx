@@ -1,43 +1,29 @@
-const imgEllipseChecked =
-  'https://www.figma.com/api/mcp/asset/e60083f2-1ce7-4e7a-a6e7-83e6a0180c10';
-const imgCheckIcon =
-  'https://www.figma.com/api/mcp/asset/cba82206-0083-4844-872d-cc39c33baeda';
-const imgEllipseUnchecked =
-  'https://www.figma.com/api/mcp/asset/b06053c9-4c78-46ba-a43a-501393664638';
-
 type CheckboxComponentProps = {
   checked?: boolean;
 };
 
-// TODO 앱 위에서 test 필요
 function CheckboxComponent({ checked = false }: CheckboxComponentProps) {
   if (checked) {
     return (
-      <div className='relative size-6 overflow-clip'>
-        <img
-          alt='checked'
-          className='block size-full'
-          src={imgEllipseChecked}
-        />
-        <div className='absolute left-[6.48px] top-[8.4px] h-[7.2px] w-[10.8px]'>
-          <img
-            alt='check icon'
-            className='block size-full'
-            src={imgCheckIcon}
-          />
-        </div>
+      <div className='flex h-[1.5rem] w-[1.5rem] flex-shrink-0 items-center justify-center rounded-full bg-point'>
+        {/* Check Mark */}
+        <svg
+          className='h-[0.875rem] w-[0.875rem] text-white'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+          strokeWidth='3'
+          strokeLinecap='round'
+          strokeLinejoin='round'
+        >
+          <polyline points='20 6 9 17 4 12'></polyline>
+        </svg>
       </div>
     );
   }
 
   return (
-    <div className='relative size-6 overflow-clip'>
-      <img
-        alt='unchecked'
-        className='block size-full'
-        src={imgEllipseUnchecked}
-      />
-    </div>
+    <div className='h-[1.5rem] w-[1.5rem] flex-shrink-0 rounded-full border-2 border-grey-300 bg-white'></div>
   );
 }
 
@@ -46,6 +32,7 @@ export type TodoItemProps = {
   subtitle?: string;
   checked?: boolean;
   onChange?: (checked: boolean) => void;
+  width?: string;
 };
 
 export default function TodoItem({
@@ -53,6 +40,7 @@ export default function TodoItem({
   subtitle,
   checked = false,
   onChange,
+  width = 'w-full',
 }: TodoItemProps) {
   const handleToggle = () => {
     onChange?.(!checked);
@@ -61,12 +49,12 @@ export default function TodoItem({
   return (
     <button
       onClick={handleToggle}
-      className='flex w-[335px] items-start gap-3 px-5 py-0 transition-opacity hover:opacity-70 active:opacity-50'
+      className={`flex ${width} items-start gap-3 px-5 py-0`}
     >
       {/* Content */}
-      <div className='flex flex-1 flex-col items-start gap-0'>
-        <div className='flex w-full items-center gap-1 px-0 py-0.5'>
-          <p className='text-body-lg text-black'>{title}</p>
+      <div className='flex min-w-0 flex-1 flex-col items-start gap-0'>
+        <div className='flex w-full items-center gap-1 overflow-hidden px-0 py-0.5'>
+          <p className='truncate text-body-lg text-black'>{title}</p>
         </div>
 
         {subtitle && (
