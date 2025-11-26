@@ -36,7 +36,7 @@ export default function TextInputField({
   errorMessage,
   onButtonClick,
   buttonLabel,
-  width = 'w-[335px]',
+  width = 'w-full',
 }: TextInputFieldProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange?.(e.target.value);
@@ -63,7 +63,7 @@ export default function TextInputField({
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
-          className='flex-1 border-none bg-transparent text-body-md text-grey-900 outline-none placeholder:text-grey-400'
+          className='min-w-0 flex-1 border-none bg-transparent text-body-md text-grey-900 outline-none placeholder:text-grey-400'
         />
         <button
           onClick={onButtonClick}
@@ -89,7 +89,7 @@ export default function TextInputField({
             onBlur={handleBlur}
             placeholder={placeholder}
             disabled
-            className='flex-1 border-none bg-transparent text-body-md text-black outline-none placeholder:text-black disabled:cursor-not-allowed'
+            className='min-w-0 flex-1 border-none bg-transparent text-body-md text-black outline-none placeholder:text-black disabled:cursor-not-allowed'
           />
         </div>
         <p className='pl-4 text-body-md text-error'>{errorMessage}</p>
@@ -111,7 +111,7 @@ export default function TextInputField({
           onBlur={handleBlur}
           placeholder={placeholder}
           autoFocus
-          className='flex-1 border-none bg-transparent text-body-md text-black outline-none placeholder:text-grey-400'
+          className='min-w-0 flex-1 border-none bg-transparent text-body-md text-black outline-none placeholder:text-grey-400'
         />
       </div>
     );
@@ -130,7 +130,7 @@ export default function TextInputField({
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
-          className='flex-1 border-none bg-transparent text-body-md text-black outline-none placeholder:text-grey-400'
+          className='min-w-0 flex-1 border-none bg-transparent text-body-md text-black outline-none placeholder:text-grey-400'
         />
       </div>
     );
@@ -148,7 +148,7 @@ export default function TextInputField({
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={placeholder}
-        className='flex-1 border-none bg-transparent text-body-md text-grey-900 outline-none placeholder:text-grey-400'
+        className='min-w-0 flex-1 border-none bg-transparent text-body-md text-grey-900 outline-none placeholder:text-grey-400'
       />
     </div>
   );
