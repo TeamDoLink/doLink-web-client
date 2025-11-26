@@ -16,6 +16,10 @@ import { BlackLine } from '@/components/common/blackLine';
 import { useState } from 'react';
 import { FeedBack, List, InputField, Filter } from '../components/common';
 import ModalLayout from '@/components/common/feedBack/ModalLayout';
+import {
+  CategoryEditorIconImage,
+  CategoryHomeIconImage,
+} from '@/constants/images';
 
 const sections = [
   {
@@ -625,64 +629,64 @@ function CommonTestComponent() {
         <div className='flex flex-wrap gap-8'>
           <Filter.CategoryEditorChip
             label='기타'
-            unselectedIcon='/src/assets/icons/category/editor/etc-unselected.svg'
-            selectedIcon='/src/assets/icons/category/editor/etc-selected.svg'
+            unselectedIcon={CategoryEditorIconImage.etc.unselected}
+            selectedIcon={CategoryEditorIconImage.etc.selected}
             isSelected={selectedCategory === 'etc'}
             onClick={() => setSelectedCategory('etc')}
           />
           <Filter.CategoryEditorChip
             label='운동'
-            unselectedIcon='/src/assets/icons/category/editor/exercise-unselected.svg'
-            selectedIcon='/src/assets/icons/category/editor/exercise-selected.svg'
+            unselectedIcon={CategoryEditorIconImage.exercise.unselected}
+            selectedIcon={CategoryEditorIconImage.exercise.selected}
             isSelected={selectedCategory === 'exercise'}
             onClick={() => setSelectedCategory('exercise')}
           />
           <Filter.CategoryEditorChip
             label='취미'
-            unselectedIcon='/src/assets/icons/category/editor/hobby-unselected.svg'
-            selectedIcon='/src/assets/icons/category/editor/hobby-selected.svg'
+            unselectedIcon={CategoryEditorIconImage.hobby.unselected}
+            selectedIcon={CategoryEditorIconImage.hobby.selected}
             isSelected={selectedCategory === 'hobby'}
             onClick={() => setSelectedCategory('hobby')}
           />
           <Filter.CategoryEditorChip
             label='금융'
-            unselectedIcon='/src/assets/icons/category/editor/money-unselected.svg'
-            selectedIcon='/src/assets/icons/category/editor/money-selected.svg'
+            unselectedIcon={CategoryEditorIconImage.money.unselected}
+            selectedIcon={CategoryEditorIconImage.money.selected}
             isSelected={selectedCategory === 'money'}
             onClick={() => setSelectedCategory('money')}
           />
           <Filter.CategoryEditorChip
             label='음식점'
-            unselectedIcon='/src/assets/icons/category/editor/restaurant-unselected.svg'
-            selectedIcon='/src/assets/icons/category/editor/restaurant-selected.svg'
+            unselectedIcon={CategoryEditorIconImage.restaurant.unselected}
+            selectedIcon={CategoryEditorIconImage.restaurant.selected}
             isSelected={selectedCategory === 'restaurant'}
             onClick={() => setSelectedCategory('restaurant')}
           />
           <Filter.CategoryEditorChip
             label='쇼핑'
-            unselectedIcon='/src/assets/icons/category/editor/shopping-unselected.svg'
-            selectedIcon='/src/assets/icons/category/editor/shopping-selected.svg'
+            unselectedIcon={CategoryEditorIconImage.shopping.unselected}
+            selectedIcon={CategoryEditorIconImage.shopping.selected}
             isSelected={selectedCategory === 'shopping'}
             onClick={() => setSelectedCategory('shopping')}
           />
           <Filter.CategoryEditorChip
             label='공부'
-            unselectedIcon='/src/assets/icons/category/editor/study-unselected.svg'
-            selectedIcon='/src/assets/icons/category/editor/study-selected.svg'
+            unselectedIcon={CategoryEditorIconImage.study.unselected}
+            selectedIcon={CategoryEditorIconImage.study.selected}
             isSelected={selectedCategory === 'study'}
             onClick={() => setSelectedCategory('study')}
           />
           <Filter.CategoryEditorChip
             label='팁'
-            unselectedIcon='/src/assets/icons/category/editor/tips-unselected.svg'
-            selectedIcon='/src/assets/icons/category/editor/tips-selected.svg'
+            unselectedIcon={CategoryEditorIconImage.tips.unselected}
+            selectedIcon={CategoryEditorIconImage.tips.selected}
             isSelected={selectedCategory === 'tips'}
             onClick={() => setSelectedCategory('tips')}
           />
           <Filter.CategoryEditorChip
             label='여행'
-            unselectedIcon='/src/assets/icons/category/editor/travel-unselected.svg'
-            selectedIcon='/src/assets/icons/category/editor/travel-selected.svg'
+            unselectedIcon={CategoryEditorIconImage.travel.unselected}
+            selectedIcon={CategoryEditorIconImage.travel.selected}
             isSelected={selectedCategory === 'travel'}
             onClick={() => setSelectedCategory('travel')}
           />
@@ -706,64 +710,64 @@ function CommonTestComponent() {
         <div className='flex flex-wrap gap-8'>
           <Filter.FolderCategoryChip
             label='커리어'
-            unselectedIcon='/src/assets/icons/category/home/career-unselected.svg'
-            selectedIcon='/src/assets/icons/category/home/career-selected.svg'
+            unselectedIcon={CategoryHomeIconImage.career.unselected}
+            selectedIcon={CategoryHomeIconImage.career.selected}
             isSelected={selectedFolderCategory === 'career'}
             onClick={() => setSelectedFolderCategory('career')}
           />
           <Filter.FolderCategoryChip
             label='기타'
-            unselectedIcon='/src/assets/icons/category/home/etc-unselected.svg'
-            selectedIcon='/src/assets/icons/category/home/etc-selected.svg'
+            unselectedIcon={CategoryHomeIconImage.etc.unselected}
+            selectedIcon={CategoryHomeIconImage.etc.selected}
             isSelected={selectedFolderCategory === 'etc'}
             onClick={() => setSelectedFolderCategory('etc')}
           />
           <Filter.FolderCategoryChip
             label='운동'
-            unselectedIcon='/src/assets/icons/category/home/exercise-unselected.svg'
-            selectedIcon='/src/assets/icons/category/home/exercise-selected.svg'
+            unselectedIcon={CategoryHomeIconImage.exercise.unselected}
+            selectedIcon={CategoryHomeIconImage.exercise.selected}
             isSelected={selectedFolderCategory === 'exercise'}
             onClick={() => setSelectedFolderCategory('exercise')}
           />
           <Filter.FolderCategoryChip
             label='취미'
-            unselectedIcon='/src/assets/icons/category/home/hobby-unselected.svg'
-            selectedIcon='/src/assets/icons/category/home/hobby-selected.svg'
+            unselectedIcon={CategoryHomeIconImage.hobby.unselected}
+            selectedIcon={CategoryHomeIconImage.hobby.selected}
             isSelected={selectedFolderCategory === 'hobby'}
             onClick={() => setSelectedFolderCategory('hobby')}
           />
           <Filter.FolderCategoryChip
             label='금융'
-            unselectedIcon='/src/assets/icons/category/home/money-unselected.svg'
-            selectedIcon='/src/assets/icons/category/home/money-selected.svg'
+            unselectedIcon={CategoryHomeIconImage.money.unselected}
+            selectedIcon={CategoryHomeIconImage.money.selected}
             isSelected={selectedFolderCategory === 'money'}
             onClick={() => setSelectedFolderCategory('money')}
           />
           <Filter.FolderCategoryChip
             label='쇼핑'
-            unselectedIcon='/src/assets/icons/category/home/shopping-unselected.svg'
-            selectedIcon='/src/assets/icons/category/home/shoppint-selected.svg'
+            unselectedIcon={CategoryHomeIconImage.shopping.unselected}
+            selectedIcon={CategoryHomeIconImage.shopping.selected}
             isSelected={selectedFolderCategory === 'shopping'}
             onClick={() => setSelectedFolderCategory('shopping')}
           />
           <Filter.FolderCategoryChip
             label='공부'
-            unselectedIcon='/src/assets/icons/category/home/study-unselected.svg'
-            selectedIcon='/src/assets/icons/category/home/study-selected.svg'
+            unselectedIcon={CategoryHomeIconImage.study.unselected}
+            selectedIcon={CategoryHomeIconImage.study.selected}
             isSelected={selectedFolderCategory === 'study'}
             onClick={() => setSelectedFolderCategory('study')}
           />
           <Filter.FolderCategoryChip
             label='팁'
-            unselectedIcon='/src/assets/icons/category/home/tips-unselected.svg'
-            selectedIcon='/src/assets/icons/category/home/tips-selected.svg'
+            unselectedIcon={CategoryHomeIconImage.tips.unselected}
+            selectedIcon={CategoryHomeIconImage.tips.selected}
             isSelected={selectedFolderCategory === 'tips'}
             onClick={() => setSelectedFolderCategory('tips')}
           />
           <Filter.FolderCategoryChip
             label='여행'
-            unselectedIcon='/src/assets/icons/category/home/travel-unselected.svg'
-            selectedIcon='/src/assets/icons/category/home/travel-selected.svg'
+            unselectedIcon={CategoryHomeIconImage.travel.unselected}
+            selectedIcon={CategoryHomeIconImage.travel.selected}
             isSelected={selectedFolderCategory === 'travel'}
             onClick={() => setSelectedFolderCategory('travel')}
           />
