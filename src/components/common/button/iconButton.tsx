@@ -1,12 +1,14 @@
 import type { ButtonHTMLAttributes } from 'react';
+import moreIcon from '@/assets/icons/common/more.svg';
 
-type BlueButtonState = 'enabled' | 'pressed' | 'disabled';
+type IconButtonState = 'enabled' | 'pressed' | 'disabled';
 
-interface BlueButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  visualState?: BlueButtonState;
+interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  visualState?: IconButtonState;
+  label: string;
 }
 
-const stateStyles: Record<BlueButtonState, { bg: string; text: string }> = {
+const stateStyles: Record<IconButtonState, { bg: string; text: string }> = {
   enabled: {
     bg: 'bg-[rgba(57,76,255,0.15)]',
     text: 'text-point',
@@ -21,14 +23,14 @@ const stateStyles: Record<BlueButtonState, { bg: string; text: string }> = {
   },
 };
 
-export const BlueButton = ({
-  children,
-  className = '',
-  disabled,
+export const IconButton = ({
+  label,
   visualState,
+  disabled,
+  className = '',
   ...props
-}: BlueButtonProps) => {
-  const resolvedState: BlueButtonState = disabled
+}: IconButtonProps) => {
+  const resolvedState: IconButtonState = disabled
     ? 'disabled'
     : (visualState ?? 'enabled');
 
@@ -39,14 +41,15 @@ export const BlueButton = ({
 
   return (
     <button
-      type="button"
+      type='button'
       disabled={isDisabled}
-      className={`inline-flex w-fit items-center justify-center rounded-[6px] px-2 py-[7px] text-body-sm transition ${
+      className={`inline-flex w-fit items-center rounded-[20px] py-[7px] pl-3 pr-2 text-body-sm transition ${
         styles.bg
       } ${styles.text} ${activeClass} ${className}`}
       {...props}
     >
-      {children}
+      <span className='mr-[2px]'>{label}</span>
+      <img src={moreIcon} alt='더보기' className='h-4 w-4' />
     </button>
   );
 };

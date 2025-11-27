@@ -59,21 +59,21 @@ export const BottomTabBar = ({
   };
 
   return (
-    <nav className="w-full bg-white px-8 pb-6 pt-4 shadow-[0_-5px_10px_rgba(0,0,0,0.04)]">
-      <ul className="flex items-center justify-center gap-20">
+    <nav className='w-full bg-white px-8 pb-6 pt-4 shadow-[0_-5px_10px_rgba(0,0,0,0.04)]'>
+      <ul className='flex items-center justify-center gap-20'>
         {items.map(({ key, label, iconSelected, iconUnselected }) => {
           const active = activeKey === key;
           return (
             <li key={key}>
               <button
-                type="button"
+                type='button'
                 onClick={() => handleSelect(key)}
-                className="flex flex-col items-center gap-1"
+                className='flex flex-col items-center gap-1'
               >
                 <img
                   src={active ? iconSelected : iconUnselected}
-                  alt=""
-                  className="h-6 w-6"
+                  alt=''
+                  className='h-6 w-6'
                 />
                 <span
                   className={`text-caption-sm ${active ? 'text-grey-900' : 'text-grey-400'}`}
