@@ -38,7 +38,7 @@ export const GreyButton = ({
 
   return (
     <button
-      type="button"
+      type='button'
       disabled={isDisabled}
       className={`inline-flex w-fit items-center justify-center rounded-[6px] px-2 py-[7px] text-body-sm transition ${
         styles.bg

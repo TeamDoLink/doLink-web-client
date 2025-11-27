@@ -42,24 +42,24 @@ export const FloatingButton = ({
       {...props}
     >
       <svg
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
+        width='20'
+        height='20'
+        viewBox='0 0 20 20'
         className={iconColor}
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
+        fill='none'
+        xmlns='http://www.w3.org/2000/svg'
       >
         <path
-          d="M10 4v12"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
+          d='M10 4v12'
+          stroke='currentColor'
+          strokeWidth='1.5'
+          strokeLinecap='round'
         />
         <path
-          d="M4 10h12"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
+          d='M4 10h12'
+          stroke='currentColor'
+          strokeWidth='1.5'
+          strokeLinecap='round'
         />
       </svg>
     </button>
