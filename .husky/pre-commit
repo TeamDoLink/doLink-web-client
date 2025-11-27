@@ -1,2 +1,7 @@
+#!/bin/bash
+. "$(dirname "$0")/_/husky.sh"
+
+# Use NVM Node version
+export PATH="/Users/seoyujin/.nvm/versions/node/v22.9.0/bin:$PATH"
 
 npx lint-staged
