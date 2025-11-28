@@ -1,19 +1,21 @@
 import searchIcon from '@/assets/icons/common/search-24.svg';
 
 interface SearchAppBarProps {
+  // 좌측 헤더 제목
   title: string;
-  className?: string;
+  // 검색 버튼 클릭 핸들러
   onClickSearch?: () => void;
 }
 
-export const SearchAppBar = ({
-  title,
-  className = '',
-  onClickSearch,
-}: SearchAppBarProps) => {
+/**
+ * 검색 헤더 컴포넌트
+ * - 좌측 : 헤더 제목
+ * - 우측 : 검색 버튼
+ */
+export const SearchAppBar = ({ title, onClickSearch }: SearchAppBarProps) => {
   return (
     <header
-      className={`flex w-full items-center justify-between bg-white px-[20px] py-[10px] ${className}`}
+      className={`flex w-full items-center justify-between bg-white px-[20px] py-[10px]`}
     >
       <span className='text-heading-xl text-black'>{title}</span>
 

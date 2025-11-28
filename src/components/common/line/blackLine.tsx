@@ -2,6 +2,9 @@ interface BlackLineProps {
   className?: string;
 }
 
+/**
+ * 가로 2px, 세로 20px 검은색 선 컴포넌트
+ */
 export const BlackLine = ({ className = '' }: BlackLineProps) => {
   return (
     <div

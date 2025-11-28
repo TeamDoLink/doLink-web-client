@@ -1,43 +1,62 @@
 import type { ButtonHTMLAttributes } from 'react';
 
-type CirclePlusVisualState = 'enabled' | 'pressed' | 'disabled';
+type FloatingButtonState = 'enabled' | 'pressed' | 'disabled';
 
 interface FloatingButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  visualState?: CirclePlusVisualState;
+  visualState?: FloatingButtonState;
 }
 
+/**
+ * 버튼의 시각적 상태 (enabled, pressed, disabled)를 props로 제어할 수 있음
+ * #00042547 : #000425 색상의 약 28% 불투명도
+ */
+const stateStyles: Record<FloatingButtonState, { bg: string; icon: string }> = {
+  enabled: {
+    bg: 'bg-black',
+    icon: 'text-white',
+  },
+  pressed: {
+    bg: 'bg-grey-600',
+    icon: 'text-white',
+  },
+  disabled: {
+    bg: 'bg-black',
+    icon: 'text-grey-600',
+  },
+};
+
+/**
+ * 플로팅 버튼 컴포넌트
+ */
 export const FloatingButton = ({
   disabled,
   className = '',
   visualState,
   ...props
 }: FloatingButtonProps) => {
-  const resolvedState: CirclePlusVisualState = disabled
+  /**
+   * disabled prop이 true면 'disabled' 상태로 고정
+   * 그렇지 않으면 visualState prop 값을 사용
+   * 둘 다 없으면 기본값 'enabled' 사용
+   */
+  const resolvedState: FloatingButtonState = disabled
     ? 'disabled'
     : (visualState ?? 'enabled');
 
-  const bgClass = (() => {
-    switch (resolvedState) {
-      case 'pressed':
-        return 'bg-grey-600';
-      default:
-        return 'bg-black';
-    }
-  })();
+  // 상태에 따른 스타일 가져오기
+  const styles = stateStyles[resolvedState];
 
-  const iconColor =
-    resolvedState === 'disabled' ? 'text-grey-600' : 'text-white';
-  const isActuallyDisabled = disabled || resolvedState === 'disabled';
-  const shadowClass =
-    resolvedState === 'disabled'
-      ? 'shadow-none'
-      : 'shadow-[0_4px_12px_rgba(0,4,37,0.28)]';
+  // disabled 상태 여부
+  const isDisabled = resolvedState === 'disabled';
+
+  // 활성 상태일 때만 active 스타일 적용
+  const activeClass = resolvedState === 'enabled' ? 'active:bg-grey-600' : '';
 
   return (
     <button
-      disabled={isActuallyDisabled}
-      className={`flex h-[52px] w-[52px] items-center justify-center rounded-full transition-colors ${bgClass} ${shadowClass} ${
-        resolvedState === 'enabled' ? 'active:bg-grey-600' : ''
+      disabled={isDisabled}
+      className={`flex h-[52px] w-[52px] items-center justify-center rounded-full transition-colors ${styles.bg} shadow-[0_4px_12px_#00042547] ${
+        activeClass
       } ${className}`}
       {...props}
     >
@@ -45,7 +64,7 @@ export const FloatingButton = ({
         width='20'
         height='20'
         viewBox='0 0 20 20'
-        className={iconColor}
+        className={styles.icon}
         fill='none'
         xmlns='http://www.w3.org/2000/svg'
       >

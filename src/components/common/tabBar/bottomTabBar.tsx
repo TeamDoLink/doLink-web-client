@@ -6,6 +6,7 @@ import folderUnselected from '@/assets/icons/tabs/folder-unselected.svg';
 import settingSelected from '@/assets/icons/tabs/setting-selected.svg';
 import settingUnselected from '@/assets/icons/tabs/setting-unselected.svg';
 
+// 탭 키 타입 정의
 export type TabKey = 'home' | 'folder' | 'setting';
 
 interface TabItem {
@@ -15,6 +16,7 @@ interface TabItem {
   iconUnselected: string;
 }
 
+// 기본 탭 아이템 정의
 const DEFAULT_TABS: TabItem[] = [
   {
     key: 'home',
@@ -40,19 +42,30 @@ interface BottomTabBarProps {
   value?: TabKey;
   onChange?: (next: TabKey) => void;
   items?: TabItem[];
-  showGrabber?: boolean;
 }
 
+/**
+ * 하단 탭 바 컴포넌트
+ */
 export const BottomTabBar = ({
   value,
   onChange,
   items = DEFAULT_TABS,
 }: BottomTabBarProps) => {
+  /**
+   * 내부 상태로 선택된 탭 키 관리
+   * controlled 모드 : 부모가 value prop를 내려주면 탭은 value를 기준으로 결정됨
+   * uncontrolled 모드 : value prop이 없으면 internalValue를 사용해 내부 상태로 관리
+   * uncontrolled 모드의 초기값은 items 배열의 첫 번째 탭 키
+   */
   const [internalValue, setInternalValue] = useState<TabKey>(
     value ?? items[0].key
   );
+
+  // 실제 활성 탭 키 결정
   const activeKey = value ?? internalValue;
 
+  // 탭 선택 핸들러
   const handleSelect = (key: TabKey) => {
     setInternalValue(key);
     onChange?.(key);
@@ -85,11 +98,6 @@ export const BottomTabBar = ({
           );
         })}
       </ul>
-      {/* {showGrabber && (
-        <div className="mt-4 flex justify-center">
-          <span className="h-1 w-16 rounded-full bg-black" />
-        </div>
-      )} */}
     </nav>
   );
 };

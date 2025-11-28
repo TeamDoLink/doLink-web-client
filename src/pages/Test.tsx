@@ -7,7 +7,7 @@ import { BlueButton } from '@/components/common/button/blueButton';
 import { GreyButton } from '@/components/common/button/greyButton';
 import { IconButton } from '@/components/common/button/iconButton';
 import { BackDetailBar } from '@/components/common/appBar/backDetailAppBar';
-import { Setting } from '@/components/common/appBar/settingAppBar';
+import { SettingAppBar } from '@/components/common/appBar/settingAppBar';
 import { GreyLine } from '@/components/common/line/greyLine';
 import { GradientBackground } from '@/components/common/background/gradientBackground';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
@@ -145,12 +145,12 @@ const sections = [
     ),
   },
   {
-    title: 'Setting Row',
+    title: 'Setting App Bar',
     description:
-      '높이 56px, 좌우 12px 패딩을 가진 리스트형 버튼입니다. 좌측 큰 텍스트와 우측 보조 텍스트/화살표를 조합해 설정 행을 표현합니다.',
+      '세팅 화면 전용 상단바입니다. 좌측 큰 텍스트와 우측 보조 텍스트/화살표를 조합해 렌더링합니다.',
     component: (
       <div className='w-full max-w-md space-y-3 rounded-3xl bg-grey-100 p-6'>
-        <Setting leftText='텍스트' rightText='텍스트' />
+        <SettingAppBar leftText='텍스트' rightText='텍스트' />
       </div>
     ),
   },
