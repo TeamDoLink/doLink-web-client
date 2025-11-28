@@ -2,17 +2,19 @@ import logoSvg from '@/assets/logos/logo.svg';
 import searchIcon from '@/assets/icons/common/search-24.svg';
 
 interface HomeAppBarProps {
-  className?: string;
+  // 우측 검색 버튼 클릭 핸들러
   onClickSearch?: () => void;
 }
 
-export const HomeAppBar = ({
-  className = '',
-  onClickSearch,
-}: HomeAppBarProps) => {
+/**
+ * 홈 화면 헤더 컴포넌트
+ * - 좌측 : doLink 로고
+ * - 우측 : 검색 버튼
+ */
+export const HomeAppBar = ({ onClickSearch }: HomeAppBarProps) => {
   return (
     <header
-      className={`flex w-full items-center justify-between bg-white px-[20px] py-[10px] ${className}`}
+      className={`flex w-full items-center justify-between bg-white px-[20px] py-[10px]`}
     >
       <img src={logoSvg} alt='DoLink 로고' className='h-[20px] w-[65.23px]' />
 

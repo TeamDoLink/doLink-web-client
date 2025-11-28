@@ -1,23 +1,32 @@
 import type { ButtonHTMLAttributes } from 'react';
 import rightIcon from '@/assets/icons/common/direction-right.svg';
 
-interface SettingProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface SettingAppBarProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  // 왼쪽 텍스트
   leftText: string;
-  rightText?: string;
+  // 오른쪽 텍스트
+  rightText: string;
+  // 화살표 아이콘 표시 여부 (기본값: true)
   showArrow?: boolean;
 }
 
-export const Setting = ({
+/**
+ * 설정 헤더 컴포넌트
+ * - 좌측 : 텍스트
+ * - 우측 : 텍스트 + 화살표 아이콘
+ */
+
+export const SettingAppBar = ({
   leftText,
   rightText,
   showArrow = true,
   className = '',
   ...props
-}: SettingProps) => {
+}: SettingAppBarProps) => {
   return (
     <button
       type='button'
-      className={`flex h-14 w-full items-center justify-between bg-white px-3 py-3 text-left ${className}`}
+      className={`flex h-14 w-full items-center justify-between bg-white px-[20px] py-[10px] text-left ${className}`}
       {...props}
     >
       <span className='text-heading-md text-grey-900'>{leftText}</span>

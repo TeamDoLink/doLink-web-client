@@ -4,6 +4,9 @@ interface CtaButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
+/**
+ * 주요 CTA 영역에서 사용하는 공통 버튼 컴포넌트
+ */
 export const CtaButton = ({
   children,
   disabled,
