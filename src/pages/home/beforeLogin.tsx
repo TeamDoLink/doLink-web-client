@@ -11,24 +11,10 @@ import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import heroIllustration from '@/assets/icons/home/home1.svg';
 import { TAB_ROUTE_MAP } from '@/constants/routes';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
+import { useTodoStore, type TodoItem } from '@/stores/useTodoStore';
+import { useFolderStore, type FolderItem } from '@/stores/useFolderStore';
 
-type TodoItemMock = {
-  id: string;
-  title: string;
-  date: string;
-  sns: string;
-  checked?: boolean;
-};
-
-type FolderItemMock = {
-  id: string;
-  title: string;
-  category: string;
-  itemCount: number;
-  images?: string[];
-};
-
-const TODO_ITEMS: TodoItemMock[] = [
+const TODO_ITEMS: TodoItem[] = [
   {
     id: 'welcome-guide',
     title: '두링크(DoLink) 안내서 📚',
@@ -38,7 +24,7 @@ const TODO_ITEMS: TodoItemMock[] = [
   },
 ];
 
-const FOLDER_ITEMS: FolderItemMock[] = [
+const FOLDER_ITEMS: FolderItem[] = [
   {
     id: 'tutorial',
     title: '두링크(DoLink) 튜토리얼',
@@ -51,18 +37,26 @@ function HomeBeforeLogin() {
   const navigate = useNavigate();
   // 로그인 토스트
   const [showToast, setShowToast] = useState(true);
-  // 할 일 체크
-  const [todoItems, setTodoItems] = useState(TODO_ITEMS);
-  // 모음 아이템
-  const [folderItems, setFolderItems] = useState(FOLDER_ITEMS);
-  // 할 일 완료 시
-  const [showCompleteModal, setShowCompleteModal] = useState(false);
-  // 할 일 완료 모달 다시 보지 않기
-  const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
-  // 삭제 확인 모달
-  const [pendingDeleteFolderId, setPendingDeleteFolderId] = useState<
-    string | null
-  >(null);
+  const {
+    items: todoItems,
+    toggleTodo,
+    showCompleteModal,
+    setShowCompleteModal,
+    setSuppressCompleteModal,
+    resetTodos,
+  } = useTodoStore();
+  const {
+    items: folderItems,
+    pendingDeleteFolderId,
+    setPendingDeleteFolderId,
+    removeFolder,
+    resetFolders,
+  } = useFolderStore();
+
+  useEffect(() => {
+    resetTodos(TODO_ITEMS);
+    resetFolders(FOLDER_ITEMS);
+  }, [resetFolders, resetTodos]);
 
   // 로그인 모달 지속시간 3초
   useEffect(() => {
@@ -72,21 +66,7 @@ function HomeBeforeLogin() {
 
   // 할 일의 체크 여부를 바꿔주는 함수
   const handleTodoCheckbox = (id: string, nextChecked: boolean) => {
-    setTodoItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              checked: nextChecked,
-            }
-          : item
-      )
-    );
-
-    // 모달에서 다시 보지 않기로 설정했을 때
-    if (nextChecked && !suppressCompleteModal) {
-      setShowCompleteModal(true);
-    }
+    toggleTodo(id, nextChecked);
   };
 
   // 완료 모달 닫기
@@ -113,10 +93,7 @@ function HomeBeforeLogin() {
   // 모음 삭제 확인
   const handleConfirmDeleteFolder = () => {
     if (!pendingDeleteFolderId) return;
-    setFolderItems((prev) =>
-      prev.filter(({ id }) => id !== pendingDeleteFolderId)
-    );
-    setPendingDeleteFolderId(null);
+    removeFolder(pendingDeleteFolderId);
   };
 
   // 모음 삭제 취소

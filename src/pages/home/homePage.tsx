@@ -1,9 +1,9 @@
+import { useAuthStore } from '@/stores/useAuthStore';
 import HomeAfterLogin from './afterLogin';
 import HomeBeforeLogin from './beforeLogin';
 
 const HomePage = () => {
-  const isLoading = false; // TODO: replace with 실제 인증 로딩 상태
-  const isAuthenticated = true; // TODO: replace with 실제 인증 여부
+  const { isLoading, isAuthenticated } = useAuthStore();
 
   if (isLoading) {
     return (

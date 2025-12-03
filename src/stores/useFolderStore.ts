@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
-type FolderItem = {
+// 공유되는 모음 목록과 삭제 확인 모달 흐름을 관리
+export type FolderItem = {
   id: string;
   title: string;
   category: string;
@@ -34,5 +35,10 @@ export const useFolderStore = create<FolderState>((set) => ({
       items: items.filter((item) => item.id !== id),
       pendingDeleteFolderId: null,
     })),
-  resetFolders: (next) => set({ items: next }),
+  // 초기화 시 선택 상태를 비워 화면 이동 후 남아 있는 삭제 확인 모달을 방지
+  resetFolders: (next) =>
+    set({
+      items: next,
+      pendingDeleteFolderId: null,
+    }),
 }));

@@ -1,28 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Background, FeedBack, List, TabBar } from '@/components/common';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import heroIllustration from '@/assets/icons/home/home2.svg';
 import { TAB_ROUTE_MAP } from '@/constants/routes';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
+import { useTodoStore, type TodoItem } from '@/stores/useTodoStore';
+import { useFolderStore, type FolderItem } from '@/stores/useFolderStore';
 
-type TodoItemMock = {
-  id: string;
-  title: string;
-  date: string;
-  sns: string;
-  checked?: boolean;
-};
-
-type FolderItemMock = {
-  id: string;
-  title: string;
-  category: string;
-  itemCount: number;
-  images?: string[];
-};
-
-const TODO_ITEMS: TodoItemMock[] = [
+const TODO_ITEMS: TodoItem[] = [
   {
     id: 'welcome-guide',
     title: '두링크(DoLink) 안내서 📚',
@@ -60,7 +46,7 @@ const TODO_ITEMS: TodoItemMock[] = [
   },
 ];
 
-const FOLDER_ITEMS: FolderItemMock[] = [
+const FOLDER_ITEMS: FolderItem[] = [
   {
     id: 'tutorial',
     title: '두링크(DoLink) 튜토리얼',
@@ -107,15 +93,26 @@ type HomeAfterLoginProps = {
 
 const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   const navigate = useNavigate();
-  // 할 일 체크
-  const [todoItems, setTodoItems] = useState(TODO_ITEMS);
-  // 모음 아이템
-  const [folderItems, setFolderItems] = useState(FOLDER_ITEMS);
-  const [showCompleteModal, setShowCompleteModal] = useState(false);
-  const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
-  const [pendingDeleteFolderId, setPendingDeleteFolderId] = useState<
-    string | null
-  >(null);
+  const {
+    items: todoItems,
+    toggleTodo,
+    showCompleteModal,
+    setShowCompleteModal,
+    setSuppressCompleteModal,
+    resetTodos,
+  } = useTodoStore();
+  const {
+    items: folderItems,
+    pendingDeleteFolderId,
+    setPendingDeleteFolderId,
+    removeFolder,
+    resetFolders,
+  } = useFolderStore();
+
+  useEffect(() => {
+    resetTodos(TODO_ITEMS);
+    resetFolders(FOLDER_ITEMS);
+  }, [resetFolders, resetTodos]);
 
   // 시간에 따른 인사 문구
   const greeting = useMemo(() => {
@@ -126,20 +123,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
 
   // 할 일의 체크 여부를 바꿔주는 함수
   const handleTodoCheckbox = (id: string, nextChecked: boolean) => {
-    setTodoItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              checked: nextChecked,
-            }
-          : item
-      )
-    );
-
-    if (nextChecked && !suppressCompleteModal) {
-      setShowCompleteModal(true);
-    }
+    toggleTodo(id, nextChecked);
   };
 
   const handleCloseModal = () => {
@@ -162,10 +146,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
 
   const handleConfirmDeleteFolder = () => {
     if (!pendingDeleteFolderId) return;
-    setFolderItems((prev) =>
-      prev.filter(({ id }) => id !== pendingDeleteFolderId)
-    );
-    setPendingDeleteFolderId(null);
+    removeFolder(pendingDeleteFolderId);
   };
 
   const handleCancelDeleteFolder = () => {
@@ -241,10 +222,12 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
         </div>
       </main>
 
+      {/* 바텀 탭바 */}
       <footer className='sticky bottom-0 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
         <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
       </footer>
 
+      {/* 할 일 완료 모달 */}
       <FeedBack.ModalLayout open={showCompleteModal} onClose={handleCloseModal}>
         <FeedBack.AlertDialog
           title='할 일을 완료했어요'
@@ -256,6 +239,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
         />
       </FeedBack.ModalLayout>
 
+      {/* 모음 삭제 모달 */}
       <FeedBack.ModalLayout
         open={pendingDeleteFolderId !== null}
         onClose={handleCancelDeleteFolder}
