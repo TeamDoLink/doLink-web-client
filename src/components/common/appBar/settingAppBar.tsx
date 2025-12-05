@@ -26,7 +26,7 @@ export const SettingAppBar = ({
   return (
     <button
       type='button'
-      className={`flex h-14 w-full items-center justify-between bg-white px-[20px] py-[10px] text-left ${className}`}
+      className={`flex h-14 w-full items-center justify-between px-[20px] py-[10px] text-left ${className}`}
       {...props}
     >
       <span className='text-heading-md text-grey-900'>{leftText}</span>
