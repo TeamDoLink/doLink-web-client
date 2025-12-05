@@ -15,7 +15,7 @@ interface SearchAppBarProps {
 export const SearchAppBar = ({ title, onClickSearch }: SearchAppBarProps) => {
   return (
     <header
-      className={`flex w-full items-center justify-between bg-white px-[20px] py-[10px]`}
+      className={`flex w-full items-center justify-between px-[20px] py-[10px]`}
     >
       <span className='text-heading-xl text-black'>{title}</span>
 
