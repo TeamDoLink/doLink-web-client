@@ -1,9 +1,9 @@
-export { default as CategoryEditorChip } from './CategoryEditorChip';
-export { default as FolderCategoryChip } from './FolderCategoryChip';
-export { default as ItemChips } from './ItemChips';
-export { default as SortDropdown } from './SortDropdown';
+export { default as CategoryEditorChip } from './categoryEditorChip';
+export { default as FolderCategoryChip } from './folderCategoryChip';
+export { default as ItemChips } from './itemChips';
+export { default as SortDropdown } from './sortDropdown';
 
-export type { CategoryEditorChipProps } from './CategoryEditorChip';
-export type { FolderCategoryChipProps } from './FolderCategoryChip';
-export type { ItemChipsProps } from './ItemChips';
-export type { SortDropdownProps } from './SortDropdown';
+export type { CategoryEditorChipProps } from './categoryEditorChip';
+export type { FolderCategoryChipProps } from './folderCategoryChip';
+export type { ItemChipsProps } from './itemChips';
+export type { SortDropdownProps } from './sortDropdown';

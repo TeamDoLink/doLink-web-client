@@ -1,4 +1,4 @@
-export { default as SearchInputField } from './SearchInputField';
-export type { SearchInputFieldProps } from './SearchInputField';
-export { default as TextInputField } from './TextInputField';
-export type { TextInputFieldProps } from './TextInputField';
+export { default as SearchInputField } from './searchInputField';
+export type { SearchInputFieldProps } from './searchInputField';
+export { default as TextInputField } from './textInputField';
+export type { TextInputFieldProps } from './textInputField';
