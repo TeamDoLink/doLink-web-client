@@ -15,7 +15,7 @@ import { SearchAppBar } from '@/components/common/appBar/searchAppBar';
 import { BlackLine } from '@/components/common/line/blackLine';
 import { useState } from 'react';
 import { FeedBack, List, InputField, Filter } from '../components/common';
-import ModalLayout from '@/components/common/feedBack/ModalLayout';
+import ModalLayout from '@/components/common/feedBack/modalLayout';
 import {
   CategoryEditorIconImage,
   CategoryHomeIconImage,
