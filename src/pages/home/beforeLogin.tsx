@@ -13,6 +13,7 @@ import { TAB_ROUTE_MAP } from '@/constants/routes';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { useTodoStore, type TodoItem } from '@/stores/useTodoStore';
 import { useFolderStore, type FolderItem } from '@/stores/useFolderStore';
+import { FloatingButton } from '@/components/common/button';
 
 const TODO_ITEMS: TodoItem[] = [
   {
@@ -185,7 +186,15 @@ function HomeBeforeLogin() {
 
       {/* 바텀 탭바 */}
       <footer className='sticky bottom-0 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
-        <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
+        <div className='relative w-full'>
+          <div className='pointer-events-none absolute -top-[76px] right-6 z-10 flex h-[52px] w-[52px] items-center justify-center'>
+            <FloatingButton
+              aria-label='새 할 일 추가'
+              className='pointer-events-auto'
+            />
+          </div>
+          <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
+        </div>
       </footer>
 
       {/* 할 일 완료 모달 */}
