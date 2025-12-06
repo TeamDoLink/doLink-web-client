@@ -1,4 +1,5 @@
 import imgNoData from '@/assets/icons/common/no-img-data.svg';
+import { FlagButton } from '@/components/common/button/flagButton';
 
 export type TaskSearchItemProps = {
   title: string;
@@ -82,13 +83,9 @@ export default function TaskSearchItem({
 
           {/* TODO 서현님 공통컴포넌트 버튼 완료시 대체 예정 */}
           {isCompleted ? (
-            <span className='flex-shrink-0 rounded-[4px] bg-[rgba(229,232,255,1)] px-1.5 py-0.5 text-caption-sm text-point'>
-              완료
-            </span>
+            <FlagButton completed>완료</FlagButton>
           ) : (
-            <span className='flex-shrink-0 rounded-[4px] bg-grey-100 px-1.5 py-0.5 text-caption-sm text-grey-600'>
-              미완료
-            </span>
+            <FlagButton>미완료</FlagButton>
           )}
         </div>
 

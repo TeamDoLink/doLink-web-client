@@ -1,8 +1,9 @@
 import { useRef, useEffect } from 'react';
 import imgEditIcon from '@/assets/icons/common/edit-24.svg';
-import imgDeleteIcon from '@/assets/icons/common/delete.svg';
+import imgDeleteIcon from '@/assets/icons/common/delete-24.svg';
 import imgNoData from '@/assets/icons/common/no-img-data.svg';
 import { CheckboxComponent } from './checkBoxComponent';
+import { LinkActionButtons } from '@/components/common/button/capsuleButton';
 
 export type LinkItemProps = {
   title: string;
@@ -108,51 +109,10 @@ export default function LinkItem({
 
           {/* Buttons */}
           <div className='flex items-start gap-1'>
-            {/*TODO 서현님 공통 컴포넌트 버튼으로 대체 예정 -> 임시로 구현 */}
-            <button
-              onClick={onOriginalClick}
-              className='flex items-center justify-center gap-1 overflow-hidden rounded-[20px] border border-grey-200 bg-white px-2.5 py-[5px]'
-            >
-              <svg
-                className='h-3 w-3 text-grey-700'
-                viewBox='0 0 12 12'
-                fill='none'
-              >
-                <path
-                  d='M2 10L10 2M10 2H4M10 2V8'
-                  stroke='currentColor'
-                  strokeWidth='1.5'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                />
-              </svg>
-              <p className='whitespace-pre text-center text-caption-sm text-grey-700'>
-                원본
-              </p>
-            </button>
-
-            {/*TODO 서현님 공통 컴포넌트 버튼으로 대체 예정 -> 임시로 구현 */}
-            <button
-              onClick={onShareClick}
-              className='flex items-center justify-center gap-1 overflow-hidden rounded-[20px] border border-grey-200 bg-white px-2.5 py-[5px]'
-            >
-              <svg
-                className='h-3 w-3 text-grey-700'
-                viewBox='0 0 12 12'
-                fill='none'
-              >
-                <path
-                  d='M4 7L8 3M8 7V3H4'
-                  stroke='currentColor'
-                  strokeWidth='1.5'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                />
-              </svg>
-              <p className='whitespace-pre text-center text-caption-sm text-grey-700'>
-                공유
-              </p>
-            </button>
+            <LinkActionButtons
+              onClickOriginal={onOriginalClick}
+              onClickShare={onShareClick}
+            />
           </div>
         </div>
       </div>
