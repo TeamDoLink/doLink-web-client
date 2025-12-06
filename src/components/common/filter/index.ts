@@ -1,9 +1,11 @@
-export { default as CategoryEditorChip } from './CategoryEditorChip';
-export { default as ArchiveCategoryChip } from './ArchiveCategoryChip';
-export { default as ItemChips } from './ItemChips';
-export { default as SortDropdown } from './SortDropdown';
+export { default as CategoryEditorChip } from './categoryEditorChip';
+export { default as ArchiveCategoryChip } from './archiveCategoryChip';
+export { default as ItemChips } from './itemChips';
+export { default as SortDropdown } from './sortDropdown';
+export { default as DropDownMenu } from './dropDownMenu';
 
-export type { CategoryEditorChipProps } from './CategoryEditorChip';
-export type { ArchiveCategoryChipProps } from './ArchiveCategoryChip';
-export type { ItemChipsProps } from './ItemChips';
-export type { SortDropdownProps } from './SortDropdown';
+export type { CategoryEditorChipProps } from './categoryEditorChip';
+export type { ArchiveCategoryChipProps } from './archiveCategoryChip';
+export type { ItemChipsProps } from './itemChips';
+export type { SortDropdownProps } from './sortDropdown';
+export type { DropDownMenuProps } from './dropDownMenu';
