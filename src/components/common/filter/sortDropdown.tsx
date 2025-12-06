@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import DropDownMenu from './dropDownMenu'; // 경로만 맞추면 됨
 
 export type SortDropdownProps = {
   value?: 'all' | 'latest';
@@ -31,7 +32,6 @@ export default function SortDropdown({
         setIsOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -46,9 +46,10 @@ export default function SortDropdown({
 
   return (
     <div ref={dropdownRef} className='relative inline-block'>
+      {/* 버튼 */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className='flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-[20px] border border-grey-400 bg-white px-3 py-1'
+        className='flex cursor-pointer items-center gap-1 whitespace-nowrap bg-white px-3 py-1'
       >
         <p className='text-caption-sm text-grey-600'>{selectedLabel}</p>
 
@@ -67,21 +68,15 @@ export default function SortDropdown({
         </svg>
       </button>
 
+      {/* 메뉴 */}
       {isOpen && (
-        <div className='absolute left-0 top-full z-50 mt-2 rounded-lg border border-grey-300 bg-white shadow-lg'>
-          {options.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => handleSelect(option.value)}
-              className={`block w-full px-4 py-2 text-left text-caption-sm first:rounded-t-lg last:rounded-b-lg ${
-                selected === option.value
-                  ? 'bg-point/10 font-semibold text-point'
-                  : 'text-grey-700'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
+        <div className='absolute left-0 top-full z-50 mt-2'>
+          <DropDownMenu
+            options={options}
+            selectedValue={selected}
+            onSelect={(value) => handleSelect(value as 'all' | 'latest')}
+            className='min-w-[100px]'
+          />
         </div>
       )}
     </div>
