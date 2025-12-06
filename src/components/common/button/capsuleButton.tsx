@@ -1,7 +1,7 @@
 import linkIcon from '@/assets/icons/common/clip-12.svg';
 import shareIcon from '@/assets/icons/common/share-12.svg';
 
-interface LinkActionButtonsProps {
+interface CapsuleButtonProps {
   /** 비활성화 상태 여부 */
   disabled?: boolean;
   /** 원본 보기 클릭 핸들러 */
@@ -14,11 +14,11 @@ interface LinkActionButtonsProps {
  * 링크 관련 액션 버튼 그룹 (원본 보기 + 공유)
  * disabled prop으로 활성/비활성 스타일 제어
  */
-export const LinkActionButtons = ({
+export const CapsuleButton = ({
   disabled = false,
   onClickOriginal,
   onClickShare,
-}: LinkActionButtonsProps) => {
+}: CapsuleButtonProps) => {
   // 스타일 variant 계산
   const buttonClass = disabled
     ? 'bg-grey-50 text-grey-300 cursor-not-allowed' // 비활성

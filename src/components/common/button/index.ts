@@ -6,5 +6,5 @@ export { FlagButton } from './flagButton';
 export { FloatingButton } from './floatingButton';
 export { GreyButton } from './greyButton';
 export { IconButton } from './iconButton';
-export { LinkActionButtons } from './capsuleButton';
+export { CapsuleButton } from './capsuleButton';
 export { TextButton } from './textButton';

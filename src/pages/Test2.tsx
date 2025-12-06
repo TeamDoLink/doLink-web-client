@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { TodoBottomSheet } from '@/components/common/bottomSheet/todoBottomSheet';
 import { CtaSecondButton } from '@/components/common/button/ctaSecondButton';
 import { FlagButton } from '@/components/common/button/flagButton';
-import { LinkActionButtons } from '@/components/common/button/capsuleButton';
+import { CapsuleButton } from '@/components/common/button/capsuleButton';
 import { TabButton } from '@/components/common/button/tabButton';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
 
@@ -62,8 +62,8 @@ const TodoBottomSheetShowcase = () => {
 const CapsuleButtonShowcase = () => {
   return (
     <div className='flex flex-col gap-4 rounded-3xl bg-grey-100 p-6'>
-      <LinkActionButtons />
-      <LinkActionButtons disabled />
+      <CapsuleButton />
+      <CapsuleButton disabled />
     </div>
   );
 };
