@@ -35,10 +35,11 @@ export default {
         'heading-sm': ['16px', { lineHeight: '20px', fontWeight: '500' }],
 
         // body
-        'body-lg': ['14px', { lineHeight: '20px', fontWeight: '600' }],
-        'body-md': ['14px', { lineHeight: '20px', fontWeight: '500' }],
-        'body-sm': ['13px', { lineHeight: '18px', fontWeight: '600' }],
-        'body-xs': ['13px', { lineHeight: '18px', fontWeight: '500' }],
+        'body-xl': ['14px', { lineHeight: '20px', fontWeight: '600' }],
+        'body-lg': ['14px', { lineHeight: '20px', fontWeight: '500' }],
+        'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '18px', fontWeight: '500' }],
+        'body-xs': ['13px', { lineHeight: '18px', fontWeight: '400' }],
 
         // caption
         'caption-md': ['12px', { lineHeight: '18px', fontWeight: '600' }],

@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Test from './pages/Test';
+import Test2 from './pages/Test2';
 
 const Home = () => (
   <div className='flex h-screen items-center justify-center'>
@@ -14,6 +15,7 @@ function App() {
 
       {/* 공통 컴포넌트 테스트용 페이지 */}
       <Route path='/test' element={<Test />} />
+      <Route path='/test2' element={<Test2 />} />
     </Routes>
   );
 }

@@ -6,4 +6,5 @@ export * as FeedBack from './feedBack';
 export * as InputField from './inputField';
 export * as Line from './line';
 export * as List from './list';
+export * as Menu from './menu/index';
 export * as TabBar from './tabBar';

@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import imgEditIcon from '@/assets/icons/common/edit-24.svg';
-import imgDeleteIcon from '@/assets/icons/common/delete.svg';
+import imgDeleteIcon from '@/assets/icons/common/delete-24.svg';
 import imgMoreIcon from '@/assets/icons/common/option-24.svg';
 
 export type ArchiveCardProps = {
