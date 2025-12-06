@@ -75,7 +75,6 @@ export default function SortDropdown({
             options={options}
             selectedValue={selected}
             onSelect={(value) => handleSelect(value as 'all' | 'latest')}
-            className='min-w-[100px]'
           />
         </div>
       )}
