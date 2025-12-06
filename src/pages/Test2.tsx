@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { TodoBottomSheet } from '@/components/common/bottomSheet/todoBottomSheet';
 import { CtaSecondButton } from '@/components/common/button/ctaSecondButton';
-import { FlagButton } from '@/components/common/button/flagButton';
+import { FlagLabel } from '@/components/label/flagLabel';
 import { CapsuleButton } from '@/components/common/button/capsuleButton';
 import { TabButton } from '@/components/common/button/tabButton';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
@@ -91,8 +91,8 @@ const sections = [
       '완료/미완료 상태에 따라 배경과 텍스트 컬러가 달라지는 태그형 버튼입니다.',
     component: (
       <div className='flex gap-3 rounded-3xl bg-grey-100 p-6'>
-        <FlagButton completed>완료</FlagButton>
-        <FlagButton>미완료</FlagButton>
+        <FlagLabel completed>완료</FlagLabel>
+        <FlagLabel>미완료</FlagLabel>
       </div>
     ),
   },
