@@ -1,4 +1,3 @@
-// TODO : Figma 에셋 URL 교체 필요
 import check from '@/assets/icons/common/drop-down-menu-check.svg';
 
 export type DropDownMenuOption = {
