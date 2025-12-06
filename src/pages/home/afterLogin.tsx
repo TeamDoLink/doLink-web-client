@@ -155,73 +155,75 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   };
 
   return (
-    <div className='relative flex min-h-screen flex-col'>
-      <Background.GradientBackground />
+    <div className='relative flex min-h-screen flex-col bg-[#F2F3F7]'>
+      <Background.GradientBackground>
+        {/* 앱바 헤더 */}
+        <header className='sticky top-0 z-20'>
+          <HomeAppBar />
+        </header>
 
-      {/* 앱바 헤더 */}
-      <header className='sticky top-0 z-20'>
-        <HomeAppBar />
-      </header>
+        {/* 메인 컨텐츠 */}
+        <main className='relative grow'>
+          <div className='mx-auto flex flex-col px-5 py-2'>
+            {/* 상단 문구 + 일러스트 */}
+            <section className='flex items-center justify-between'>
+              {/* 문구 */}
+              <div className='flex flex-col gap-1'>
+                <p className='text-heading-sm text-grey-500'>{greeting}</p>
+                <h1 className='text-display-2xl text-black'>
+                  만나서 반가워요
+                  <br />
+                  <span className='text-display-2xl text-black'>
+                    {memberName}님
+                  </span>
+                </h1>
+              </div>
+              {/* 일러스트 */}
+              <img
+                src={heroIllustration}
+                alt='홈 일러스트'
+                className='h-[120px] w-[130px] flex-shrink-0 object-contain'
+              />
+            </section>
 
-      {/* 메인 컨텐츠 */}
-      <main className='relative grow'>
-        <div className='mx-auto flex flex-col px-5 py-2'>
-          {/* 상단 문구 + 일러스트 */}
-          <section className='flex items-center justify-between'>
-            {/* 문구 */}
-            <div className='flex flex-col gap-1'>
-              <p className='text-heading-sm text-grey-500'>{greeting}</p>
-              <h1 className='text-display-2xl text-black'>
-                만나서 반가워요
-                <br />
-                <span className='text-display-2xl text-black'>
-                  {memberName}님
-                </span>
-              </h1>
-            </div>
-            {/* 일러스트 */}
-            <img
-              src={heroIllustration}
-              alt='홈 일러스트'
-              className='h-[120px] w-[130px] flex-shrink-0 object-contain'
-            />
-          </section>
+            {/* 하단 할 일 */}
+            <section className='mt-5 space-y-4'>
+              <h2 className='text-heading-sm text-black'>할 일</h2>
+              <div className='space-y-4 rounded-2xl bg-white py-5 shadow-[0_12px_24px_rgba(18,30,64,0.08)]'>
+                {todoItems.map(({ id, title, date, sns, checked }) => (
+                  <List.TodoItem
+                    key={id}
+                    title={title}
+                    subtitle={`${date} · ${sns}`}
+                    checked={checked}
+                    onChange={(next) => handleTodoCheckbox(id, next)}
+                  />
+                ))}
+              </div>
+            </section>
 
-          {/* 하단 할 일 */}
-          <section className='mt-5 space-y-4'>
-            <h2 className='text-heading-sm text-black'>할 일</h2>
-            <div className='space-y-4 rounded-2xl bg-white py-5 shadow-[0_12px_24px_rgba(18,30,64,0.08)]'>
-              {todoItems.map(({ id, title, date, sns, checked }) => (
-                <List.TodoItem
-                  key={id}
-                  title={title}
-                  subtitle={`${date} · ${sns}`}
-                  checked={checked}
-                  onChange={(next) => handleTodoCheckbox(id, next)}
-                />
-              ))}
-            </div>
-          </section>
-
-          {/* 하단 모음 */}
-          <section className='mt-7 space-y-4 pb-20'>
-            <h2 className='text-heading-sm text-black'>모음</h2>
-            <div className='space-y-3'>
-              {folderItems.map(({ id, title, category, itemCount, images }) => (
-                <List.ArchiveCard
-                  key={id}
-                  title={title}
-                  category={category}
-                  itemCount={itemCount}
-                  images={images}
-                  width='w-full'
-                  onDeleteClick={() => handleRequestDeleteFolder(id)}
-                />
-              ))}
-            </div>
-          </section>
-        </div>
-      </main>
+            {/* 하단 모음 */}
+            <section className='mt-7 space-y-4 pb-20'>
+              <h2 className='text-heading-sm text-black'>모음</h2>
+              <div className='space-y-3'>
+                {folderItems.map(
+                  ({ id, title, category, itemCount, images }) => (
+                    <List.ArchiveCard
+                      key={id}
+                      title={title}
+                      category={category}
+                      itemCount={itemCount}
+                      images={images}
+                      width='w-full'
+                      onDeleteClick={() => handleRequestDeleteFolder(id)}
+                    />
+                  )
+                )}
+              </div>
+            </section>
+          </div>
+        </main>
+      </Background.GradientBackground>
 
       {/* 바텀 탭바 */}
       <footer className='sticky bottom-0 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>

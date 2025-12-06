@@ -103,129 +103,131 @@ function HomeBeforeLogin() {
   };
 
   return (
-    <div className='relative flex min-h-screen flex-col'>
-      <Background.GradientBackground />
+    <div className='relative flex min-h-screen flex-col bg-[#F2F3F7]'>
+      <Background.GradientBackground className='flex min-h-0 flex-1 flex-col'>
+        {/* 앱바 헤더 */}
+        <header className='sticky top-0 z-20'>
+          <HomeAppBar />
+        </header>
 
-      {/* 앱바 헤더 */}
-      <header className='sticky top-0 z-20'>
-        <HomeAppBar />
-      </header>
-
-      {/* 메인 컨텐츠 */}
-      <main className='relative grow'>
-        <div className='mx-auto flex flex-col px-5 py-2'>
-          {/* 상단 문구 + 일러스트 */}
-          <section className='flex items-center justify-between'>
-            {/* 문구 */}
-            <div className='flex flex-col gap-1'>
-              <p className='text-heading-sm text-grey-500'>
-                만나서 반가워요 😊
-              </p>
-              <h1 className='text-display-2xl text-black'>
-                두링크가 처음이라면
-              </h1>
-              <Button.IconButton
-                label='로그인하기'
-                className='mt-3 text-body-md'
+        {/* 메인 컨텐츠 */}
+        <main className='relative grow'>
+          <div className='mx-auto flex flex-col px-5 py-2'>
+            {/* 상단 문구 + 일러스트 */}
+            <section className='flex items-center justify-between'>
+              {/* 문구 */}
+              <div className='flex flex-col gap-1'>
+                <p className='text-heading-sm text-grey-500'>
+                  만나서 반가워요 😊
+                </p>
+                <h1 className='text-display-2xl text-black'>
+                  두링크가 처음이라면
+                </h1>
+                <Button.IconButton
+                  label='로그인하기'
+                  className='mt-3 text-body-md'
+                />
+              </div>
+              {/* 일러스트 */}
+              <img
+                src={heroIllustration}
+                alt='홈 일러스트'
+                className='h-[120px] w-[130px] flex-shrink-0 object-contain'
               />
-            </div>
-            {/* 일러스트 */}
-            <img
-              src={heroIllustration}
-              alt='홈 일러스트'
-              className='h-[120px] w-[130px] flex-shrink-0 object-contain'
-            />
-          </section>
+            </section>
 
-          {/* 하단 할 일 */}
-          <section className='mt-5 space-y-4'>
-            <h2 className='text-heading-sm text-black'>할 일</h2>
-            <div className='space-y-4 rounded-2xl bg-white py-5 shadow-[0_4px_12px_rgba(0,0,0,0.03)]'>
-              {todoItems.map(({ id, title, date, sns, checked }) => (
-                <List.TodoItem
-                  key={id}
-                  title={title}
-                  subtitle={`${date} · ${sns}`}
-                  checked={checked}
-                  onChange={(next) => handleTodoCheckbox(id, next)}
-                />
-              ))}
-            </div>
-          </section>
+            {/* 하단 할 일 */}
+            <section className='mt-5 space-y-4'>
+              <h2 className='text-heading-sm text-black'>할 일</h2>
+              <div className='space-y-4 rounded-2xl bg-white py-5 shadow-[0_4px_12px_rgba(0,0,0,0.03)]'>
+                {todoItems.map(({ id, title, date, sns, checked }) => (
+                  <List.TodoItem
+                    key={id}
+                    title={title}
+                    subtitle={`${date} · ${sns}`}
+                    checked={checked}
+                    onChange={(next) => handleTodoCheckbox(id, next)}
+                  />
+                ))}
+              </div>
+            </section>
 
-          {/* 하단 모음 */}
-          <section className='mt-7 space-y-4 pb-20'>
-            <h2 className='text-heading-sm text-black'>모음</h2>
-            <div className='space-y-3'>
-              {folderItems.map(({ id, title, category, itemCount, images }) => (
-                <List.ArchiveCard
-                  key={id}
-                  title={title}
-                  category={category}
-                  itemCount={itemCount}
-                  images={images}
-                  width='w-full'
-                  onDeleteClick={() => handleRequestDeleteFolder(id)}
-                />
-              ))}
-            </div>
-          </section>
-        </div>
-      </main>
+            {/* 하단 모음 */}
+            <section className='mt-7 space-y-4 pb-20'>
+              <h2 className='text-heading-sm text-black'>모음</h2>
+              <div className='space-y-3'>
+                {folderItems.map(
+                  ({ id, title, category, itemCount, images }) => (
+                    <List.ArchiveCard
+                      key={id}
+                      title={title}
+                      category={category}
+                      itemCount={itemCount}
+                      images={images}
+                      width='w-full'
+                      onDeleteClick={() => handleRequestDeleteFolder(id)}
+                    />
+                  )
+                )}
+              </div>
+            </section>
+          </div>
+        </main>
 
-      {/* 로그인 토스트 */}
-      {showToast && (
-        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
-          <FeedBack.Toast
-            message='로그인 후 간편하게 DoLink를 이용해보세요.'
-            actionLabel='로그인'
-            onAction={() => setShowToast(false)}
-          />
-        </div>
-      )}
-
-      {/* 바텀 탭바 */}
-      <footer className='sticky bottom-0 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
-        <div className='relative w-full'>
-          <div className='pointer-events-none absolute -top-[76px] right-6 z-10 flex h-[52px] w-[52px] items-center justify-center'>
-            <FloatingButton
-              aria-label='새 할 일 추가'
-              className='pointer-events-auto'
+        {/* 로그인 토스트 */}
+        {showToast && (
+          <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+            <FeedBack.Toast
+              message='로그인 후 간편하게 DoLink를 이용해보세요.'
+              actionLabel='로그인'
+              onAction={() => setShowToast(false)}
             />
           </div>
-          <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
-        </div>
-      </footer>
+        )}
 
-      {/* 할 일 완료 모달 */}
-      <FeedBack.ModalLayout
-        open={showCompleteModal}
-        onClose={handleCloseCompleteModal}
-      >
-        <FeedBack.AlertDialog
-          title='할 일을 완료했어요'
-          subtitle='완료한 일들은 해당 모음에서 확인할 수 있어요.'
-          primaryLabel='확인'
-          secondaryLabel='다시 보지 않기'
-          onPrimary={handleCloseCompleteModal}
-          onSecondary={handleDisableCompleteModal}
-        />
-      </FeedBack.ModalLayout>
+        {/* 바텀 탭바 */}
+        <footer className='sticky bottom-0 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
+          <div className='relative w-full'>
+            <div className='pointer-events-none absolute -top-[76px] right-6 z-10 flex h-[52px] w-[52px] items-center justify-center'>
+              <FloatingButton
+                aria-label='새 할 일 추가'
+                className='pointer-events-auto'
+              />
+            </div>
+            <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
+          </div>
+        </footer>
 
-      {/* 모음 삭제 모달 */}
-      <FeedBack.ModalLayout
-        open={pendingDeleteFolderId !== null}
-        onClose={handleCancelDeleteFolder}
-      >
-        <FeedBack.ConfirmDialog
-          title='모음을 삭제할까요?'
-          subtitle='모음 내 할 일도 함께 삭제돼요.'
-          positiveLabel='삭제하기'
-          negativeLabel='취소'
-          onPositive={handleConfirmDeleteFolder}
-          onNegative={handleCancelDeleteFolder}
-        />
-      </FeedBack.ModalLayout>
+        {/* 할 일 완료 모달 */}
+        <FeedBack.ModalLayout
+          open={showCompleteModal}
+          onClose={handleCloseCompleteModal}
+        >
+          <FeedBack.AlertDialog
+            title='할 일을 완료했어요'
+            subtitle='완료한 일들은 해당 모음에서 확인할 수 있어요.'
+            primaryLabel='확인'
+            secondaryLabel='다시 보지 않기'
+            onPrimary={handleCloseCompleteModal}
+            onSecondary={handleDisableCompleteModal}
+          />
+        </FeedBack.ModalLayout>
+
+        {/* 모음 삭제 모달 */}
+        <FeedBack.ModalLayout
+          open={pendingDeleteFolderId !== null}
+          onClose={handleCancelDeleteFolder}
+        >
+          <FeedBack.ConfirmDialog
+            title='모음을 삭제할까요?'
+            subtitle='모음 내 할 일도 함께 삭제돼요.'
+            positiveLabel='삭제하기'
+            negativeLabel='취소'
+            onPositive={handleConfirmDeleteFolder}
+            onNegative={handleCancelDeleteFolder}
+          />
+        </FeedBack.ModalLayout>
+      </Background.GradientBackground>
     </div>
   );
 }
