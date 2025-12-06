@@ -26,11 +26,10 @@ export default function DropDownMenu({
   options,
   selectedValue,
   onSelect,
-  className = '',
 }: DropDownMenuProps) {
   return (
     <div
-      className={`relative flex flex-col items-start overflow-clip rounded-[8px] bg-white px-0 py-[0.5rem] shadow-[0px_3px_10px_0px_rgba(0,0,0,0.16)] ${className}`}
+      className={`relative flex w-[100px] flex-col items-start overflow-clip rounded-[8px] bg-white px-0 py-[0.5rem] shadow-[0px_3px_10px_0px_rgba(0,0,0,0.16)]`}
     >
       {options.map((opt) => {
         const selected = opt.value === selectedValue;
@@ -38,7 +37,7 @@ export default function DropDownMenu({
           <button
             key={opt.value}
             onClick={() => onSelect?.(opt.value)}
-            className={`relative flex shrink-0 items-center gap-[4px] bg-white px-[1.25rem] py-[0.5625rem] text-left ${
+            className={`flex w-full shrink-0 items-center gap-[4px] bg-white px-[20px] py-[9px] text-left ${
               selected
                 ? 'text-caption-md text-grey-900'
                 : 'text-caption-sm text-grey-700'
