@@ -117,7 +117,7 @@ const sections = [
   {
     title: 'Back Detail Bar',
     description:
-      '디테일 화면 상단바입니다. 좌측 back.svg, 우측 option-36.svg 아이콘(각 36px)을 쓰며 showBackButton/showOptionButton으로 노출을 제어합니다.',
+      '디테일 화면 상단바입니다. 좌측 back.svg 버튼과 제목, 우측엔 actions 배열로 제어하는 임시저장/검색/더보기 액션을 렌더링합니다.',
     component: (
       <div className='w-full max-w-md rounded-3xl bg-grey-100 p-6'>
         <BackDetailBar title='Title' />
