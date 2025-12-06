@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
-import Test from './pages/Test';
-import Test2 from './pages/Test2';
+import Test from './pages/test';
+import Test2 from './pages/test2';
 
 const Home = () => (
   <div className='flex h-screen items-center justify-center'>
