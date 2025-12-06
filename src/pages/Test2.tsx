@@ -63,7 +63,6 @@ const CapsuleButtonShowcase = () => {
   return (
     <div className='flex flex-col gap-4 rounded-3xl bg-grey-100 p-6'>
       <CapsuleButton />
-      <CapsuleButton disabled />
     </div>
   );
 };
@@ -86,9 +85,9 @@ const sections = [
     component: <CapsuleButtonShowcase />,
   },
   {
-    title: 'Flag Button',
+    title: 'Flag Label',
     description:
-      '완료/미완료 상태에 따라 배경과 텍스트 컬러가 달라지는 태그형 버튼입니다.',
+      '완료/미완료 상태에 따라 배경과 텍스트 컬러가 달라지는 라벨입니다.',
     component: (
       <div className='flex gap-3 rounded-3xl bg-grey-100 p-6'>
         <FlagLabel completed>완료</FlagLabel>
