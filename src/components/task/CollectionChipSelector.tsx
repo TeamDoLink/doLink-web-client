@@ -43,10 +43,10 @@ export const CollectionChipSelector = ({
           <button
             key={item.id}
             onClick={() => onSelect(item.id)}
-            className={`rounded-[6px] px-3 py-2 text-body-md ${
+            className={`rounded-[6px] border px-[12px] py-[8px] text-body-md ${
               selectedId === item.id
-                ? 'border border-point bg-white text-point'
-                : 'bg-[#f3f4f7] text-grey-600'
+                ? 'border-point bg-white text-point'
+                : 'border-transparent bg-[#f3f4f7] text-grey-600'
             }`}
           >
             {item.label}
