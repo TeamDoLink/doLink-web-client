@@ -1,7 +1,28 @@
-import { useCallback, useState } from 'react';
-import { InputField, Button, AppBar } from '@/components/common';
+import { useCallback, useEffect, useState } from 'react';
+import { InputField, Button, AppBar, FeedBack } from '@/components/common';
 import { CollectionChipSelector, type CollectionChip } from '@/components/task';
 import { useClipboardBridge } from '@/hooks/useClipboardBridge';
+import { useDraftBridge } from '@/hooks/useDraftBridge';
+import type { TaskDraft } from '@/types/draft';
+// 임시 데이터 - 실제로는 API에서 받아올 데이터
+const MOCK_COLLECTIONS: CollectionChip[] = [
+  { id: '1', label: '2025 연말 도쿄 여행' },
+  { id: '2', label: '넷플릭스 볼 영화' },
+  { id: '3', label: '가을 축제' },
+  { id: '4', label: '게임 신작' },
+  { id: '5', label: '아무거나' },
+  { id: '7', label: '재테크' },
+  { id: '6', label: '퇴사 후 할 일' },
+  { id: '8', label: '용산' },
+  { id: '10', label: '뭐하지' },
+  { id: '11', label: '할 일' },
+  { id: '12', label: '할 일' },
+  { id: '13', label: '할 일' },
+  { id: '14', label: '할 일' },
+  { id: '15', label: '할 일' },
+  { id: '16', label: '할 일' },
+  { id: '17', label: '할 일' },
+];
 
 /**
  * 업무 생성 페이지
@@ -17,31 +38,24 @@ function TaskCreatePage() {
     clearError,
   } = useClipboardBridge();
 
+  // TODO 임시저장 불러오기 시  isLoading  error 화면 UI 처리
+  const {
+    saveDraft,
+    loadDraft,
+    isLoading: isDraftLoading,
+    error: draftError,
+  } = useDraftBridge<TaskDraft>();
+
   const [title, setTitle] = useState('');
   const [memo, setMemo] = useState('');
-  const [selectedCollectionId, setSelectedCollectionId] = useState<string>('');
+
+  // 선택된 아카이브 모음 상태
+  const [selectedArchiveCollection, setSelectedArchiveCollection] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [titleFocused, setTitleFocused] = useState(false);
   const [linkFocused, setLinkFocused] = useState(false);
-
-  // 임시 데이터 - 실제로는 API에서 받아올 데이터
-  const collections: CollectionChip[] = [
-    { id: '1', label: '2025 연말 도쿄 여행' },
-    { id: '2', label: '넷플릭스 볼 영화' },
-    { id: '3', label: '가을 축제' },
-    { id: '4', label: '게임 신작' },
-    { id: '5', label: '아무거나' },
-    { id: '6', label: '퇴사 후 할 일' },
-    { id: '7', label: '재테크' },
-    { id: '8', label: '용산' },
-    { id: '10', label: '뭐하지' },
-    { id: '11', label: '할 일' },
-    { id: '12', label: '할 일' },
-    { id: '13', label: '할 일' },
-    { id: '14', label: '할 일' },
-    { id: '15', label: '할 일' },
-    { id: '16', label: '할 일' },
-    { id: '17', label: '할 일' },
-  ];
 
   /**
    * 제목 입력필드 focus 핸들러
@@ -98,22 +112,91 @@ function TaskCreatePage() {
   }, []);
 
   /**
-   * 추가하기 버튼 클릭 핸들러
+   * 모음 선택 핸들러
    */
-  const handleAddClick = useCallback(() => {
-    // TODO: API 호출 구현
-    console.log({
-      title,
-      collection: selectedCollectionId,
-      link: linkValue,
-      memo,
-    });
-  }, [title, selectedCollectionId, linkValue, memo]);
+  const handleCollectionSelect = useCallback((id: string) => {
+    const selected = MOCK_COLLECTIONS.find((item) => item.id === id);
+    if (selected) {
+      setSelectedArchiveCollection({
+        id: selected.id,
+        name: selected.label,
+      });
+    }
+  }, []);
+
+  /**
+   * 임시저장 데이터 불러오기
+   */
+  useEffect(() => {
+    // TODO 테스트 위해 이 곳에 넣어놓음 -> + 플로팅 버튼 눌렀을 시 불러오기로 변경 예정 (대시보드 반영 시 작업 예정)
+    const loadDraftData = async () => {
+      try {
+        const draftData = await loadDraft('task-create-draft');
+        if (draftData) {
+          setTitle(draftData.title);
+          setLinkValue(draftData.link);
+          setMemo(draftData.memo);
+
+          // archive 정보로 collection 찾아서 설정
+          const collection = MOCK_COLLECTIONS.find(
+            (item) => item.label === draftData.archive
+          );
+
+          if (collection) {
+            setSelectedArchiveCollection({
+              id: collection.id,
+              name: collection.label,
+            });
+          } else {
+            setSelectedArchiveCollection(null);
+          }
+        }
+      } catch (err) {
+        console.error('임시저장 데이터 불러오기 실패:', err);
+      }
+    };
+
+    loadDraftData();
+  }, [loadDraft, setLinkValue]);
+
+  /**
+   * 임시저장 버튼 클릭 핸들러
+   */
+  const handleDraftAddClick = async () => {
+    try {
+      const draftData: TaskDraft = {
+        archive: selectedArchiveCollection?.name || '',
+        title,
+        link: linkValue,
+        memo,
+      };
+
+      await saveDraft('task-create-draft', draftData);
+      console.log('임시저장 완료:', draftData);
+    } catch (err) {
+      console.error('임시저장 실패:', err);
+    }
+  };
+
+  const handleAddClick = () => {
+    // TODO 추가하기 시 , 할 일 API 로직 연결 예정
+    // TODO 이전에 할 일 추가 동작한 화면으로 Return
+  };
+
+  /**
+   * 임시저장 버튼 활성화 조건: title, linkValue, memo 중 한글자라도 입력하거나 모음 선택
+   */
+  const isDraftSaveEnabled =
+    title.trim() !== '' ||
+    linkValue.trim() !== '' ||
+    memo.trim() !== '' ||
+    selectedArchiveCollection !== null;
 
   /**
    * 추가하기 버튼 활성화 조건: 제목과 모음 선택 필수
    */
-  const isAddButtonEnabled = title.trim() !== '' && selectedCollectionId !== '';
+  const isAddButtonEnabled =
+    title.trim() !== '' && selectedArchiveCollection !== null;
 
   /**
    * 제목 입력필드 상태 결정
@@ -160,16 +243,16 @@ function TaskCreatePage() {
       <AppBar.BackDetailBar
         title='할 일 추가'
         rightIcons={['save']}
-        isSaveDisabled={!isAddButtonEnabled}
-        onClickSave={handleAddClick}
+        isSaveDisabled={!isDraftSaveEnabled}
+        onClickSave={handleDraftAddClick}
       />
 
       <div className='flex h-full flex-col gap-6 overflow-y-auto bg-white px-5 py-4'>
         {/* 담을 모음 선택 섹션 */}
         <CollectionChipSelector
-          items={collections}
-          selectedId={selectedCollectionId}
-          onSelect={setSelectedCollectionId}
+          items={MOCK_COLLECTIONS}
+          selectedId={selectedArchiveCollection?.id || ''}
+          onSelect={handleCollectionSelect}
           expandedItemCount={8}
         />
 
