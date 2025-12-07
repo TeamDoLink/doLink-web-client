@@ -234,7 +234,7 @@ function CommonTestComponent() {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [selectedFolderCategory, setSelectedFolderCategory] =
+  const [selectedArchiveCategory, setSelectedArchiveCategory] =
     useState<string>('');
   const [sortValue, setSortValue] = useState<'all' | 'latest'>('all');
   const [todoItems, setTodoItems] = useState([
@@ -700,83 +700,83 @@ function CommonTestComponent() {
         </div>
       </section>
 
-      {/* FolderCategoryChip Demo Section */}
+      {/* ArchiveCategoryChip Demo Section */}
       <section className='rounded-lg bg-white p-6 shadow'>
-        <h2 className='mb-4 text-2xl font-semibold'>FolderCategoryChip</h2>
+        <h2 className='mb-4 text-2xl font-semibold'>ArchiveCategoryChip</h2>
         <p className='mb-6 text-sm text-grey-600'>
           클릭하여 카테고리 선택 토글(일부만 가져옴)
         </p>
 
         <div className='flex flex-wrap gap-8'>
-          <Filter.FolderCategoryChip
+          <Filter.ArchiveCategoryChip
             label='커리어'
             unselectedIcon={CategoryHomeIconImage.career.unselected}
             selectedIcon={CategoryHomeIconImage.career.selected}
-            isSelected={selectedFolderCategory === 'career'}
-            onClick={() => setSelectedFolderCategory('career')}
+            isSelected={selectedArchiveCategory === 'career'}
+            onClick={() => setSelectedArchiveCategory('career')}
           />
-          <Filter.FolderCategoryChip
+          <Filter.ArchiveCategoryChip
             label='기타'
             unselectedIcon={CategoryHomeIconImage.etc.unselected}
             selectedIcon={CategoryHomeIconImage.etc.selected}
-            isSelected={selectedFolderCategory === 'etc'}
-            onClick={() => setSelectedFolderCategory('etc')}
+            isSelected={selectedArchiveCategory === 'etc'}
+            onClick={() => setSelectedArchiveCategory('etc')}
           />
-          <Filter.FolderCategoryChip
+          <Filter.ArchiveCategoryChip
             label='운동'
             unselectedIcon={CategoryHomeIconImage.exercise.unselected}
             selectedIcon={CategoryHomeIconImage.exercise.selected}
-            isSelected={selectedFolderCategory === 'exercise'}
-            onClick={() => setSelectedFolderCategory('exercise')}
+            isSelected={selectedArchiveCategory === 'exercise'}
+            onClick={() => setSelectedArchiveCategory('exercise')}
           />
-          <Filter.FolderCategoryChip
+          <Filter.ArchiveCategoryChip
             label='취미'
             unselectedIcon={CategoryHomeIconImage.hobby.unselected}
             selectedIcon={CategoryHomeIconImage.hobby.selected}
-            isSelected={selectedFolderCategory === 'hobby'}
-            onClick={() => setSelectedFolderCategory('hobby')}
+            isSelected={selectedArchiveCategory === 'hobby'}
+            onClick={() => setSelectedArchiveCategory('hobby')}
           />
-          <Filter.FolderCategoryChip
+          <Filter.ArchiveCategoryChip
             label='금융'
             unselectedIcon={CategoryHomeIconImage.money.unselected}
             selectedIcon={CategoryHomeIconImage.money.selected}
-            isSelected={selectedFolderCategory === 'money'}
-            onClick={() => setSelectedFolderCategory('money')}
+            isSelected={selectedArchiveCategory === 'money'}
+            onClick={() => setSelectedArchiveCategory('money')}
           />
-          <Filter.FolderCategoryChip
+          <Filter.ArchiveCategoryChip
             label='쇼핑'
             unselectedIcon={CategoryHomeIconImage.shopping.unselected}
             selectedIcon={CategoryHomeIconImage.shopping.selected}
-            isSelected={selectedFolderCategory === 'shopping'}
-            onClick={() => setSelectedFolderCategory('shopping')}
+            isSelected={selectedArchiveCategory === 'shopping'}
+            onClick={() => setSelectedArchiveCategory('shopping')}
           />
-          <Filter.FolderCategoryChip
+          <Filter.ArchiveCategoryChip
             label='공부'
             unselectedIcon={CategoryHomeIconImage.study.unselected}
             selectedIcon={CategoryHomeIconImage.study.selected}
-            isSelected={selectedFolderCategory === 'study'}
-            onClick={() => setSelectedFolderCategory('study')}
+            isSelected={selectedArchiveCategory === 'study'}
+            onClick={() => setSelectedArchiveCategory('study')}
           />
-          <Filter.FolderCategoryChip
+          <Filter.ArchiveCategoryChip
             label='팁'
             unselectedIcon={CategoryHomeIconImage.tips.unselected}
             selectedIcon={CategoryHomeIconImage.tips.selected}
-            isSelected={selectedFolderCategory === 'tips'}
-            onClick={() => setSelectedFolderCategory('tips')}
+            isSelected={selectedArchiveCategory === 'tips'}
+            onClick={() => setSelectedArchiveCategory('tips')}
           />
-          <Filter.FolderCategoryChip
+          <Filter.ArchiveCategoryChip
             label='여행'
             unselectedIcon={CategoryHomeIconImage.travel.unselected}
             selectedIcon={CategoryHomeIconImage.travel.selected}
-            isSelected={selectedFolderCategory === 'travel'}
-            onClick={() => setSelectedFolderCategory('travel')}
+            isSelected={selectedArchiveCategory === 'travel'}
+            onClick={() => setSelectedArchiveCategory('travel')}
           />
         </div>
 
         <div className='mt-6 rounded-lg border-2 border-point/20 bg-point/5 p-4'>
           <p className='text-sm font-semibold text-grey-900'>
             선택된 폴더 카테고리:{' '}
-            <span className='text-point'>{selectedFolderCategory}</span>
+            <span className='text-point'>{selectedArchiveCategory}</span>
           </p>
         </div>
       </section>

@@ -5,11 +5,11 @@ import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 
 const TAB_ROUTE_MAP: Record<TabKey, string> = {
   home: ROUTES.home,
-  folder: ROUTES.folders,
+  archive: ROUTES.archives,
   setting: ROUTES.settings,
 };
 
-const FoldersPage = () => {
+const ArchivesPage = () => {
   const navigate = useNavigate();
 
   const handleTabChange = (next: TabKey) => {
@@ -28,10 +28,10 @@ const FoldersPage = () => {
         </section>
       </main>
       <footer className='sticky bottom-0 bg-white shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
-        <TabBar.BottomTabBar value='folder' onChange={handleTabChange} />
+        <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
       </footer>
     </div>
   );
 };
 
-export default FoldersPage;
+export default ArchivesPage;

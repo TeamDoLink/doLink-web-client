@@ -1,4 +1,4 @@
-export type FolderCategoryChipProps = {
+export type ArchiveCategoryChipProps = {
   isSelected?: boolean;
   label: string;
   unselectedIcon: string;
@@ -6,13 +6,13 @@ export type FolderCategoryChipProps = {
   onClick?: () => void;
 };
 
-export default function FolderCategoryChip({
+export default function ArchiveCategoryChip({
   isSelected = false,
   label,
   unselectedIcon,
   selectedIcon,
   onClick,
-}: FolderCategoryChipProps) {
+}: ArchiveCategoryChipProps) {
   return (
     <button
       onClick={onClick}

@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import homeSelected from '@/assets/icons/tabs/home-selected.svg';
 import homeUnselected from '@/assets/icons/tabs/home-unselected.svg';
-import folderSelected from '@/assets/icons/tabs/folder-selected.svg';
-import folderUnselected from '@/assets/icons/tabs/folder-unselected.svg';
+import archiveSelected from '@/assets/icons/tabs/archive-selected.svg';
+import archiveUnselected from '@/assets/icons/tabs/archive-unselected.svg';
 import settingSelected from '@/assets/icons/tabs/setting-selected.svg';
 import settingUnselected from '@/assets/icons/tabs/setting-unselected.svg';
 
 // 탭 키 타입 정의
-export type TabKey = 'home' | 'folder' | 'setting';
+export type TabKey = 'home' | 'archive' | 'setting';
 
 interface TabItem {
   key: TabKey;
@@ -25,10 +25,10 @@ const DEFAULT_TABS: TabItem[] = [
     iconUnselected: homeUnselected,
   },
   {
-    key: 'folder',
+    key: 'archive',
     label: '모음',
-    iconSelected: folderSelected,
-    iconUnselected: folderUnselected,
+    iconSelected: archiveSelected,
+    iconUnselected: archiveUnselected,
   },
   {
     key: 'setting',
