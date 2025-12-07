@@ -2,7 +2,6 @@ export { BlueButton } from './blueButton';
 export { ChipButton } from './chipButton';
 export { CtaButton } from './ctaButton';
 export { CtaSecondButton } from './ctaSecondButton';
-export { FlagLabel } from '../label/flagLabel';
 export { FloatingButton } from './floatingButton';
 export { GreyButton } from './greyButton';
 export { IconButton } from './iconButton';
