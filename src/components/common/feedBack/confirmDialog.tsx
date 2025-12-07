@@ -17,7 +17,7 @@ export default function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     // TODO 근사값으로 맞춰놓음 디자이너분들과 논의 후 수정 예정
-    <div className='flex w-96 flex-col gap-7 rounded-2xl bg-white px-5 py-6'>
+    <div className='flex w-full flex-col gap-7 rounded-2xl bg-white px-5 py-6'>
       {/* Text Section */}
       <div className='flex w-full flex-col gap-2'>
         <p className='w-full text-heading-lg text-black'>{title}</p>
@@ -30,7 +30,7 @@ export default function ConfirmDialog({
         {/* Primary CTA Button */}
         <button
           onClick={onPositive}
-          className='flex h-11 w-full items-center justify-center rounded-lg bg-point text-body-lg text-white'
+          className='text-body-xl flex h-11 w-full items-center justify-center rounded-[10px] bg-point text-white'
         >
           {positiveLabel}
         </button>
