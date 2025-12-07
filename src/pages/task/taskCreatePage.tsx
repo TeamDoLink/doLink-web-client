@@ -4,6 +4,8 @@ import { CollectionChipSelector, type CollectionChip } from '@/components/task';
 import { useClipboardBridge } from '@/hooks/useClipboardBridge';
 import { useDraftBridge } from '@/hooks/useDraftBridge';
 import type { TaskDraft } from '@/types/draft';
+import { ModalLayout } from '@/components/common/feedBack';
+
 // 임시 데이터 - 실제로는 API에서 받아올 데이터
 const MOCK_COLLECTIONS: CollectionChip[] = [
   { id: '1', label: '2025 연말 도쿄 여행' },
@@ -29,6 +31,7 @@ const MOCK_COLLECTIONS: CollectionChip[] = [
  * 할일 추가를 위한 전체 폼 페이지
  */
 function TaskCreatePage() {
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
     linkValue,
     setLinkValue,
@@ -182,6 +185,8 @@ function TaskCreatePage() {
     // TODO 추가하기 시 , 할 일 API 로직 연결 예정
     // TODO 이전에 할 일 추가 동작한 화면으로 Return
   };
+  // [ ] TEST 지워야함
+  // setShowConfirmDialog(true);
 
   /**
    * 임시저장 버튼 활성화 조건: title, linkValue, memo 중 한글자라도 입력하거나 모음 선택
@@ -240,6 +245,26 @@ function TaskCreatePage() {
 
   return (
     <div>
+      {/* TODO 팀 컨벤션에 맞게 전역 state? 내부 state? 결정해 수정  */}
+      {/* TODO 임시저장 조건 충족화면 */}
+      <ModalLayout
+        open={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+      >
+        <FeedBack.ConfirmDialog
+          title={`작성 중인 할 일을\n저장하고 나갈까요?`}
+          positiveLabel='저장하고 나가기'
+          negativeLabel='취소'
+          onPositive={() => {
+            // TODO 임시저장하고 나가기 이전 화면으로 이동
+          }}
+          onNegative={() => {
+            // 모달 창만 사라지기
+            setShowConfirmDialog(false);
+          }}
+        />
+      </ModalLayout>
+
       <AppBar.BackDetailBar
         title='할 일 추가'
         rightIcons={['save']}
