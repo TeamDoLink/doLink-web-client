@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { TodoBottomSheet } from '@/components/common/bottomSheet/todoBottomSheet';
 import { CtaSecondButton } from '@/components/common/button/ctaSecondButton';
-import { FlagLabel } from '@/components/label/flagLabel';
-import { CapsuleButton } from '@/components/common/button/capsuleButton';
+import { FlagLabel } from '@/components/common/label/flagLabel';
+import { LinkCapsuleButton } from '@/components/common/button/linkCapsuleButton';
+import { ShareCapsuleButton } from '@/components/common/button/shareCapsuleButton';
 import { TabButton } from '@/components/common/button/tabButton';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
 
@@ -59,13 +60,18 @@ const TodoBottomSheetShowcase = () => {
   );
 };
 
-const CapsuleButtonShowcase = () => {
-  return (
-    <div className='flex flex-col gap-4 rounded-3xl bg-grey-100 p-6'>
-      <CapsuleButton />
+const CapsuleButtonShowcase = () => (
+  <div className='flex flex-col gap-4 rounded-3xl bg-grey-100 p-6'>
+    <div className='flex gap-2'>
+      <LinkCapsuleButton />
+      <ShareCapsuleButton />
     </div>
-  );
-};
+    <div className='flex gap-2'>
+      <LinkCapsuleButton disabled />
+      <ShareCapsuleButton disabled />
+    </div>
+  </div>
+);
 
 const sections = [
   {
@@ -79,9 +85,9 @@ const sections = [
     ),
   },
   {
-    title: 'Capsule Button',
+    title: 'Capsule Buttons',
     description:
-      '링크 관련 액션을 묶은 캡슐형 버튼입니다. disabled 상태에서는 연한 회색으로 표시됩니다.',
+      '링크 원본과 공유 액션을 개별 버튼으로 제공하는 캡슐형 UI입니다. disabled 상태에서는 연한 회색으로 표시됩니다.',
     component: <CapsuleButtonShowcase />,
   },
   {
