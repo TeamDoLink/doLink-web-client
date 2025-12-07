@@ -57,21 +57,29 @@ export interface ReactNativeWebView {
   ) => void;
 }
 
-/**
- * 메시지가 유효한 AppResponse인지 확인
- */
-export const isDraftResponse = (data: unknown): data is AppResponse => {
+export const isDraftMessageType = (data: unknown): data is AppResponse => {
   if (typeof data !== 'object' || data === null) {
     return false;
   }
 
   const obj = data as Record<string, unknown>;
   return (
-    (obj.type === 'SAVE_DRAFT' ||
-      obj.type === 'LOAD_DRAFT' ||
-      obj.type === 'DELETE_DRAFT') &&
-    typeof obj.success === 'boolean'
+    obj.type === 'SAVE_DRAFT' ||
+    obj.type === 'LOAD_DRAFT' ||
+    obj.type === 'DELETE_DRAFT'
   );
+};
+
+/**
+ * 메시지가 success AppResponse인지 확인
+ */
+export const isDraftSuccess = (data: unknown): data is AppResponse => {
+  if (typeof data !== 'object' || data === null) {
+    return false;
+  }
+
+  const obj = data as Record<string, unknown>;
+  return typeof obj.success === 'boolean';
 };
 
 /**
