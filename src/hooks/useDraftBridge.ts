@@ -4,7 +4,7 @@ import type {
   ReactNativeWebView,
   WebViewMessage,
 } from '@/types/draft';
-import { isDraftResponse } from '@/types/draft';
+import { isDraftMessageType, isDraftSuccess } from '@/types/draft';
 
 /**
  * Draft Bridge 에러 타입
@@ -126,8 +126,13 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
         response = data;
       }
 
+      // Draft 메시지 타입 확인
+      if (!isDraftMessageType(response)) {
+        return;
+      }
+
       // 메시지 유효성 검증
-      if (!isDraftResponse(response)) {
+      if (!isDraftSuccess(response)) {
         console.error('[useDraftBridge] Invalid response type:', response);
         return;
       }
@@ -151,6 +156,8 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
       if (response.success) {
         setError(null);
         pending.resolve(response.data ?? null);
+        // TODO 테스트 위해 임시로 alert 사용
+        alert(`임시저장 완료: ${event.data}`);
       } else {
         const error = new DraftBridgeError(
           response.error || 'Unknown error',
