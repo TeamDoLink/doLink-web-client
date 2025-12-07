@@ -50,6 +50,7 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
   /**
    * Platform 감지 (iOS vs Android)
    */
+  // TODO 공통 utils로 이동
   const detectPlatform = useCallback((): 'ios' | 'android' => {
     const userAgent = navigator.userAgent.toLowerCase();
     const isIOS =
@@ -100,11 +101,13 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
       }
 
       // 메시지 유효성 검증
+      // clipboard 관련 메시지만 처리하게 함
       if (!isClipboardMessage(message)) {
-        throw new ClipboardBridgeError(
-          `Invalid message type: ${typeof (message as Record<string, unknown>)?.type}`,
-          'INVALID_MESSAGE'
-        );
+        return;
+        // throw new ClipboardBridgeError(
+        //   `Invalid message type: ${typeof (message as Record<string, unknown>)?.type}`,
+        //   'INVALID_MESSAGE'
+        // );
       }
 
       // 메시지 타입별 처리
