@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 
 import HomePage from '@/pages/home/homePage';
-import FoldersPage from '@/pages/folders/foldersPage';
+import ArchivePage from '@/pages/archive/archivePage';
 import SettingsPage from '@/pages/settings/settingsPage';
 import Test from '@/pages/Test';
 import Test2 from '@/pages/Test2';
@@ -10,7 +10,7 @@ const AppRouter = () => {
   return (
     <Routes>
       <Route path='/' element={<HomePage />} />
-      <Route path='/folders' element={<FoldersPage />} />
+      <Route path='/archives' element={<ArchivePage />} />
       <Route path='/settings' element={<SettingsPage />} />
 
       {/* 공통 컴포넌트 테스트 페이지 */}

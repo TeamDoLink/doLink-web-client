@@ -1,6 +1,6 @@
 export const ROUTES = {
   home: '/',
-  folders: '/folders',
+  archives: '/archives',
   settings: '/settings',
   test: '/test',
   test2: '/test2',
@@ -8,7 +8,7 @@ export const ROUTES = {
 
 export const TAB_ROUTE_MAP = {
   home: ROUTES.home,
-  folder: ROUTES.folders,
+  archive: ROUTES.archives,
   setting: ROUTES.settings,
 } as const;
 
