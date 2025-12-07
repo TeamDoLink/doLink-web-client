@@ -12,7 +12,7 @@ import heroIllustration from '@/assets/icons/home/home1.svg';
 import { TAB_ROUTE_MAP } from '@/constants/routes';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { useTodoStore, type TodoItem } from '@/stores/useTodoStore';
-import { useFolderStore, type FolderItem } from '@/stores/useFolderStore';
+import { useArchiveStore, type ArchiveItem } from '@/stores/useArchiveStore';
 import { FloatingButton } from '@/components/common/button';
 
 const TODO_ITEMS: TodoItem[] = [
@@ -25,7 +25,7 @@ const TODO_ITEMS: TodoItem[] = [
   },
 ];
 
-const FOLDER_ITEMS: FolderItem[] = [
+const ARCHIVE_ITEMS: ArchiveItem[] = [
   {
     id: 'tutorial',
     title: '두링크(DoLink) 튜토리얼',
@@ -47,17 +47,17 @@ function HomeBeforeLogin() {
     resetTodos,
   } = useTodoStore();
   const {
-    items: folderItems,
-    pendingDeleteFolderId,
-    setPendingDeleteFolderId,
-    removeFolder,
-    resetFolders,
-  } = useFolderStore();
+    items: archiveItems,
+    pendingDeleteArchiveId,
+    setPendingDeleteArchiveId,
+    removeArchive,
+    resetArchives,
+  } = useArchiveStore();
 
   useEffect(() => {
     resetTodos(TODO_ITEMS);
-    resetFolders(FOLDER_ITEMS);
-  }, [resetFolders, resetTodos]);
+    resetArchives(ARCHIVE_ITEMS);
+  }, [resetArchives, resetTodos]);
 
   // 로그인 모달 지속시간 3초
   useEffect(() => {
@@ -87,23 +87,23 @@ function HomeBeforeLogin() {
   };
 
   // 모음 삭제 요청
-  const handleRequestDeleteFolder = (id: string) => {
-    setPendingDeleteFolderId(id);
+  const handleRequestDeleteArchive = (id: string) => {
+    setPendingDeleteArchiveId(id);
   };
 
   // 모음 삭제 확인
-  const handleConfirmDeleteFolder = () => {
-    if (!pendingDeleteFolderId) return;
-    removeFolder(pendingDeleteFolderId);
+  const handleConfirmDeleteArchive = () => {
+    if (!pendingDeleteArchiveId) return;
+    removeArchive(pendingDeleteArchiveId);
   };
 
   // 모음 삭제 취소
-  const handleCancelDeleteFolder = () => {
-    setPendingDeleteFolderId(null);
+  const handleCancelDeleteArchive = () => {
+    setPendingDeleteArchiveId(null);
   };
 
   return (
-    <div className='relative flex min-h-screen flex-col bg-[#F2F3F7]'>
+    <div className='relative flex min-h-screen flex-col'>
       <Background.GradientBackground className='flex min-h-0 flex-1 flex-col'>
         {/* 앱바 헤더 */}
         <header className='sticky top-0 z-20'>
@@ -156,7 +156,7 @@ function HomeBeforeLogin() {
             <section className='mt-7 space-y-4 pb-20'>
               <h2 className='text-heading-sm text-black'>모음</h2>
               <div className='space-y-3'>
-                {folderItems.map(
+                {archiveItems.map(
                   ({ id, title, category, itemCount, images }) => (
                     <List.ArchiveCard
                       key={id}
@@ -165,7 +165,7 @@ function HomeBeforeLogin() {
                       itemCount={itemCount}
                       images={images}
                       width='w-full'
-                      onDeleteClick={() => handleRequestDeleteFolder(id)}
+                      onDeleteClick={() => handleRequestDeleteArchive(id)}
                     />
                   )
                 )}
@@ -215,16 +215,16 @@ function HomeBeforeLogin() {
 
         {/* 모음 삭제 모달 */}
         <FeedBack.ModalLayout
-          open={pendingDeleteFolderId !== null}
-          onClose={handleCancelDeleteFolder}
+          open={pendingDeleteArchiveId !== null}
+          onClose={handleCancelDeleteArchive}
         >
           <FeedBack.ConfirmDialog
             title='모음을 삭제할까요?'
             subtitle='모음 내 할 일도 함께 삭제돼요.'
             positiveLabel='삭제하기'
             negativeLabel='취소'
-            onPositive={handleConfirmDeleteFolder}
-            onNegative={handleCancelDeleteFolder}
+            onPositive={handleConfirmDeleteArchive}
+            onNegative={handleCancelDeleteArchive}
           />
         </FeedBack.ModalLayout>
       </Background.GradientBackground>
