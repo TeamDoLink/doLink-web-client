@@ -1,5 +1,5 @@
 import imgNoData from '@/assets/icons/common/no-img-data.svg';
-import { FlagButton } from '@/components/common/button/flagButton';
+import { FlagLabel } from '../label';
 
 export type TaskSearchItemProps = {
   title: string;
@@ -81,11 +81,10 @@ export default function TaskSearchItem({
             {highlightText(title, searchQuery)}
           </p>
 
-          {/* TODO 서현님 공통컴포넌트 버튼 완료시 대체 예정 */}
           {isCompleted ? (
-            <FlagButton completed>완료</FlagButton>
+            <FlagLabel completed>완료</FlagLabel>
           ) : (
-            <FlagButton>미완료</FlagButton>
+            <FlagLabel>미완료</FlagLabel>
           )}
         </div>
 

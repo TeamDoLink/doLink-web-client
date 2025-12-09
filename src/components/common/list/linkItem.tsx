@@ -3,7 +3,10 @@ import imgEditIcon from '@/assets/icons/common/edit-24.svg';
 import imgDeleteIcon from '@/assets/icons/common/delete-24.svg';
 import imgNoData from '@/assets/icons/common/no-img-data.svg';
 import { CheckboxComponent } from './checkBoxComponent';
-import { LinkActionButtons } from '@/components/common/button/capsuleButton';
+import {
+  LinkCapsuleButton,
+  ShareCapsuleButton,
+} from '@/components/common/button';
 
 export type LinkItemProps = {
   title: string;
@@ -109,10 +112,8 @@ export default function LinkItem({
 
           {/* Buttons */}
           <div className='flex items-start gap-1'>
-            <LinkActionButtons
-              onClickOriginal={onOriginalClick}
-              onClickShare={onShareClick}
-            />
+            <LinkCapsuleButton onClick={onOriginalClick} />
+            <ShareCapsuleButton onClick={onShareClick} />
           </div>
         </div>
       </div>
