@@ -28,7 +28,7 @@ export default function DropDownMenu({
 }: DropDownMenuProps) {
   return (
     <div
-      className={`relative flex w-[100px] flex-col items-start overflow-clip rounded-[8px] bg-white px-0 py-[0.5rem] shadow-[0px_3px_10px_0px_rgba(0,0,0,0.16)]`}
+      className={`relative flex w-[108px] flex-col items-start overflow-clip rounded-[8px] bg-white px-0 py-[0.5rem] shadow-[0px_3px_10px_0px_rgba(0,0,0,0.16)]`}
     >
       {options.map((opt) => {
         const selected = opt.value === selectedValue;
