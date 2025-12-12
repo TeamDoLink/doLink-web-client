@@ -5,6 +5,7 @@ import ArchivePage from '@/pages/archive/archivePage';
 import SettingsPage from '@/pages/settings/settingsPage';
 import Test from '@/pages/test';
 import Test2 from '@/pages/test2';
+import Test3 from '@/pages/test3';
 
 const AppRouter = () => {
   return (
@@ -16,6 +17,7 @@ const AppRouter = () => {
       {/* 공통 컴포넌트 테스트 페이지 */}
       <Route path='/test' element={<Test />} />
       <Route path='/test2' element={<Test2 />} />
+      <Route path='/test3' element={<Test3 />} />
     </Routes>
   );
 };
