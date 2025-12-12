@@ -1,7 +1,7 @@
 import React from 'react';
-import empty_message from '@/assets/icons/common/emtpy_message.svg';
+import empty_message from '@/assets/icons/common/empty_message.svg';
 
-export type OutlineBoxProps = {
+export type EmptyNoticeProps = {
   className?: string;
   style?: React.CSSProperties;
   title?: string;
@@ -13,7 +13,7 @@ export default function EmptyNotice({
   style,
   title = '저장할 링크를 추가해주세요',
   subtitle = '우측 하단 검정색 + 버튼으로 추가할 수 있어요',
-}: OutlineBoxProps) {
+}: EmptyNoticeProps) {
   return (
     <div
       className={`flex flex-col items-center gap-[1.25rem] ${className}`}
