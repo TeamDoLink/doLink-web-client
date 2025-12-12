@@ -1,4 +1,4 @@
-import { CheckboxComponent } from './checkBoxComponent';
+import { CheckBox } from './checkBox';
 
 export type TodoItemProps = {
   title: string;
@@ -39,7 +39,7 @@ export default function TodoItem({
 
       {/* Checkbox */}
       <div className='flex-shrink-0'>
-        <CheckboxComponent checked={checked} />
+        <CheckBox checked={checked} />
       </div>
     </button>
   );

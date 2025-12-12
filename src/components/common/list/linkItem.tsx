@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'react';
 import imgEditIcon from '@/assets/icons/common/edit-24.svg';
 import imgDeleteIcon from '@/assets/icons/common/delete-24.svg';
 import imgNoData from '@/assets/icons/common/no-img-data.svg';
-import { CheckboxComponent } from './checkBoxComponent';
+import { CheckBox } from './checkBox';
 import {
   LinkCapsuleButton,
   ShareCapsuleButton,
@@ -142,7 +142,7 @@ export default function LinkItem({
           className='flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden'
           type='button'
         >
-          <CheckboxComponent checked={checked} />
+          <CheckBox checked={checked} />
         </button>
       )}
     </div>

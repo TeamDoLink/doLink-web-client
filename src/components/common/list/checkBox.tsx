@@ -1,8 +1,8 @@
-type CheckboxComponentProps = {
+type CheckBoxProps = {
   checked?: boolean;
 };
 
-export function CheckboxComponent({ checked = false }: CheckboxComponentProps) {
+export function CheckBox({ checked = false }: CheckBoxProps) {
   if (checked) {
     return (
       <div className='flex h-[1.5rem] w-[1.5rem] flex-shrink-0 items-center justify-center rounded-full bg-point'>
