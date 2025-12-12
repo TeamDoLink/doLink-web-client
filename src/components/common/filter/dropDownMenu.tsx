@@ -36,6 +36,7 @@ export default function DropDownMenu({
           <button
             key={opt.value}
             onClick={() => onSelect?.(opt.value)}
+            type='button'
             className={`flex w-full shrink-0 items-center gap-[4px] bg-white px-[20px] py-[9px] text-left ${
               selected
                 ? 'text-caption-md text-grey-900'

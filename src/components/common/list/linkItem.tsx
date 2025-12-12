@@ -122,6 +122,7 @@ export default function LinkItem({
       {isEditMode ? (
         <div className='flex flex-shrink-0 items-center gap-2.5'>
           <button
+            type='button'
             onClick={onEditClick}
             className='flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden'
           >
@@ -130,6 +131,7 @@ export default function LinkItem({
           <button
             onClick={onDeleteClick}
             className='flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden'
+            type='button'
           >
             <img alt='delete' className='h-6 w-6' src={imgDeleteIcon} />
           </button>
@@ -138,6 +140,7 @@ export default function LinkItem({
         <button
           onClick={handleCheckboxClick}
           className='flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden'
+          type='button'
         >
           <CheckboxComponent checked={checked} />
         </button>
