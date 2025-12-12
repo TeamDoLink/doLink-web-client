@@ -67,7 +67,7 @@ export default function ArchiveSearchItem({
       {/* 썸네일 */}
       <div className='grid h-[60px] w-[60px] shrink-0 grid-cols-2 grid-rows-2 gap-[2px] overflow-clip rounded-[9.6px]'>
         {slots.map((imageSrc, index) => (
-          <div key={index} className='overflow-hidde relative'>
+          <div key={index} className='relative overflow-hidden'>
             {imageSrc && (
               <>
                 <img
