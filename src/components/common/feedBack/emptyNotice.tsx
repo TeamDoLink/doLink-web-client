@@ -16,24 +16,20 @@ export default function EmptyNotice({
 }: EmptyNoticeProps) {
   return (
     <div
-      className={`flex flex-col items-center gap-[1.25rem] ${className}`}
+      className={`flex flex-col items-center gap-5 ${className}`}
       style={style}
     >
-      <div className='relative h-[3.25rem] w-[3.25rem] shrink-0'>
+      <div className='relative size-[52px] shrink-0'>
         <img
           src={empty_message}
           alt=''
-          className='block h-full w-full max-w-none'
+          className='block size-full max-w-none'
         />
       </div>
 
-      <div className='flex w-full flex-col items-center gap-[0.25rem] text-center'>
-        <p className='text-[16px] font-semibold leading-[20px] text-[#6b7684]'>
-          {title}
-        </p>
-        <p className='text-[14px] font-medium leading-[20px] text-[#9c9fae]'>
-          {subtitle}
-        </p>
+      <div className='flex w-full flex-col items-center gap-[1px] text-center'>
+        <p className='text-heading-md text-grey-600'>{title}</p>
+        <p className='text-body-lg text-grey-400'>{subtitle}</p>
       </div>
     </div>
   );
