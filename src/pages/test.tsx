@@ -15,7 +15,7 @@ import { SearchAppBar } from '@/components/common/appBar/searchAppBar';
 import { BlackLine } from '@/components/common/line/blackLine';
 import { useState } from 'react';
 import { FeedBack, List, InputField, Filter } from '../components/common';
-import ModalLayout from '@/components/common/feedBack/ModalLayout';
+import ModalLayout from '@/components/common/feedBack/modalLayout';
 import {
   CategoryEditorIconImage,
   CategoryHomeIconImage,
@@ -120,7 +120,126 @@ const sections = [
       '디테일 화면 상단바입니다. 좌측 back.svg 버튼과 제목, 우측엔 actions 배열로 제어하는 임시저장/검색/더보기 액션을 렌더링합니다.',
     component: (
       <div className='w-full max-w-md rounded-3xl bg-grey-100 p-6'>
-        <BackDetailBar title='Title' />
+        <div className='flex flex-col gap-4'>
+          {/* Save 아이콘만 */}
+          <div>
+            <p className='mb-2 text-xs font-semibold text-grey-600'>
+              Save 아이콘 (enabled)
+            </p>
+            <BackDetailBar
+              title='할일 추가'
+              rightIcons='save'
+              isSaveDisabled={false}
+              onClickSave={() => alert('Save!')}
+            />
+          </div>
+
+          {/* Save 아이콘 disabled */}
+          <div>
+            <p className='mb-2 text-xs font-semibold text-grey-600'>
+              Save 아이콘 (disabled)
+            </p>
+            <BackDetailBar
+              title='할일 추가'
+              rightIcons='save'
+              isSaveDisabled={true}
+              onClickSave={() => alert('Save!')}
+            />
+          </div>
+
+          {/* Search 아이콘만 */}
+          <div>
+            <p className='mb-2 text-xs font-semibold text-grey-600'>
+              Search 아이콘만
+            </p>
+            <BackDetailBar
+              title='검색'
+              rightIcons='search'
+              onClickSearch={() => alert('Search!')}
+            />
+          </div>
+
+          {/* Option 아이콘만 */}
+          <div>
+            <p className='mb-2 text-xs font-semibold text-grey-600'>
+              Option 아이콘만
+            </p>
+            <BackDetailBar
+              title='상세'
+              rightIcons='option'
+              onClickOption={() => alert('Option!')}
+            />
+          </div>
+
+          {/* Save + Option */}
+          <div>
+            <p className='mb-2 text-xs font-semibold text-grey-600'>
+              Save + Option (enabled)
+            </p>
+            <BackDetailBar
+              title='할일 수정'
+              rightIcons={['save', 'option']}
+              isSaveDisabled={false}
+              onClickSave={() => alert('Save!')}
+              onClickOption={() => alert('Option!')}
+            />
+          </div>
+
+          {/* Save + Option (disabled) */}
+          <div>
+            <p className='mb-2 text-xs font-semibold text-grey-600'>
+              Save + Option (disabled)
+            </p>
+            <BackDetailBar
+              title='할일 수정'
+              rightIcons={['save', 'option']}
+              isSaveDisabled={true}
+              onClickSave={() => alert('Save!')}
+              onClickOption={() => alert('Option!')}
+            />
+          </div>
+
+          {/* Search + Option */}
+          <div>
+            <p className='mb-2 text-xs font-semibold text-grey-600'>
+              Search + Option
+            </p>
+            <BackDetailBar
+              title='할일 목록'
+              rightIcons={['search', 'option']}
+              onClickSearch={() => alert('Search!')}
+              onClickOption={() => alert('Option!')}
+            />
+          </div>
+
+          {/* Save + Search + Option */}
+          <div>
+            <p className='mb-2 text-xs font-semibold text-grey-600'>
+              Save + Search + Option
+            </p>
+            <BackDetailBar
+              title='복잡한 화면'
+              rightIcons={['save', 'search', 'option']}
+              isSaveDisabled={false}
+              onClickSave={() => alert('Save!')}
+              onClickSearch={() => alert('Search!')}
+              onClickOption={() => alert('Option!')}
+            />
+          </div>
+
+          {/* Back 버튼 없음 */}
+          <div>
+            <p className='mb-2 text-xs font-semibold text-grey-600'>
+              Back 버튼 없음 (showBackButton=false)
+            </p>
+            <BackDetailBar
+              title='Back 없는 화면'
+              showBackButton={false}
+              rightIcons='option'
+              onClickOption={() => alert('Option!')}
+            />
+          </div>
+        </div>
       </div>
     ),
   },

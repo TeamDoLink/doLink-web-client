@@ -6,6 +6,7 @@ import { LinkCapsuleButton } from '@/components/common/button/linkCapsuleButton'
 import { ShareCapsuleButton } from '@/components/common/button/shareCapsuleButton';
 import { TabButton } from '@/components/common/button/tabButton';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
+import Test_yj1 from './test_yj1';
 
 const TabButtonShowcase = () => {
   const [selected, setSelected] = useState<'left' | 'right'>('left');
@@ -145,6 +146,8 @@ const Test2 = () => {
           </section>
         ))}
       </div>
+
+      <Test_yj1 />
     </main>
   );
 };

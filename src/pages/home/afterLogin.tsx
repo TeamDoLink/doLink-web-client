@@ -102,6 +102,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     setSuppressCompleteModal,
     resetTodos,
   } = useTodoStore();
+
   const {
     items: archiveItems,
     pendingDeleteArchiveId,

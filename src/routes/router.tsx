@@ -3,8 +3,8 @@ import { Route, Routes } from 'react-router-dom';
 import HomePage from '@/pages/home/homePage';
 import ArchivePage from '@/pages/archive/archivePage';
 import SettingsPage from '@/pages/settings/settingsPage';
-import Test from '@/pages/Test';
-import Test2 from '@/pages/Test2';
+import Test from '@/pages/test';
+import Test2 from '@/pages/test2';
 
 const AppRouter = () => {
   return (
