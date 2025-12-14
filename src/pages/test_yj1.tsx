@@ -155,7 +155,7 @@ function ClearableSearchInputDemo() {
   );
 }
 
-const Test_yj1 = () => {
+export default function TestYj1() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchLinkQuery, setSearchLinkQuery] = useState('');
   const [sortValue, setSortValue] = useState('latest');
@@ -628,6 +628,4 @@ const Test_yj1 = () => {
       </div>
     </main>
   );
-};
-
-export default Test_yj1;
+}
