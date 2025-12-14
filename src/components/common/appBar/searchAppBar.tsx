@@ -14,19 +14,25 @@ interface SearchAppBarProps {
  */
 export const SearchAppBar = ({ title, onClickSearch }: SearchAppBarProps) => {
   return (
-    <header
-      className={`flex w-full items-center justify-between bg-white px-[20px] py-[10px]`}
-    >
-      <span className='text-heading-xl text-black'>{title}</span>
+    <header className='w-full bg-white'>
+      <div
+        className='w-full'
+        style={{ height: 'var(--safe-area-top, 44px)' }}
+        aria-hidden
+      />
 
-      <button
-        type='button'
-        onClick={onClickSearch}
-        aria-label='검색'
-        className='flex h-8 w-8 items-center justify-center'
-      >
-        <img src={searchIcon} alt='검색' className='h-6 w-6' />
-      </button>
+      <div className='flex h-14 w-full items-center justify-between px-[20px]'>
+        <span className='text-heading-xl text-black'>{title}</span>
+
+        <button
+          type='button'
+          onClick={onClickSearch}
+          aria-label='검색'
+          className='flex h-8 w-8 items-center justify-center'
+        >
+          <img src={searchIcon} alt='검색' className='h-6 w-6' />
+        </button>
+      </div>
     </header>
   );
 };

@@ -108,28 +108,36 @@ export const BackDetailBar = ({
   };
 
   return (
-    <header className='flex h-14 w-full items-center justify-between gap-2 bg-white px-3 py-3 sm:px-4'>
-      {/* 좌측: 뒤로가기 + 제목 */}
-      <div className='flex min-w-0 flex-1 items-center gap-2'>
-        <button
-          type='button'
-          onClick={onClickBack}
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-opacity hover:opacity-70 ${
-            showBackButton ? '' : 'invisible'
-          }`}
-          aria-label='뒤로'
-        >
-          <img src={backIcon} alt='' className='h-6 w-6' />
-        </button>
+    <header className='w-full bg-white'>
+      <div
+        className='w-full'
+        style={{ height: 'var(--safe-area-top, 44px)' }}
+        aria-hidden
+      />
 
-        <h1 className='truncate text-heading-md font-semibold text-grey-900'>
-          {title}
-        </h1>
-      </div>
+      <div className='flex h-14 w-full items-center justify-between gap-2 px-3 sm:px-4'>
+        {/* 좌측: 뒤로가기 + 제목 */}
+        <div className='flex min-w-0 flex-1 items-center gap-2'>
+          <button
+            type='button'
+            onClick={onClickBack}
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-opacity hover:opacity-70 ${
+              showBackButton ? '' : 'invisible'
+            }`}
+            aria-label='뒤로'
+          >
+            <img src={backIcon} alt='' className='h-6 w-6' />
+          </button>
 
-      {/* 우측: 아이콘 버튼들 */}
-      <div className='flex shrink-0 items-center gap-1'>
-        {icons.map((iconType) => getIconButton(iconType))}
+          <h1 className='truncate text-heading-md font-semibold text-grey-900'>
+            {title}
+          </h1>
+        </div>
+
+        {/* 우측: 아이콘 버튼들 */}
+        <div className='flex shrink-0 items-center gap-1'>
+          {icons.map((iconType) => getIconButton(iconType))}
+        </div>
       </div>
     </header>
   );
