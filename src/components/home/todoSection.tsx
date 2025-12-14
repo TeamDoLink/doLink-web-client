@@ -1,20 +1,20 @@
 import { List } from '@/components/common';
-import { useTodoStore } from '@/stores/useTodoStore';
+import type { TodoItem } from '@/types';
 
 type TodoSectionProps = {
   className?: string;
+  items: TodoItem[];
+  onToggle: (id: string, checked: boolean) => void;
 };
 
 /**
  * 홈 화면 하단 할 일 목록 섹션
  */
-export const TodoSection = ({ className = '' }: TodoSectionProps) => {
-  const { items, toggleTodo } = useTodoStore();
-
-  const handleToggle = (id: string, checked: boolean) => {
-    toggleTodo(id, checked);
-  };
-
+export const TodoSection = ({
+  className = '',
+  items,
+  onToggle,
+}: TodoSectionProps) => {
   return (
     <section className={`mt-5 space-y-4 ${className}`}>
       <h2 className='text-heading-sm text-black'>할 일</h2>
@@ -25,7 +25,7 @@ export const TodoSection = ({ className = '' }: TodoSectionProps) => {
             title={title}
             subtitle={`${date} · ${sns}`}
             checked={checked}
-            onChange={(next) => handleToggle(id, next)}
+            onChange={(next) => onToggle(id, next)}
           />
         ))}
       </div>
