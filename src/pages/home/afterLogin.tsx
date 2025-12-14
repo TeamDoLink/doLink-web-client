@@ -1,15 +1,16 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Background, FeedBack, TabBar } from '@/components/common';
 import { FloatingButton } from '@/components/common/button/floatingButton';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import { TAB_ROUTE_MAP } from '@/constants/routes';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
-import { useTodoStore, type TodoItem } from '@/stores/useTodoStore';
-import { useArchiveStore, type ArchiveItem } from '@/stores/useArchiveStore';
+import { useTodoStore } from '@/stores/useTodoStore';
+import { useArchiveStore } from '@/stores/useArchiveStore';
 import { GreetingSection } from '@/components/home/greetingSection';
 import { TodoSection } from '@/components/home/todoSection';
 import { ArchiveSection } from '@/components/home/archiveSection';
+import type { ArchiveItem, TodoItem } from '@/types';
 
 const TODO_ITEMS: TodoItem[] = [
   {
@@ -96,25 +97,26 @@ type HomeAfterLoginProps = {
 
 const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   const navigate = useNavigate();
+  const [todoItems, setTodoItems] = useState<TodoItem[]>(() =>
+    TODO_ITEMS.map((todo) => ({ ...todo }))
+  );
+  const [archiveItems, setArchiveItems] = useState<ArchiveItem[]>(() =>
+    ARCHIVE_ITEMS.map((archive) => ({ ...archive }))
+  );
   const {
     showCompleteModal,
+    suppressCompleteModal,
     setShowCompleteModal,
     setSuppressCompleteModal,
-    resetTodos,
   } = useTodoStore();
 
-  const {
-    items: archiveItems,
-    pendingDeleteArchiveId,
-    setPendingDeleteArchiveId,
-    removeArchive,
-    resetArchives,
-  } = useArchiveStore();
+  const { pendingDeleteArchiveId, setPendingDeleteArchiveId } =
+    useArchiveStore();
 
   useEffect(() => {
-    resetTodos(TODO_ITEMS);
-    resetArchives(ARCHIVE_ITEMS);
-  }, [resetArchives, resetTodos]);
+    setTodoItems(TODO_ITEMS.map((todo) => ({ ...todo })));
+    setArchiveItems(ARCHIVE_ITEMS.map((archive) => ({ ...archive })));
+  }, []);
 
   // 시간에 따른 인사 문구
   const greeting = useMemo(() => {
@@ -132,6 +134,18 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     setShowCompleteModal(false);
   };
 
+  const handleToggleTodo = (id: string, nextChecked: boolean) => {
+    setTodoItems((prev) =>
+      prev.map((todo) =>
+        todo.id === id ? { ...todo, checked: nextChecked } : todo
+      )
+    );
+
+    if (nextChecked && !suppressCompleteModal) {
+      setShowCompleteModal(true);
+    }
+  };
+
   // 바텀 탭바 함수
   const handleTabChange = (next: TabKey) => {
     navigate(TAB_ROUTE_MAP[next]);
@@ -143,7 +157,10 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
 
   const handleConfirmDeleteArchive = () => {
     if (!pendingDeleteArchiveId) return;
-    removeArchive(pendingDeleteArchiveId);
+    setArchiveItems((prev) =>
+      prev.filter((archive) => archive.id !== pendingDeleteArchiveId)
+    );
+    setPendingDeleteArchiveId(null);
   };
 
   const handleCancelDeleteArchive = () => {
@@ -164,7 +181,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
             {/* 상단 문구 + 일러스트 */}
             <GreetingSection memberName={memberName} greeting={greeting} />
             {/* 하단 할 일 */}
-            <TodoSection></TodoSection>
+            <TodoSection items={todoItems} onToggle={handleToggleTodo} />
             {/* 하단 모음 */}
             <ArchiveSection
               items={archiveItems}

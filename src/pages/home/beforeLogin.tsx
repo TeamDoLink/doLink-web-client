@@ -11,9 +11,10 @@ import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import heroIllustration from '@/assets/icons/home/home1.svg';
 import { TAB_ROUTE_MAP } from '@/constants/routes';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
-import { useTodoStore, type TodoItem } from '@/stores/useTodoStore';
-import { useArchiveStore, type ArchiveItem } from '@/stores/useArchiveStore';
+import { useTodoStore } from '@/stores/useTodoStore';
+import { useArchiveStore } from '@/stores/useArchiveStore';
 import { FloatingButton } from '@/components/common/button';
+import type { ArchiveItem, TodoItem } from '@/types';
 
 const TODO_ITEMS: TodoItem[] = [
   {
@@ -38,26 +39,25 @@ function HomeBeforeLogin() {
   const navigate = useNavigate();
   // 로그인 토스트
   const [showToast, setShowToast] = useState(true);
+  const [todoItems, setTodoItems] = useState<TodoItem[]>(() =>
+    TODO_ITEMS.map((todo) => ({ ...todo }))
+  );
+  const [archiveItems, setArchiveItems] = useState<ArchiveItem[]>(() =>
+    ARCHIVE_ITEMS.map((archive) => ({ ...archive }))
+  );
   const {
-    items: todoItems,
-    toggleTodo,
     showCompleteModal,
+    suppressCompleteModal,
     setShowCompleteModal,
     setSuppressCompleteModal,
-    resetTodos,
   } = useTodoStore();
-  const {
-    items: archiveItems,
-    pendingDeleteArchiveId,
-    setPendingDeleteArchiveId,
-    removeArchive,
-    resetArchives,
-  } = useArchiveStore();
+  const { pendingDeleteArchiveId, setPendingDeleteArchiveId } =
+    useArchiveStore();
 
   useEffect(() => {
-    resetTodos(TODO_ITEMS);
-    resetArchives(ARCHIVE_ITEMS);
-  }, [resetArchives, resetTodos]);
+    setTodoItems(TODO_ITEMS.map((todo) => ({ ...todo })));
+    setArchiveItems(ARCHIVE_ITEMS.map((archive) => ({ ...archive })));
+  }, []);
 
   // 로그인 모달 지속시간 3초
   useEffect(() => {
@@ -67,7 +67,15 @@ function HomeBeforeLogin() {
 
   // 할 일의 체크 여부를 바꿔주는 함수
   const handleTodoCheckbox = (id: string, nextChecked: boolean) => {
-    toggleTodo(id, nextChecked);
+    setTodoItems((prev) =>
+      prev.map((todo) =>
+        todo.id === id ? { ...todo, checked: nextChecked } : todo
+      )
+    );
+
+    if (nextChecked && !suppressCompleteModal) {
+      setShowCompleteModal(true);
+    }
   };
 
   // 완료 모달 닫기
@@ -94,7 +102,10 @@ function HomeBeforeLogin() {
   // 모음 삭제 확인
   const handleConfirmDeleteArchive = () => {
     if (!pendingDeleteArchiveId) return;
-    removeArchive(pendingDeleteArchiveId);
+    setArchiveItems((prev) =>
+      prev.filter((archive) => archive.id !== pendingDeleteArchiveId)
+    );
+    setPendingDeleteArchiveId(null);
   };
 
   // 모음 삭제 취소
