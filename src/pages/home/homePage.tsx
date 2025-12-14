@@ -1,9 +1,11 @@
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useGlobalLoadingStore } from '@/stores/useGlobalLoadingStore';
 import HomeAfterLogin from './afterLogin';
 import HomeBeforeLogin from './beforeLogin';
 
 const HomePage = () => {
-  const { isLoading, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
+  const { isLoading } = useGlobalLoadingStore();
 
   if (isLoading) {
     return (
