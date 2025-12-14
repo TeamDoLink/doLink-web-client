@@ -24,6 +24,18 @@ export default {
       backgroundImage: {
         'gradient-primary': 'linear-gradient(to right, #394CFF, #C539DE)',
       },
+      spacing: {
+        'safe-top': 'var(--safe-area-top, 0px)',
+        'safe-right': 'var(--safe-area-right, 0px)',
+        'safe-bottom': 'var(--safe-area-bottom, 0px)',
+        'safe-left': 'var(--safe-area-left, 0px)',
+      },
+      inset: {
+        'safe-top': 'var(--safe-area-top, 0px)',
+        'safe-right': 'var(--safe-area-right, 0px)',
+        'safe-bottom': 'var(--safe-area-bottom, 0px)',
+        'safe-left': 'var(--safe-area-left, 0px)',
+      },
       fontSize: {
         // display
         'display-2xl': ['22px', { lineHeight: '30px', fontWeight: '600' }],
