@@ -31,6 +31,7 @@ const MOCK_COLLECTIONS: CollectionChip[] = [
  * 할일 추가를 위한 전체 폼 페이지
  */
 function TaskCreatePage() {
+  const MAX_LENGTH = 100; // 가장 일반적인 경우
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
     linkValue,
@@ -107,11 +108,20 @@ function TaskCreatePage() {
     [setLinkValue, clearError]
   );
 
+  const isValidTextLength = (value: string) => value.length <= MAX_LENGTH;
+
   /**
    * 제목 입력값 변경 핸들러
    */
   const handleTitleChange = useCallback((value: string) => {
-    setTitle(value);
+    if (isValidTextLength(value)) setTitle(value);
+  }, []);
+
+  /**
+   * 메모 입력값 변경 핸들러
+   */
+  const handleMemoChange = useCallback((value: string) => {
+    if (isValidTextLength(value)) setMemo(value);
   }, []);
 
   /**
@@ -283,7 +293,18 @@ function TaskCreatePage() {
 
         {/* 제목 섹션 */}
         <div className='flex flex-col gap-2'>
-          <label className='text-body-lg font-semibold text-black'>제목</label>
+          <div className='flex items-center justify-between'>
+            <label className='text-body-lg font-semibold text-black'>
+              제목
+            </label>
+            <span
+              className={`text-body-sm ${
+                title.length >= MAX_LENGTH ? 'text-error' : 'text-gray-500'
+              }`}
+            >
+              {title.length}/{MAX_LENGTH}
+            </span>
+          </div>
           <InputField.TextInputField
             state={getTitleState()}
             placeholder='제목을 입력해주세요.'
@@ -316,13 +337,22 @@ function TaskCreatePage() {
 
         {/* 메모(선택) 섹션 */}
         <div className='flex flex-col gap-2'>
-          <label className='text-body-lg font-semibold text-black'>
-            메모(선택)
-          </label>
+          <div className='flex items-center justify-between'>
+            <label className='text-body-lg font-semibold text-black'>
+              메모(선택)
+            </label>
+            <span
+              className={`text-body-sm ${
+                memo.length >= MAX_LENGTH ? 'text-error' : 'text-gray-500'
+              }`}
+            >
+              {memo.length}/{MAX_LENGTH}
+            </span>
+          </div>
           <textarea
             placeholder='메모를 입력해주세요.'
             value={memo}
-            onChange={(e) => setMemo(e.target.value)}
+            onChange={(e) => handleMemoChange(e.target.value)}
             className='h-[132px] w-full resize-none rounded-[10px] border border-grey-200 bg-white px-4 py-4 text-body-md text-grey-900 outline-none placeholder:text-grey-400'
           />
         </div>
