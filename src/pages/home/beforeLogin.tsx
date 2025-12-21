@@ -12,7 +12,6 @@ import heroIllustration from '@/assets/icons/home/home1.svg';
 import { TAB_ROUTE_MAP } from '@/constants/routes';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { useTodoStore } from '@/stores/useTodoStore';
-import { useArchiveStore } from '@/stores/useArchiveStore';
 import { FloatingButton } from '@/components/common/button';
 import type { ArchiveItem, TodoItem } from '@/types';
 
@@ -35,7 +34,7 @@ const ARCHIVE_ITEMS: ArchiveItem[] = [
   },
 ];
 
-function HomeBeforeLogin() {
+const HomeBeforeLogin = () => {
   const navigate = useNavigate();
   // 로그인 토스트
   const [showToast, setShowToast] = useState(true);
@@ -51,8 +50,9 @@ function HomeBeforeLogin() {
     setShowCompleteModal,
     setSuppressCompleteModal,
   } = useTodoStore();
-  const { pendingDeleteArchiveId, setPendingDeleteArchiveId } =
-    useArchiveStore();
+  const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     setTodoItems(TODO_ITEMS.map((todo) => ({ ...todo })));
@@ -241,6 +241,6 @@ function HomeBeforeLogin() {
       </Background.GradientBackground>
     </div>
   );
-}
+};
 
 export default HomeBeforeLogin;

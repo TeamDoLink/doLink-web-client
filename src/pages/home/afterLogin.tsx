@@ -6,7 +6,6 @@ import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import { TAB_ROUTE_MAP } from '@/constants/routes';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { useTodoStore } from '@/stores/useTodoStore';
-import { useArchiveStore } from '@/stores/useArchiveStore';
 import { GreetingSection } from '@/components/home/greetingSection';
 import { TodoSection } from '@/components/home/todoSection';
 import { ArchiveSection } from '@/components/home/archiveSection';
@@ -110,8 +109,9 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     setSuppressCompleteModal,
   } = useTodoStore();
 
-  const { pendingDeleteArchiveId, setPendingDeleteArchiveId } =
-    useArchiveStore();
+  const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     setTodoItems(TODO_ITEMS.map((todo) => ({ ...todo })));
