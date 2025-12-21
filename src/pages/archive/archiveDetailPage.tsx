@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BackDetailBar } from '@/components/common/appBar';
 import { EmptyNotice } from '@/components/common/feedBack';
-import { TabButton } from '@/components/common/button/tabButton';
 import { FloatingButton } from '@/components/common/button/floatingButton';
 import { TabBar } from '@/components/common';
-import SortDropdown from '@/components/common/filter/sortDropdown';
+import { StickyTabSection } from '@/components/archive/stickyTabSection';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { ROUTES } from '@/constants/routes';
 
@@ -37,7 +36,12 @@ const SORT_OPTIONS = [
   { value: 'oldest', label: '오래된 순' },
 ];
 
-// TODO 임시 데이터 - 실제 API 데이터로 교체 예정
+const TAB_OPTIONS = [
+  { value: 'all', label: '전체' },
+  { value: 'incomplete', label: '미완료' },
+  { value: 'complete', label: '완료' },
+];
+
 const MOCK_LINKS: LinkData[] = [
   {
     id: 1,
@@ -74,12 +78,119 @@ const MOCK_LINKS: LinkData[] = [
     completed: false,
     createdAt: new Date('2024-01-18'),
   },
+  {
+    id: 6,
+    title: '부산 해운대 카페',
+    url: 'https://example.com/6',
+    completed: false,
+    createdAt: new Date('2024-02-01'),
+  },
+  {
+    id: 7,
+    title: '제주도 고기국수',
+    url: 'https://example.com/7',
+    completed: true,
+    createdAt: new Date('2024-02-05'),
+  },
+  {
+    id: 8,
+    title: '강릉 장칼국수',
+    url: 'https://example.com/8',
+    completed: false,
+    createdAt: new Date('2024-02-10'),
+  },
+  {
+    id: 9,
+    title: '속초 닭강정 맛집',
+    url: 'https://example.com/9',
+    completed: true,
+    createdAt: new Date('2024-02-12'),
+  },
+  {
+    id: 10,
+    title: '전주 비빔밥 본점',
+    url: 'https://example.com/10',
+    completed: false,
+    createdAt: new Date('2024-02-15'),
+  },
+  {
+    id: 11,
+    title: '대구 막창 투어',
+    url: 'https://example.com/11',
+    completed: false,
+    createdAt: new Date('2024-02-20'),
+  },
+  {
+    id: 12,
+    title: '광주 오리탕 골목',
+    url: 'https://example.com/12',
+    completed: true,
+    createdAt: new Date('2024-02-22'),
+  },
+  {
+    id: 13,
+    title: '인천 차이나타운',
+    url: 'https://example.com/13',
+    completed: false,
+    createdAt: new Date('2024-02-25'),
+  },
+  {
+    id: 14,
+    title: '수원 왕갈비 통닭',
+    url: 'https://example.com/14',
+    completed: true,
+    createdAt: new Date('2024-02-28'),
+  },
+  {
+    id: 15,
+    title: '경주 황남빵 본점',
+    url: 'https://example.com/15',
+    completed: false,
+    createdAt: new Date('2024-03-01'),
+  },
+  {
+    id: 16,
+    title: '여수 갓김치 정식',
+    url: 'https://example.com/16',
+    completed: true,
+    createdAt: new Date('2024-03-05'),
+  },
+  {
+    id: 17,
+    title: '춘천 닭갈비 거리',
+    url: 'https://example.com/17',
+    completed: false,
+    createdAt: new Date('2024-03-10'),
+  },
+  {
+    id: 18,
+    title: '안동 찜닭 골목',
+    url: 'https://example.com/18',
+    completed: true,
+    createdAt: new Date('2024-03-12'),
+  },
+  {
+    id: 19,
+    title: '포항 물회 맛집',
+    url: 'https://example.com/19',
+    completed: false,
+    createdAt: new Date('2024-03-15'),
+  },
+  {
+    id: 20,
+    title: '천안 호두과자',
+    url: 'https://example.com/20',
+    completed: true,
+    createdAt: new Date('2024-03-18'),
+  },
 ];
 
 const ArchiveDetailPage = () => {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState<TabType>('all');
   const [sortOption, setSortOption] = useState<SortOption>('newest');
+  const [isTitleVisible, setIsTitleVisible] = useState(true);
+  const titleSectionRef = useRef<HTMLDivElement>(null);
 
   // TODO 임시 데이터 (나중에 실제 데이터로 교체)
   const archiveData = {
@@ -118,6 +229,40 @@ const ArchiveDetailPage = () => {
   const handleSortChange = (newSort: SortOption) => {
     setSortOption(newSort);
   };
+
+  const handleContentTabChange = (tab: string) => {
+    setSelectedTab(tab as TabType);
+  };
+
+  const handleSortChangeString = (value: string) => {
+    handleSortChange(value as SortOption);
+  };
+
+  // 큰 제목 섹션의 표시 여부를 감지
+  useEffect(() => {
+    const titleElement = titleSectionRef.current;
+
+    if (!titleElement) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        setIsTitleVisible(entry.isIntersecting);
+      },
+      {
+        threshold: 0,
+        rootMargin: '0px 0px 0px 0px',
+      }
+    );
+
+    observer.observe(titleElement);
+
+    return () => {
+      if (titleElement) {
+        observer.unobserve(titleElement);
+      }
+    };
+  }, []);
 
   // 탭에 따른 링크 필터링 및 정렬
   const getFilteredAndSortedLinks = () => {
@@ -160,7 +305,7 @@ const ArchiveDetailPage = () => {
       {/* TODO  BackDetailBar 고정 수정*/}
       <div className='sticky left-0 right-0 top-0 z-10 w-full'>
         <BackDetailBar
-          title='모음 상세'
+          title={isTitleVisible ? '모음 상세' : archiveData.title}
           rightIcons={['search', 'option']}
           onClickBack={handleBack}
           onClickSearch={handleSearch}
@@ -169,14 +314,14 @@ const ArchiveDetailPage = () => {
       </div>
 
       {/* 제목 및 정보 영역 */}
-      <div className='bg-white pb-0'>
+      <div ref={titleSectionRef} className='bg-white pb-4 pt-6'>
         {/* 제목 */}
-        <div className='px-5 pb-4'>
+        <div className='px-5'>
           <h1 className='text-heading-lg text-grey-900'>{archiveData.title}</h1>
         </div>
 
         {/* 카테고리 및 할일 정보 */}
-        <div className='flex items-center gap-2 px-5 pb-4'>
+        <div className='flex items-center gap-2 px-5'>
           <div className='flex items-center gap-1'>
             <img
               src={archiveData.categoryIcon}
@@ -194,36 +339,17 @@ const ArchiveDetailPage = () => {
             </span>
           </div>
         </div>
-
-        {/* 탭 및 정렬 */}
-        <div className='flex items-center justify-between border-b border-grey-200 px-5 pb-2'>
-          <div className='flex items-center gap-5'>
-            <TabButton
-              selected={selectedTab === 'all'}
-              onClick={() => setSelectedTab('all')}
-            >
-              전체
-            </TabButton>
-            <TabButton
-              selected={selectedTab === 'incomplete'}
-              onClick={() => setSelectedTab('incomplete')}
-            >
-              미완료
-            </TabButton>
-            <TabButton
-              selected={selectedTab === 'complete'}
-              onClick={() => setSelectedTab('complete')}
-            >
-              완료
-            </TabButton>
-          </div>
-          <SortDropdown
-            value={sortOption}
-            onChange={handleSortChange}
-            options={SORT_OPTIONS}
-          />
-        </div>
       </div>
+
+      {/* 탭 및 정렬 */}
+      <StickyTabSection
+        tabs={TAB_OPTIONS}
+        selectedTab={selectedTab}
+        onTabChange={handleContentTabChange}
+        sortOptions={SORT_OPTIONS}
+        sortValue={sortOption}
+        onSortChange={handleSortChangeString}
+      />
 
       {/* 메인 콘텐츠 */}
       <main className='grow px-5 py-8'>
