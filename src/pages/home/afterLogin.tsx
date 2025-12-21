@@ -96,6 +96,7 @@ type HomeAfterLoginProps = {
 
 const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   const navigate = useNavigate();
+
   const [todoItems, setTodoItems] = useState<TodoItem[]>(() =>
     TODO_ITEMS.map((todo) => ({ ...todo }))
   );
@@ -108,7 +109,6 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     setShowCompleteModal,
     setSuppressCompleteModal,
   } = useTodoStore();
-
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
     string | null
   >(null);

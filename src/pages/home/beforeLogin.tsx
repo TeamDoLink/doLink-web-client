@@ -11,8 +11,8 @@ import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import heroIllustration from '@/assets/icons/home/home1.svg';
 import { TAB_ROUTE_MAP } from '@/constants/routes';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
-import { useTodoStore } from '@/stores/useTodoStore';
 import { FloatingButton } from '@/components/common/button';
+import { useTodoStore } from '@/stores/useTodoStore';
 import type { ArchiveItem, TodoItem } from '@/types';
 
 const TODO_ITEMS: TodoItem[] = [
