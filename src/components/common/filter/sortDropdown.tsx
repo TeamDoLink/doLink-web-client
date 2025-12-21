@@ -1,26 +1,25 @@
 import { useState, useRef, useEffect } from 'react';
-import DropDownMenu from './dropDownMenu'; // 경로만 맞추면 됨
+import DropDownMenu, { type DropDownMenuOption } from './dropDownMenu';
 
-export type SortDropdownProps = {
-  value?: 'all' | 'latest';
-  onChange?: (value: 'all' | 'latest') => void;
+export type SortDropdownProps<T extends string = string> = {
+  value?: T;
+  onChange?: (value: T) => void;
+  options: DropDownMenuOption[];
 };
 
-const options = [
-  { value: 'all' as const, label: '전체' },
-  { value: 'latest' as const, label: '최신 순' },
-];
-
-export default function SortDropdown({
-  value = 'all',
+export default function SortDropdown<T extends string = string>({
+  value,
   onChange,
-}: SortDropdownProps) {
+  options,
+}: SortDropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState(value);
+  const [selected, setSelected] = useState(value ?? (options[0]?.value as T));
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setSelected(value);
+    if (value !== undefined) {
+      setSelected(value);
+    }
   }, [value]);
 
   useEffect(() => {
@@ -36,9 +35,9 @@ export default function SortDropdown({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSelect = (optionValue: 'all' | 'latest') => {
-    setSelected(optionValue);
-    onChange?.(optionValue);
+  const handleSelect = (optionValue: string) => {
+    setSelected(optionValue as T);
+    onChange?.(optionValue as T);
     setIsOpen(false);
   };
 
@@ -49,32 +48,32 @@ export default function SortDropdown({
       {/* 버튼 */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className='flex cursor-pointer items-center gap-1 whitespace-nowrap bg-white px-3 py-1'
+        className='flex cursor-pointer items-center gap-[2px] whitespace-nowrap rounded-[4px] bg-white px-0 py-0'
       >
         <p className='text-caption-sm text-grey-600'>{selectedLabel}</p>
 
         <svg
-          className={`h-4 w-2 shrink-0 text-grey-600 ${isOpen ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 text-grey-600 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill='none'
           stroke='currentColor'
-          viewBox='0 0 8 4'
+          viewBox='0 0 16 16'
         >
           <path
             strokeLinecap='round'
             strokeLinejoin='round'
             strokeWidth={1.5}
-            d='M1 1l3 2 3-2'
+            d='M4 6l4 4 4-4'
           />
         </svg>
       </button>
 
       {/* 메뉴 */}
       {isOpen && (
-        <div className='absolute left-0 top-full z-50 mt-2'>
+        <div className='absolute right-0 top-full z-50 mt-2'>
           <DropDownMenu
             options={options}
             selectedValue={selected}
-            onSelect={(value) => handleSelect(value as 'all' | 'latest')}
+            onSelect={handleSelect}
           />
         </div>
       )}
