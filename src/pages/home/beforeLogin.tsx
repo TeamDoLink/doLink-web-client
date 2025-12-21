@@ -21,7 +21,7 @@ const TODO_ITEMS: TodoItem[] = [
     id: 'welcome-guide',
     title: '두링크(DoLink) 안내서 📚',
     date: '오늘',
-    sns: '노션 (Notion)',
+    platform: '노션 (Notion)',
     checked: false,
   },
 ];
@@ -151,11 +151,11 @@ function HomeBeforeLogin() {
             <section className='mt-5 space-y-4'>
               <h2 className='text-heading-sm text-black'>할 일</h2>
               <div className='space-y-4 rounded-2xl bg-white py-5 shadow-[0_4px_12px_rgba(0,0,0,0.03)]'>
-                {todoItems.map(({ id, title, date, sns, checked }) => (
+                {todoItems.map(({ id, title, date, platform, checked }) => (
                   <List.TodoItem
                     key={id}
                     title={title}
-                    subtitle={`${date} · ${sns}`}
+                    subtitle={`${date} · ${platform}`}
                     checked={checked}
                     onChange={(next) => handleTodoCheckbox(id, next)}
                   />

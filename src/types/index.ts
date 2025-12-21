@@ -2,7 +2,7 @@ export type TodoItem = {
   id: string;
   title: string;
   date: string;
-  sns: string;
+  platform: string;
   checked: boolean;
 };
 
