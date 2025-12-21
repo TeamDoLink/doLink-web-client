@@ -194,7 +194,7 @@ const ArchiveDetailPage = () => {
 
   // TODO 임시 데이터 (나중에 실제 데이터로 교체)
   const archiveData = {
-    title: '최대 19글자 오육칠팔구십일이삼사오육칠',
+    title: '최대 19글자 오육칠팔구십일이삼사오육칠팔구십십일ㄴㅇㄹㄴㅇㄹ',
     category: '맛집',
     categoryIcon: restaurantIcon,
     todoCount: MOCK_LINKS.filter((link) => !link.completed).length,
@@ -317,7 +317,9 @@ const ArchiveDetailPage = () => {
       <div ref={titleSectionRef} className='bg-white pb-4 pt-6'>
         {/* 제목 */}
         <div className='px-5'>
-          <h1 className='text-heading-lg text-grey-900'>{archiveData.title}</h1>
+          <h1 className='truncate text-heading-lg text-grey-900'>
+            {archiveData.title}
+          </h1>
         </div>
 
         {/* 카테고리 및 할일 정보 */}
