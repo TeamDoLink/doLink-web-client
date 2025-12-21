@@ -19,11 +19,11 @@ export const TodoSection = ({
     <section className={`mt-5 space-y-4 ${className}`}>
       <h2 className='text-heading-sm text-black'>할 일</h2>
       <div className='space-y-4 rounded-2xl bg-white py-5 shadow-[0_12px_24px_rgba(18,30,64,0.08)]'>
-        {items.map(({ id, title, date, sns, checked }) => (
+        {items.map(({ id, title, date, platform, checked }) => (
           <List.TodoItem
             key={id}
             title={title}
-            subtitle={`${date} · ${sns}`}
+            subtitle={`${date} · ${platform}`}
             checked={checked}
             onChange={(next) => onToggle(id, next)}
           />
