@@ -13,6 +13,7 @@ import { TAB_ROUTE_MAP } from '@/constants/routes';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { FloatingButton } from '@/components/common/button';
 import { useModalStore } from '@/stores/useModalStore';
+import { useTodoPreferenceStore } from '@/stores/useTodoPreferenceStore';
 import type { ArchiveItem, TodoItem } from '@/types';
 
 const TODO_ITEMS: TodoItem[] = [
@@ -63,19 +64,15 @@ const HomeBeforeLogin = () => {
   );
 
   /**
-   * 완료 모달 표시 억제 상태
+   * 완료 모달 표시 억제 상태 (persisted)
    * 사용자가 '다시 보지 않기'를 선택하면 true
-   * 이후 체크 완료 시에 완료 모달을 띄우지 않음
+   * 전역 Store에 저장되어 새로고침 이후에도 유지
    */
-  const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
+  const { suppressCompleteModal, setSuppressCompleteModal } =
+    useTodoPreferenceStore();
 
   /**
    * 전역 모달 상태 관리 (Zustand)
-   * - isOpen : 모달 열림/닫힘
-   * - type: 'alert' | 'confirm'
-   * - alertConfig : Alert 모달 설정
-   * - confirmConfig: Confirm 모달 설정
-   * - 액션 : openAlert, openConfirm, close
    */
   const {
     isOpen: isModalOpen,
@@ -112,8 +109,6 @@ const HomeBeforeLogin = () => {
   /**
    * 할 일 토글 핸들러
    * 동작 : 해당 할 일의 checked 상태 업데이트
-   * 완료 상태 (nextChanges=true)이고, 모달 억제가 안 될 경우 Alert 모달 표시
-   * Alert 모달에서 '다시 보지 않기' 선택 가능
    */
   const handleTodoCheckbox = (id: string, nextChecked: boolean) => {
     // 체크 상태 업데이트
@@ -149,21 +144,20 @@ const HomeBeforeLogin = () => {
   /**
    * 모음 삭제 확인 핸들러
    * 동작 : Confirm 모달에서 '삭제하기' 클릭 시 실행
-   * pendingDeleteArchiveId에 저장된 ID로 모음 삭제
-   * 상태 초기화
    */
   const handleConfirmDeleteArchive = () => {
     if (!pendingDeleteArchiveId) return;
+    // 해당 모음 제거
     setArchiveItems((prev) =>
       prev.filter((archive) => archive.id !== pendingDeleteArchiveId)
     );
+    // pending 상태 초기화
     setPendingDeleteArchiveId(null);
   };
 
   /**
    * 모음 삭제 취소 핸들러
    * 동작 : Confirm 모달에서 '취소' 클릭 시 실행
-   * pending 상태만 초기화하고 실제 삭제는 하지 않음
    */
   const handleCancelDeleteArchive = () => {
     setPendingDeleteArchiveId(null);
@@ -172,8 +166,6 @@ const HomeBeforeLogin = () => {
   /**
    * 모음 삭제 요청 핸들러
    * 동작 : 삭제할 ID를 pending 상태에 저장
-   * Confirm 모달 표시
-   * 사용자 선택에 따라 확인/취소 핸들러가 실행
    */
   const handleRequestDeleteArchive = (id: string) => {
     // 삭제 대기 상태
@@ -193,8 +185,6 @@ const HomeBeforeLogin = () => {
   /**
    * 모달 닫기 핸들러
    * 모달 배경을 클릭 시 실행
-   * - Confirm 모달인 경우 onNegative 콜백 실행 (취소)
-   * - 모달 닫기
    */
   const handleModalClose = () => {
     if (modalType === 'confirm') {
