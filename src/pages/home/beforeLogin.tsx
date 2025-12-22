@@ -71,6 +71,10 @@ const HomeBeforeLogin = () => {
   const { suppressCompleteModal, setSuppressCompleteModal } =
     useTodoPreferenceStore();
 
+  useEffect(() => {
+    setSuppressCompleteModal(false);
+  }, [setSuppressCompleteModal]);
+
   /**
    * 전역 모달 상태 관리 (Zustand)
    */
