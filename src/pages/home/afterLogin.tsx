@@ -172,6 +172,10 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   const { suppressCompleteModal, setSuppressCompleteModal } =
     useTodoPreferenceStore();
 
+  useEffect(() => {
+    setSuppressCompleteModal(false);
+  }, [setSuppressCompleteModal]);
+
   /**
    * 전역 모달 상태 관리 (Zustand)
    */
