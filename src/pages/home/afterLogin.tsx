@@ -81,6 +81,42 @@ const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: '기타',
     itemCount: 1,
   },
+  {
+    id: 'tutorial-3',
+    title: '두링크(DoLink) 튜토리얼',
+    category: '기타',
+    itemCount: 4,
+  },
+  {
+    id: 'tutorial-4',
+    title: '두링크(DoLink) 튜토리얼',
+    category: '기타',
+    itemCount: 3,
+  },
+  {
+    id: 'tutorial-5',
+    title: '두링크(DoLink) 튜토리얼',
+    category: '기타',
+    itemCount: 1,
+  },
+  {
+    id: 'tutorial-3',
+    title: '두링크(DoLink) 튜토리얼',
+    category: '기타',
+    itemCount: 4,
+  },
+  {
+    id: 'tutorial-4',
+    title: '두링크(DoLink) 튜토리얼',
+    category: '기타',
+    itemCount: 3,
+  },
+  {
+    id: 'tutorial-5',
+    title: '두링크(DoLink) 튜토리얼',
+    category: '기타',
+    itemCount: 1,
+  },
 ];
 
 // 시간 계산 함수
@@ -115,6 +151,18 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   const [archiveItems, setArchiveItems] = useState<ArchiveItem[]>(() =>
     ARCHIVE_ITEMS.map((archive) => ({ ...archive }))
   );
+
+  /**
+   * 최신 등록 순으로 정렬한 모음 목록 (최대 8개)
+   */
+  const latestArchiveItems = useMemo(() => {
+    const toTimestamp = (value?: string) =>
+      value ? new Date(value).getTime() : 0;
+
+    return [...archiveItems]
+      .sort((a, b) => toTimestamp(b.createdAt) - toTimestamp(a.createdAt))
+      .slice(0, 8);
+  }, [archiveItems]);
 
   /**
    * 완료 모달 표시 억제 상태 (persisted)
@@ -268,7 +316,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
             <TodoSection items={todoItems} onToggle={handleToggleTodo} />
             {/* 하단 모음 */}
             <ArchiveSection
-              items={archiveItems}
+              items={latestArchiveItems}
               onRequestDelete={handleRequestDeleteArchive}
             />
           </div>
