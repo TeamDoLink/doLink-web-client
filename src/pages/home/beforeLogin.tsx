@@ -12,7 +12,7 @@ import heroIllustration from '@/assets/icons/home/home1.svg';
 import { TAB_ROUTE_MAP } from '@/constants/routes';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { FloatingButton } from '@/components/common/button';
-import { useTodoStore } from '@/stores/useTodoStore';
+import { useModalStore } from '@/stores/useModalStore';
 import type { ArchiveItem, TodoItem } from '@/types';
 
 const TODO_ITEMS: TodoItem[] = [
@@ -44,12 +44,16 @@ const HomeBeforeLogin = () => {
   const [archiveItems, setArchiveItems] = useState<ArchiveItem[]>(() =>
     ARCHIVE_ITEMS.map((archive) => ({ ...archive }))
   );
+  const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
   const {
-    showCompleteModal,
-    suppressCompleteModal,
-    setShowCompleteModal,
-    setSuppressCompleteModal,
-  } = useTodoStore();
+    isOpen: isModalOpen,
+    type: modalType,
+    alertConfig,
+    confirmConfig,
+    openAlert,
+    openConfirm,
+    close: closeModal,
+  } = useModalStore();
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
     string | null
   >(null);
@@ -74,29 +78,19 @@ const HomeBeforeLogin = () => {
     );
 
     if (nextChecked && !suppressCompleteModal) {
-      setShowCompleteModal(true);
+      openAlert({
+        title: '할 일을 완료했어요',
+        subtitle: '완료한 일들은 해당 모음에서 확인할 수 있어요.',
+        primaryLabel: '확인',
+        secondaryLabel: '다시 보지 않기',
+        onSecondary: () => setSuppressCompleteModal(true),
+      });
     }
-  };
-
-  // 완료 모달 닫기
-  const handleCloseCompleteModal = () => {
-    setShowCompleteModal(false);
-  };
-
-  // 완료 모달 다시 보지 않기
-  const handleDisableCompleteModal = () => {
-    setSuppressCompleteModal(true);
-    setShowCompleteModal(false);
   };
 
   // 바텀 탭바 함수
   const handleTabChange = (next: TabKey) => {
     navigate(TAB_ROUTE_MAP[next]);
-  };
-
-  // 모음 삭제 요청
-  const handleRequestDeleteArchive = (id: string) => {
-    setPendingDeleteArchiveId(id);
   };
 
   // 모음 삭제 확인
@@ -111,6 +105,26 @@ const HomeBeforeLogin = () => {
   // 모음 삭제 취소
   const handleCancelDeleteArchive = () => {
     setPendingDeleteArchiveId(null);
+  };
+
+  // 모음 삭제 요청
+  const handleRequestDeleteArchive = (id: string) => {
+    setPendingDeleteArchiveId(id);
+    openConfirm({
+      title: '모음을 삭제할까요?',
+      subtitle: '모음 내 할 일도 함께 삭제돼요.',
+      positiveLabel: '삭제하기',
+      negativeLabel: '취소',
+      onPositive: handleConfirmDeleteArchive,
+      onNegative: handleCancelDeleteArchive,
+    });
+  };
+
+  const handleModalClose = () => {
+    if (modalType === 'confirm') {
+      confirmConfig?.onNegative?.();
+    }
+    closeModal();
   };
 
   return (
@@ -209,34 +223,43 @@ const HomeBeforeLogin = () => {
           </div>
         </footer>
 
-        {/* 할 일 완료 모달 */}
-        <FeedBack.ModalLayout
-          open={showCompleteModal}
-          onClose={handleCloseCompleteModal}
-        >
-          <FeedBack.AlertDialog
-            title='할 일을 완료했어요'
-            subtitle='완료한 일들은 해당 모음에서 확인할 수 있어요.'
-            primaryLabel='확인'
-            secondaryLabel='다시 보지 않기'
-            onPrimary={handleCloseCompleteModal}
-            onSecondary={handleDisableCompleteModal}
-          />
-        </FeedBack.ModalLayout>
-
-        {/* 모음 삭제 모달 */}
-        <FeedBack.ModalLayout
-          open={pendingDeleteArchiveId !== null}
-          onClose={handleCancelDeleteArchive}
-        >
-          <FeedBack.ConfirmDialog
-            title='모음을 삭제할까요?'
-            subtitle='모음 내 할 일도 함께 삭제돼요.'
-            positiveLabel='삭제하기'
-            negativeLabel='취소'
-            onPositive={handleConfirmDeleteArchive}
-            onNegative={handleCancelDeleteArchive}
-          />
+        <FeedBack.ModalLayout open={isModalOpen} onClose={handleModalClose}>
+          {modalType === 'alert' && alertConfig && (
+            <FeedBack.AlertDialog
+              title={alertConfig.title}
+              subtitle={alertConfig.subtitle}
+              primaryLabel={alertConfig.primaryLabel}
+              secondaryLabel={alertConfig.secondaryLabel}
+              onPrimary={() => {
+                alertConfig.onPrimary?.();
+                closeModal();
+              }}
+              onSecondary={
+                alertConfig.secondaryLabel
+                  ? () => {
+                      alertConfig.onSecondary?.();
+                      closeModal();
+                    }
+                  : undefined
+              }
+            />
+          )}
+          {modalType === 'confirm' && confirmConfig && (
+            <FeedBack.ConfirmDialog
+              title={confirmConfig.title}
+              subtitle={confirmConfig.subtitle}
+              positiveLabel={confirmConfig.positiveLabel}
+              negativeLabel={confirmConfig.negativeLabel}
+              onPositive={() => {
+                confirmConfig.onPositive?.();
+                closeModal();
+              }}
+              onNegative={() => {
+                confirmConfig.onNegative?.();
+                closeModal();
+              }}
+            />
+          )}
         </FeedBack.ModalLayout>
       </Background.GradientBackground>
     </div>
