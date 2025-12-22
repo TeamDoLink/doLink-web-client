@@ -8,7 +8,7 @@ type AuthStoreState = {
 };
 
 export const useAuthStore = create<AuthStoreState>((set) => ({
-  isAuthenticated: false,
+  isAuthenticated: true,
   signIn: () => set({ isAuthenticated: true }),
   signOut: () => set({ isAuthenticated: false }),
   reset: () => set({ isAuthenticated: false }),
