@@ -40,7 +40,7 @@ export const StickyTabSection = ({
   onSortChange,
 }: StickyTabSectionProps) => {
   return (
-    <div className='sticky top-14 z-20 flex items-center justify-between border-b border-grey-200 bg-white px-5 pb-3 pt-1'>
+    <div className='sticky top-14 z-10 flex items-center justify-between border-b border-grey-200 bg-white px-5 pb-3 pt-1'>
       {/* 탭 버튼들 */}
       <div className='flex items-center gap-5'>
         {tabs.map((tab) => (
