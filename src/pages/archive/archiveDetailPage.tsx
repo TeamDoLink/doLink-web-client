@@ -1,10 +1,14 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BackDetailBar } from '@/components/common/appBar';
 import { EmptyNotice } from '@/components/common/feedBack';
 import { FloatingButton } from '@/components/common/button/floatingButton';
 import { TabBar } from '@/components/common';
 import { StickyTabSection } from '@/components/archive/stickyTabSection';
+import {
+  SwipeableDeleteCard,
+  type Task,
+} from '@/components/archive/swipeableDeleteCard';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { ROUTES } from '@/constants/routes';
 
@@ -15,15 +19,6 @@ import todoIcon from '@/assets/icons/category/detail/todo.svg';
 
 type TabType = 'all' | 'incomplete' | 'complete';
 type SortOption = 'newest' | 'oldest';
-
-// 링크 데이터 타입 정의
-type LinkData = {
-  id: number;
-  title: string;
-  url: string;
-  completed: boolean;
-  createdAt: Date;
-};
 
 const TAB_ROUTE_MAP: Record<TabKey, string> = {
   home: ROUTES.home,
@@ -42,148 +37,232 @@ const TAB_OPTIONS = [
   { value: 'complete', label: '완료' },
 ];
 
-const MOCK_LINKS: LinkData[] = [
+// Task 타입은 SwipeableDeleteCard에서 import
+
+const MOCK_TASK_ITEM: Task[] = [
   {
-    id: 1,
-    title: '서울 맛집 1',
-    url: 'https://example.com/1',
-    completed: false,
-    createdAt: new Date('2024-01-15'),
+    taskId: 101,
+    title: 'API 명세 작성',
+    link: null,
+    memo: '우선순위 높음',
+    status: false,
+    inout: true,
+    createdAt: '2025-02-10T13:10:00',
+    modifiedAt: '2025-02-10T13:10:00',
   },
   {
-    id: 2,
-    title: '서울 맛집 2',
-    url: 'https://example.com/2',
-    completed: true,
-    createdAt: new Date('2024-01-20'),
+    taskId: 102,
+    title: 'ERD 설계',
+    link: 'https://example.com/erd',
+    memo: null,
+    status: true,
+    inout: false,
+    createdAt: '2025-02-10T13:10:00',
+    modifiedAt: '2025-02-12T18:40:10',
   },
   {
-    id: 3,
-    title: '서울 맛집 3',
-    url: 'https://example.com/3',
-    completed: false,
-    createdAt: new Date('2024-01-10'),
+    taskId: 103,
+    title: '회원가입 API 구현',
+    link: 'https://example.com/signup',
+    memo: 'validation 필요',
+    status: false,
+    inout: true,
+    createdAt: '2025-02-10T13:10:00',
+    modifiedAt: '2025-02-12T10:30:00',
   },
   {
-    id: 4,
-    title: '서울 맛집 4',
-    url: 'https://example.com/4',
-    completed: true,
-    createdAt: new Date('2024-01-25'),
+    taskId: 104,
+    title: '로그인 기능 개발',
+    link: null,
+    memo: null,
+    status: true,
+    inout: false,
+    createdAt: '2025-02-13T14:20:00',
+    modifiedAt: '2025-02-14T11:05:30',
   },
   {
-    id: 5,
-    title: '서울 맛집 5',
-    url: 'https://example.com/5',
-    completed: false,
-    createdAt: new Date('2024-01-18'),
+    taskId: 105,
+    title: 'JWT 인증 적용',
+    link: 'https://example.com/jwt',
+    memo: 'refresh token 포함',
+    status: false,
+    inout: true,
+    createdAt: '2025-02-13T14:20:00',
+    modifiedAt: '2025-02-14T16:00:00',
   },
   {
-    id: 6,
-    title: '부산 해운대 카페',
-    url: 'https://example.com/6',
-    completed: false,
-    createdAt: new Date('2024-02-01'),
+    taskId: 106,
+    title: '게시글 CRUD API',
+    link: null,
+    memo: null,
+    status: true,
+    inout: false,
+    createdAt: '2025-02-13T14:20:00',
+    modifiedAt: '2025-02-16T13:45:00',
   },
   {
-    id: 7,
-    title: '제주도 고기국수',
-    url: 'https://example.com/7',
-    completed: true,
-    createdAt: new Date('2024-02-05'),
+    taskId: 107,
+    title: '댓글 기능 구현',
+    link: 'https://example.com/comment',
+    memo: '대댓글 포함',
+    status: false,
+    inout: true,
+    createdAt: '2025-02-16T11:00:00',
+    modifiedAt: '2025-02-16T11:00:00',
   },
   {
-    id: 8,
-    title: '강릉 장칼국수',
-    url: 'https://example.com/8',
-    completed: false,
-    createdAt: new Date('2024-02-10'),
+    taskId: 108,
+    title: '좋아요 기능 추가',
+    link: null,
+    memo: null,
+    status: true,
+    inout: false,
+    createdAt: '2025-02-17T15:30:00',
+    modifiedAt: '2025-02-18T10:20:00',
   },
   {
-    id: 9,
-    title: '속초 닭강정 맛집',
-    url: 'https://example.com/9',
-    completed: true,
-    createdAt: new Date('2024-02-12'),
+    taskId: 109,
+    title: '검색 API 구현',
+    link: 'https://example.com/search',
+    memo: 'index 고려',
+    status: false,
+    inout: true,
+    createdAt: '2025-02-18T17:00:00',
+    modifiedAt: '2025-02-18T17:00:00',
   },
   {
-    id: 10,
-    title: '전주 비빔밥 본점',
-    url: 'https://example.com/10',
-    completed: false,
-    createdAt: new Date('2024-02-15'),
+    taskId: 110,
+    title: '페이징 처리',
+    link: null,
+    memo: null,
+    status: true,
+    inout: false,
+    createdAt: '2025-02-19T09:40:00',
+    modifiedAt: '2025-02-19T14:10:00',
   },
   {
-    id: 11,
-    title: '대구 막창 투어',
-    url: 'https://example.com/11',
-    completed: false,
-    createdAt: new Date('2024-02-20'),
+    taskId: 111,
+    title: '예외 처리 공통화',
+    link: 'https://example.com/error',
+    memo: 'global handler',
+    status: false,
+    inout: true,
+    createdAt: '2025-12-20T10:00:00',
+    modifiedAt: '2025-12-20T10:00:00',
   },
   {
-    id: 12,
-    title: '광주 오리탕 골목',
-    url: 'https://example.com/12',
-    completed: true,
-    createdAt: new Date('2024-02-22'),
+    taskId: 112,
+    title: '로그 설정',
+    link: null,
+    memo: null,
+    status: true,
+    inout: false,
+    createdAt: '2025-12-20T10:00:00',
+    modifiedAt: '2025-12-20T10:00:00',
   },
   {
-    id: 13,
-    title: '인천 차이나타운',
-    url: 'https://example.com/13',
-    completed: false,
-    createdAt: new Date('2024-02-25'),
+    taskId: 113,
+    title: '환경변수 분리',
+    link: null,
+    memo: '.env 사용',
+    status: false,
+    inout: true,
+    createdAt: '2025-12-20T10:00:00',
+    modifiedAt: '2025-12-20T10:00:00',
   },
   {
-    id: 14,
-    title: '수원 왕갈비 통닭',
-    url: 'https://example.com/14',
-    completed: true,
-    createdAt: new Date('2024-02-28'),
+    taskId: 114,
+    title: 'Swagger 문서화',
+    link: 'https://example.com/swagger',
+    memo: null,
+    status: true,
+    inout: false,
+    createdAt: '2025-02-23T14:00:00',
+    modifiedAt: '2025-02-24T10:30:00',
   },
   {
-    id: 15,
-    title: '경주 황남빵 본점',
-    url: 'https://example.com/15',
-    completed: false,
-    createdAt: new Date('2024-03-01'),
+    taskId: 115,
+    title: '단위 테스트 작성',
+    link: null,
+    memo: 'service 중심',
+    status: false,
+    inout: true,
+    createdAt: '2025-02-24T15:40:00',
+    modifiedAt: '2025-02-24T15:40:00',
   },
   {
-    id: 16,
-    title: '여수 갓김치 정식',
-    url: 'https://example.com/16',
-    completed: true,
-    createdAt: new Date('2024-03-05'),
+    taskId: 116,
+    title: '통합 테스트',
+    link: 'https://example.com/test',
+    memo: null,
+    status: true,
+    inout: false,
+    createdAt: '2025-02-25T11:10:00',
+    modifiedAt: '2025-02-26T09:55:00',
   },
   {
-    id: 17,
-    title: '춘천 닭갈비 거리',
-    url: 'https://example.com/17',
-    completed: false,
-    createdAt: new Date('2024-03-10'),
+    taskId: 117,
+    title: 'CI 파이프라인 구성',
+    link: null,
+    memo: 'GitHub Actions',
+    status: false,
+    inout: true,
+    createdAt: '2025-02-26T16:30:00',
+    modifiedAt: '2025-02-26T16:30:00',
   },
   {
-    id: 18,
-    title: '안동 찜닭 골목',
-    url: 'https://example.com/18',
-    completed: true,
-    createdAt: new Date('2024-03-12'),
+    taskId: 118,
+    title: 'CD 설정',
+    link: 'https://example.com/cd',
+    memo: null,
+    status: true,
+    inout: false,
+    createdAt: '2025-02-27T10:00:00',
+    modifiedAt: '2025-02-28T13:20:00',
   },
   {
-    id: 19,
-    title: '포항 물회 맛집',
-    url: 'https://example.com/19',
-    completed: false,
-    createdAt: new Date('2024-03-15'),
+    taskId: 119,
+    title: '배포 스크립트 작성',
+    link: null,
+    memo: 'rollback 고려',
+    status: false,
+    inout: true,
+    createdAt: '2025-02-28T15:00:00',
+    modifiedAt: '2025-02-28T15:00:00',
   },
   {
-    id: 20,
-    title: '천안 호두과자',
-    url: 'https://example.com/20',
-    completed: true,
-    createdAt: new Date('2024-03-18'),
+    taskId: 120,
+    title: '운영 서버 모니터링',
+    link: 'https://example.com/monitoring',
+    memo: null,
+    status: true,
+    inout: false,
+    createdAt: '2025-03-01T09:30:00',
+    modifiedAt: '2025-03-02T11:45:00',
   },
 ];
+
+// TODO 임시 데이터 (나중에 실제 데이터로 교체)
+const archiveData = {
+  title: '최대 19글자 오육칠팔구십일이삼사오육칠팔구십십일ㄴㅇㄹㄴㅇㄹ',
+  category: '맛집',
+  categoryIcon: restaurantIcon,
+  todoCount: MOCK_TASK_ITEM.filter((link) => !link.status).length,
+};
+
+// 날짜 유틸 함수들
+const formatDateKey = (isoString: string): string => {
+  const date = new Date(isoString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}${month}${day}`;
+};
+
+const formatDisplayDate = (isoString: string): string => {
+  const date = new Date(isoString);
+  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+};
 
 const ArchiveDetailPage = () => {
   const navigate = useNavigate();
@@ -192,16 +271,32 @@ const ArchiveDetailPage = () => {
   const [isTitleVisible, setIsTitleVisible] = useState(true);
   const titleSectionRef = useRef<HTMLDivElement>(null);
 
-  // TODO 임시 데이터 (나중에 실제 데이터로 교체)
-  const archiveData = {
-    title: '최대 19글자 오육칠팔구십일이삼사오육칠팔구십십일ㄴㅇㄹㄴㅇㄹ',
-    category: '맛집',
-    categoryIcon: restaurantIcon,
-    todoCount: MOCK_LINKS.filter((link) => !link.completed).length,
+  // 나중에 API로 데이터 받을 예정이면
+  const [taskList, setTaskList] = useState<Task[]>([]);
+
+  // TODO API 호출 값 받아오기
+  useEffect(() => {
+    // API 호출 시 그대로 사용
+    setTaskList(MOCK_TASK_ITEM);
+  }, []);
+
+  const [linkStates, setLinkStates] = useState<Record<number, boolean>>(
+    MOCK_TASK_ITEM.reduce(
+      (acc, link) => ({ ...acc, [link.taskId]: link.status }),
+      {}
+    )
+  );
+  const [linkEditModes, setLinkEditModes] = useState<Record<number, boolean>>(
+    MOCK_TASK_ITEM.reduce((acc, link) => ({ ...acc, [link.taskId]: false }), {})
+  );
+
+  const handleLinkCheck = (id: number, checked: boolean) => {
+    setLinkStates((prev) => ({ ...prev, [id]: checked }));
   };
 
-  // 실제 링크 데이터
-  const [links] = useState<LinkData[]>(MOCK_LINKS);
+  const handleEditModeChange = (id: number, isEditMode: boolean) => {
+    setLinkEditModes((prev) => ({ ...prev, [id]: isEditMode }));
+  };
 
   const handleTabChange = (next: TabKey) => {
     navigate(TAB_ROUTE_MAP[next]);
@@ -222,8 +317,8 @@ const ArchiveDetailPage = () => {
   };
 
   const handleFloatingButtonClick = () => {
-    // 링크 추가 기능 구현
-    console.log('링크 추가');
+    // 할일 추가로 이동 route
+    console.log('할일 추가로 이동 route');
   };
 
   const handleSortChange = (newSort: SortOption) => {
@@ -264,40 +359,44 @@ const ArchiveDetailPage = () => {
     };
   }, []);
 
-  // 탭에 따른 링크 필터링 및 정렬
-  const getFilteredAndSortedLinks = () => {
-    // 1. 탭에 따른 필터링
-    let filtered: LinkData[];
+  // createdAt별로 링크를 필터링, 정렬, 그룹화
+  const groupedLinks = useMemo(() => {
+    // 1. 필터링
+    let filtered: Task[];
     switch (selectedTab) {
       case 'all':
-        filtered = links;
+        filtered = taskList;
         break;
       case 'incomplete':
-        filtered = links.filter((link) => !link.completed);
+        filtered = taskList.filter((task) => !task.status);
         break;
       case 'complete':
-        filtered = links.filter((link) => link.completed);
+        filtered = taskList.filter((task) => task.status);
         break;
       default:
-        filtered = links;
+        filtered = taskList;
     }
 
-    // 2. 정렬 옵션에 따른 정렬
-    const sorted = [...filtered].sort((a, b) => {
-      if (sortOption === 'newest') {
-        // 최신 순: 날짜가 최근인 것이 앞으로
-        return b.createdAt.getTime() - a.createdAt.getTime();
-      } else {
-        // 오래된 순: 날짜가 오래된 것이 앞으로
-        return a.createdAt.getTime() - b.createdAt.getTime();
+    const grouped = new Map<string, Task[]>();
+
+    filtered.forEach((link) => {
+      const key = formatDateKey(link.createdAt);
+      if (!grouped.has(key)) {
+        grouped.set(key, []);
       }
+      grouped.get(key)!.push(link);
     });
 
-    return sorted;
-  };
+    const result = Array.from(grouped.entries()).sort(([aKey], [bKey]) => {
+      return sortOption === 'newest'
+        ? Number(bKey) - Number(aKey)
+        : Number(aKey) - Number(bKey);
+    });
 
-  const filteredLinks = getFilteredAndSortedLinks();
-  const hasData = filteredLinks.length > 0;
+    return result;
+  }, [taskList, selectedTab, sortOption]);
+
+  const hasData = groupedLinks.length > 0;
 
   return (
     <div className='relative flex min-h-screen flex-col bg-grey-50'>
@@ -364,33 +463,50 @@ const ArchiveDetailPage = () => {
           </div>
         ) : (
           <div className='space-y-3'>
-            {filteredLinks.map((link) => (
-              <div key={link.id} className='rounded-lg bg-white p-4 shadow-sm'>
-                <div className='flex items-start justify-between'>
-                  <div className='flex-1'>
-                    <h3 className='text-body-md font-semibold text-grey-900'>
-                      {link.title}
-                    </h3>
-                    <p className='mt-1 text-caption-sm text-grey-500'>
-                      {link.url}
-                    </p>
-                    <p className='mt-2 text-caption-sm text-grey-400'>
-                      {link.createdAt.toLocaleDateString('ko-KR')}
-                    </p>
-                  </div>
-                  <div className='ml-4'>
-                    <span
-                      className={`rounded-full px-3 py-1 text-caption-sm ${
-                        link.completed
-                          ? 'bg-point/10 text-point'
-                          : 'bg-grey-100 text-grey-600'
-                      }`}
-                    >
-                      {link.completed ? '완료' : '미완료'}
-                    </span>
-                  </div>
-                </div>
-              </div>
+            {groupedLinks.map(([dateKey, tasks], index) => (
+              <SwipeableDeleteCard
+                key={`${dateKey}-${index}`}
+                tasks={tasks}
+                createdAt={new Date(tasks[0].createdAt)}
+                linkStates={linkStates}
+                linkEditModes={linkEditModes}
+                onCheck={handleLinkCheck}
+                onEditModeChange={(isEditMode) => {
+                  tasks.forEach((task) => {
+                    handleEditModeChange(task.taskId, isEditMode);
+                  });
+                }}
+                onOriginalClick={(taskId) => {
+                  const task = tasks.find((t) => t.taskId === taskId);
+                  if (task && task.link) {
+                    console.log('원본 클릭:', task.title);
+                    window.open(task.link, '_blank');
+                  }
+                }}
+                onShareClick={(taskId) => {
+                  const task = tasks.find((t) => t.taskId === taskId);
+                  if (task) {
+                    console.log('공유 클릭:', task.title);
+                    alert(`${task.title} 공유하기`);
+                  }
+                }}
+                onEditClick={(taskId) => {
+                  const task = tasks.find((t) => t.taskId === taskId);
+                  if (task) {
+                    console.log('편집 클릭:', task.title);
+                    alert(`${task.title} 편집하기`);
+                  }
+                }}
+                onDeleteClick={(taskId) => {
+                  const task = tasks.find((t) => t.taskId === taskId);
+                  if (task) {
+                    console.log('삭제 클릭:', task.title);
+                    if (confirm(`${task.title}을(를) 삭제하시겠습니까?`)) {
+                      alert('삭제됨');
+                    }
+                  }
+                }}
+              />
             ))}
           </div>
         )}
