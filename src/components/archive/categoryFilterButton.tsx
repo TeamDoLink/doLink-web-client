@@ -12,6 +12,10 @@ import MoneySelectedIcon from '@/assets/icons/category/home/money-selected.svg';
 import MoneyUnselectedIcon from '@/assets/icons/category/home/money-unselected.svg';
 import HobbySelectedIcon from '@/assets/icons/category/home/hobby-selected.svg';
 import HobbyUnselectedIcon from '@/assets/icons/category/home/hobby-unselected.svg';
+import ExerciseSelectedIcon from '@/assets/icons/category/home/exercise-selected.svg';
+import ExerciseUnselectedIcon from '@/assets/icons/category/home/exercise-unselected.svg';
+import CareerSelectedIcon from '@/assets/icons/category/home/career-selected.svg';
+import CareerUnselectedIcon from '@/assets/icons/category/home/career-unselected.svg';
 import StudySelectedIcon from '@/assets/icons/category/home/study-selected.svg';
 import StudyUnselectedIcon from '@/assets/icons/category/home/study-unselected.svg';
 import EtcSelectedIcon from '@/assets/icons/category/home/etc-selected.svg';
@@ -26,9 +30,11 @@ const CATEGORY_LABEL_MAP = {
   shopping: '쇼핑',
   money: '재테크',
   hobby: '취미',
-  study: '자기계발',
-  etc: '기타',
+  exercise: '운동',
+  career: '커리어',
+  study: '자기개발',
   tip: '꿀팁',
+  etc: '기타',
 } as const;
 
 const CATEGORY_ICON_MAP = {
@@ -56,17 +62,25 @@ const CATEGORY_ICON_MAP = {
     selected: HobbySelectedIcon,
     unselected: HobbyUnselectedIcon,
   },
+  exercise: {
+    selected: ExerciseSelectedIcon,
+    unselected: ExerciseUnselectedIcon,
+  },
+  career: {
+    selected: CareerSelectedIcon,
+    unselected: CareerUnselectedIcon,
+  },
   study: {
     selected: StudySelectedIcon,
     unselected: StudyUnselectedIcon,
   },
-  etc: {
-    selected: EtcSelectedIcon,
-    unselected: EtcUnselectedIcon,
-  },
   tip: {
     selected: TipSelectedIcon,
     unselected: TipUnselectedIcon,
+  },
+  etc: {
+    selected: EtcSelectedIcon,
+    unselected: EtcUnselectedIcon,
   },
 } as const;
 
@@ -92,7 +106,7 @@ export const CategoryFilterButton = ({
   return (
     <button
       type='button'
-      className={`flex h-[74px] w-14 flex-col items-center justify-between bg-transparent p-0${
+      className={`flex h-[100px] w-14 shrink-0 flex-col items-center justify-start gap-2 bg-transparent p-0 pb-2 pt-3${
         className ? ` ${className}` : ''
       }`}
       {...buttonProps}
