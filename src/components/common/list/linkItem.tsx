@@ -105,7 +105,7 @@ export default function LinkItem({
             >
               {title}
             </p>
-            <p className='whitespace-pre text-caption-sm text-grey-500'>
+            <p className='w-full truncate whitespace-pre text-caption-sm text-grey-500'>
               {subtitle}
             </p>
           </div>
