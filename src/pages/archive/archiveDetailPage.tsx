@@ -11,6 +11,7 @@ import {
 } from '@/components/archive/swipeableDeleteCard';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { ROUTES } from '@/constants/routes';
+import { OptionMenu } from '@/components/common/menu/optionMenu';
 
 // 카테고리 아이콘 임포트
 // TODO 임시 - 카테고리에 맞게 수정 예정
@@ -250,25 +251,12 @@ const archiveData = {
   todoCount: MOCK_TASK_ITEM.filter((link) => !link.status).length,
 };
 
-// 날짜 유틸 함수들
-const formatDateKey = (isoString: string): string => {
-  const date = new Date(isoString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}${month}${day}`;
-};
-
-const formatDisplayDate = (isoString: string): string => {
-  const date = new Date(isoString);
-  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
-};
-
 const ArchiveDetailPage = () => {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState<TabType>('all');
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [isTitleVisible, setIsTitleVisible] = useState(true);
+  const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
   const titleSectionRef = useRef<HTMLDivElement>(null);
 
   // 나중에 API로 데이터 받을 예정이면
@@ -312,8 +300,18 @@ const ArchiveDetailPage = () => {
   };
 
   const handleOption = () => {
-    // 옵션 메뉴 구현
-    console.log('옵션');
+    setIsOptionMenuOpen((prev) => !prev);
+  };
+
+  const handleOptionSelect = (key: string) => {
+    if (key === 'edit') {
+      console.log('모음 수정');
+      // TODO: 모음 수정 로직 구현
+    } else if (key === 'delete') {
+      console.log('모음 삭제');
+      // TODO: 모음 삭제 로직 구현
+    }
+    setIsOptionMenuOpen(false);
   };
 
   const handleFloatingButtonClick = () => {
@@ -380,7 +378,7 @@ const ArchiveDetailPage = () => {
     const grouped = new Map<string, Task[]>();
 
     filtered.forEach((link) => {
-      const key = formatDateKey(link.createdAt);
+      const key = link.createdAt;
       if (!grouped.has(key)) {
         grouped.set(key, []);
       }
@@ -411,6 +409,19 @@ const ArchiveDetailPage = () => {
           onClickOption={handleOption}
         />
       </div>
+
+      {/* 옵션 메뉴 */}
+      {isOptionMenuOpen && (
+        <>
+          <div
+            className='fixed inset-0 z-modal-overlay'
+            onClick={() => setIsOptionMenuOpen(false)}
+          />
+          <div className='fixed right-5 top-14 z-modal-content'>
+            <OptionMenu onSelect={handleOptionSelect} />
+          </div>
+        </>
+      )}
 
       {/* 제목 및 정보 영역 */}
       <div ref={titleSectionRef} className='bg-white pb-4 pt-6'>
