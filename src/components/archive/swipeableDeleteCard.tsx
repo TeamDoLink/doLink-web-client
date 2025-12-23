@@ -30,17 +30,17 @@ const DeleteIcon = () => {
 };
 
 /**
- * 링크 아이템 타입 정의
+ * Task 타입 정의 (임시 - 나중에 types 폴더로 이동)
  */
-interface LinkItem {
-  /** 링크의 고유 ID */
-  id: number;
-  /** 링크의 제목 */
+export interface Task {
+  taskId: number;
   title: string;
-  /** 링크의 부제목 (URL 또는 출처) */
-  subtitle: string;
-  /** 링크의 썸네일 이미지 URL */
-  thumbnail: string;
+  link: string | null;
+  memo: string | null;
+  status: boolean;
+  inout: boolean;
+  createdAt: string;
+  modifiedAt: string;
 }
 
 /**
@@ -48,8 +48,8 @@ interface LinkItem {
  * 스와이프로 삭제 가능한 링크 카드 컴포넌트의 속성 정의
  */
 interface SwipeableDeleteCardProps {
-  /** 링크 정보 배열 - 같은 날짜에 생성된 링크들 */
-  links: LinkItem[];
+  /** Task 정보 배열 - 같은 날짜에 생성된 Task들 */
+  tasks: Task[];
   /** 생성 날짜 - 이 카드에 속한 모든 링크의 공통 생성 날짜 */
   createdAt: Date;
   /** 각 링크의 체크박스 상태를 저장한 객체 (linkId를 키로 사용) */
@@ -106,7 +106,7 @@ const formatRelativeTime = (date: Date): string => {
  * - 편집 버튼 클릭 시 해당 카드의 모든 링크에 대해 수정 모드 활성화
  */
 export const SwipeableDeleteCard = ({
-  links,
+  tasks,
   createdAt,
   linkStates,
   linkEditModes,
@@ -117,6 +117,14 @@ export const SwipeableDeleteCard = ({
   onEditClick,
   onDeleteClick,
 }: SwipeableDeleteCardProps) => {
+  // Task를 LinkItem 형식으로 변환
+  const links = tasks.map((task) => ({
+    id: task.taskId,
+    title: task.title,
+    subtitle: task.link || '직접 추가',
+    thumbnail: '', // TODO: 실제 썸네일 데이터 연동 필요
+  }));
+
   // 스와이프 상태 관리
   const [swipeOffset, setSwipeOffset] = useState(0); // 현재 스와이프 오프셋
   const [isDragging, setIsDragging] = useState(false); // 드래그 중인지 여부
