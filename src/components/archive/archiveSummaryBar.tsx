@@ -19,8 +19,8 @@ export const ArchiveSummaryBar = ({
   ...divProps
 }: ArchiveSummaryBarProps) => {
   return (
-    <div className={`w-full px-5 ${className}`} {...divProps}>
-      <div className='flex h-[43px] w-full items-center justify-between'>
+    <div className={`w-full ${className}`} {...divProps}>
+      <div className='flex h-[43px] w-full items-center justify-between px-5'>
         <p className='text-body-md text-grey-900'>
           총 <span className='text-point'>{totalCount}</span>개
         </p>
