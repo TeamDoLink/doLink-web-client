@@ -1,15 +1,13 @@
 import { useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Background, FeedBack, TabBar } from '@/components/common';
 import { FloatingButton } from '@/components/common/button/floatingButton';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
-import { TAB_ROUTE_MAP } from '@/constants/routes';
-import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { useTodoStore, type TodoItem } from '@/stores/useTodoStore';
 import { useArchiveStore, type ArchiveItem } from '@/stores/useArchiveStore';
 import { GreetingSection } from '@/components/home/greetingSection';
 import { TodoSection } from '@/components/home/todoSection';
 import { ArchiveSection } from '@/components/home/archiveSection';
+import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 
 const TODO_ITEMS: TodoItem[] = [
   {
@@ -95,7 +93,7 @@ type HomeAfterLoginProps = {
 };
 
 const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
-  const navigate = useNavigate();
+  const { handleTabChange } = useBottomTabNavigation();
   const {
     showCompleteModal,
     setShowCompleteModal,
@@ -130,11 +128,6 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   const handleDisableModal = () => {
     setSuppressCompleteModal(true);
     setShowCompleteModal(false);
-  };
-
-  // 바텀 탭바 함수
-  const handleTabChange = (next: TabKey) => {
-    navigate(TAB_ROUTE_MAP[next]);
   };
 
   const handleRequestDeleteArchive = (id: string) => {

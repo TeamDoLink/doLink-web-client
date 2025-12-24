@@ -1,20 +1,8 @@
-import { useNavigate } from 'react-router-dom';
 import { TabBar } from '@/components/common';
-import { ROUTES } from '@/constants/routes';
-import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
-
-const TAB_ROUTE_MAP: Record<TabKey, string> = {
-  home: ROUTES.home,
-  archive: ROUTES.archives,
-  setting: ROUTES.settings,
-};
+import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 
 const SettingsPage = () => {
-  const navigate = useNavigate();
-
-  const handleTabChange = (next: TabKey) => {
-    navigate(TAB_ROUTE_MAP[next]);
-  };
+  const { handleTabChange } = useBottomTabNavigation();
 
   return (
     <div className='flex min-h-screen flex-col bg-grey-50'>

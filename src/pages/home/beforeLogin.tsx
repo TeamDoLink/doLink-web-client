@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Background,
   Button,
@@ -9,11 +8,10 @@ import {
 } from '@/components/common';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import heroIllustration from '@/assets/icons/home/home1.svg';
-import { TAB_ROUTE_MAP } from '@/constants/routes';
-import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { useTodoStore, type TodoItem } from '@/stores/useTodoStore';
 import { useArchiveStore, type ArchiveItem } from '@/stores/useArchiveStore';
 import { FloatingButton } from '@/components/common/button';
+import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 
 const TODO_ITEMS: TodoItem[] = [
   {
@@ -35,7 +33,7 @@ const ARCHIVE_ITEMS: ArchiveItem[] = [
 ];
 
 function HomeBeforeLogin() {
-  const navigate = useNavigate();
+  const { handleTabChange } = useBottomTabNavigation();
   // 로그인 토스트
   const [showToast, setShowToast] = useState(true);
   const {
@@ -79,11 +77,6 @@ function HomeBeforeLogin() {
   const handleDisableCompleteModal = () => {
     setSuppressCompleteModal(true);
     setShowCompleteModal(false);
-  };
-
-  // 바텀 탭바 함수
-  const handleTabChange = (next: TabKey) => {
-    navigate(TAB_ROUTE_MAP[next]);
   };
 
   // 모음 삭제 요청
