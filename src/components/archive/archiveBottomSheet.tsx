@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 
 import closeIcon from '@/assets/icons/common/close-36.svg';
-import { Archive, Button } from '@/components/common';
-import type { ArchiveCategoryKey } from '@/components/common/archive';
+import { Button } from '@/components/common';
+import { ArchiveInput } from './archiveInput';
+import { ArchiveSelect, type ArchiveCategoryKey } from './archiveSelect';
 
 interface ArchiveBottomSheetProps {
   title?: string;
@@ -25,14 +26,14 @@ export const ArchiveBottomSheet = ({
 }: ArchiveBottomSheetProps) => {
   const [name, setName] = useState(initialName);
   const [selectedCategory, setSelectedCategory] =
-    useState<ArchiveCategoryKey | null>(initialCategory);
+    useState<ArchiveCategoryKey | null>(initialCategory ?? null);
 
   useEffect(() => {
     setName(initialName);
   }, [initialName]);
 
   useEffect(() => {
-    setSelectedCategory(initialCategory);
+    setSelectedCategory(initialCategory ?? null);
   }, [initialCategory]);
 
   const isSubmittable = useMemo(
@@ -68,7 +69,7 @@ export const ArchiveBottomSheet = ({
         </div>
 
         <div className='flex flex-col gap-8'>
-          <Archive.ArchiveInput
+          <ArchiveInput
             label='모음 이름'
             value={name}
             onChange={(event) => setName(event.target.value)}
@@ -76,7 +77,7 @@ export const ArchiveBottomSheet = ({
             maxLength={MAX_NAME_LENGTH}
           />
 
-          <Archive.ArchiveSelect
+          <ArchiveSelect
             selected={selectedCategory ?? undefined}
             onSelect={setSelectedCategory}
           />

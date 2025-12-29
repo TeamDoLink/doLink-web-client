@@ -1,5 +1,5 @@
 import { ArchiveBottomSheet } from '@/components/archive';
-import type { ArchiveCategoryKey } from '@/components/common/archive';
+import type { ArchiveCategoryKey } from '@/components/archive';
 import { useNavigate } from 'react-router-dom';
 
 const ArchiveAddPage = () => {
