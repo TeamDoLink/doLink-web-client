@@ -1,4 +1,5 @@
 export * as AppBar from './appBar';
+export * as Archive from './archive';
 export * as Background from './background';
 export * as Button from './button';
 export * as Filter from './filter';
