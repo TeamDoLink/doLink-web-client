@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 
 import closeIcon from '@/assets/icons/common/close-36.svg';
 import { Button } from '@/components/common';
