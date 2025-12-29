@@ -5,9 +5,24 @@ import { Button } from '@/components/common';
 import { ArchiveInput } from './archiveInput';
 import { ArchiveSelect, type ArchiveCategoryKey } from './archiveSelect';
 
+type ArchiveBottomSheetMode = 'create' | 'edit';
+
+const MODE_PRESET: Record<
+  ArchiveBottomSheetMode,
+  { title: string; submit: string }
+> = {
+  create: {
+    title: '모음 추가',
+    submit: '추가하기',
+  },
+  edit: {
+    title: '모음 수정',
+    submit: '수정하기',
+  },
+};
+
 interface ArchiveBottomSheetProps {
-  title?: string;
-  submitLabel?: string;
+  mode?: ArchiveBottomSheetMode;
   initialName?: string;
   initialCategory?: ArchiveCategoryKey | null;
   onSubmit?: (payload: { name: string; category: ArchiveCategoryKey }) => void;
@@ -17,24 +32,17 @@ interface ArchiveBottomSheetProps {
 const MAX_NAME_LENGTH = 20;
 
 export const ArchiveBottomSheet = ({
-  title = '모음 추가',
-  submitLabel = '추가하기',
+  mode = 'create',
   initialName = '',
   initialCategory = null,
   onSubmit,
   onClose,
 }: ArchiveBottomSheetProps) => {
+  const preset = MODE_PRESET[mode];
+
   const [name, setName] = useState(initialName);
   const [selectedCategory, setSelectedCategory] =
-    useState<ArchiveCategoryKey | null>(initialCategory ?? null);
-
-  useEffect(() => {
-    setName(initialName);
-  }, [initialName]);
-
-  useEffect(() => {
-    setSelectedCategory(initialCategory ?? null);
-  }, [initialCategory]);
+    useState<ArchiveCategoryKey | null>(initialCategory);
 
   const isSubmittable = useMemo(
     () => name.trim().length > 0 && selectedCategory !== null,
@@ -56,7 +64,9 @@ export const ArchiveBottomSheet = ({
         style={{ paddingBottom: 'calc(40px + env(safe-area-inset-bottom))' }}
       >
         <div className='flex h-[76px] items-center justify-between'>
-          <h1 className='text-heading-xl font-semibold text-black'>{title}</h1>
+          <h1 className='text-heading-xl font-semibold text-black'>
+            {preset.title}
+          </h1>
           <button
             type='button'
             aria-label='닫기'
@@ -78,7 +88,7 @@ export const ArchiveBottomSheet = ({
           />
 
           <ArchiveSelect
-            selected={selectedCategory ?? undefined}
+            selected={selectedCategory}
             onSelect={setSelectedCategory}
           />
         </div>
@@ -88,7 +98,7 @@ export const ArchiveBottomSheet = ({
           disabled={!isSubmittable}
           className='mt-8'
         >
-          {submitLabel}
+          {preset.submit}
         </Button.CtaButton>
       </form>
     </div>
