@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
   DraftMessageType,
   ReactNativeWebView,
+  TaskDraft,
   WebViewMessage,
 } from '@/types/draft';
 import { isDraftMessageType, isDraftSuccess } from '@/types/draft';
@@ -34,7 +35,7 @@ export class DraftBridgeError extends Error {
  * useDraftBridge Hook의 반환 타입
  */
 interface UseDraftBridgeReturn<T> {
-  saveDraft: (key: string, data: T) => Promise<void>;
+  saveDraft: (key: string, data: TaskDraft) => Promise<void>;
   loadDraft: (key: string) => Promise<T | null>;
   deleteDraft: (key: string) => Promise<void>;
   isLoading: boolean;
@@ -157,7 +158,7 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
         setError(null);
         pending.resolve(response.data ?? null);
         // TODO 테스트 위해 임시로 alert 사용
-        alert(`임시저장 완료: ${event.data}`);
+        alert(`success : ${event.data}`);
       } else {
         const error = new DraftBridgeError(
           response.error || 'Unknown error',
@@ -165,9 +166,11 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
         );
         setError(error);
         pending.reject(error);
+        alert(`error : ${event.data}`);
       }
     } catch (err) {
       console.error('[useDraftBridge] Error handling message:', err);
+      alert(`[useDraftBridge] Error handling message: : ${event.data}`);
     }
   }, []);
 
