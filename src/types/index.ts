@@ -12,5 +12,5 @@ export type ArchiveItem = {
   category: string;
   itemCount: number;
   images?: string[];
-  createdAt?: string;
+  createdAt: string;
 };
