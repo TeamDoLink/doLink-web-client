@@ -112,22 +112,23 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
 
       // 메시지 타입별 처리
       if (isClipboardDataMessage(message)) {
-        const text = message.payload?.trim() ?? '';
-        if (!text) {
-          throw new ClipboardBridgeError(
-            'Clipboard payload is empty',
-            'MESSAGE_FAILED'
-          );
+        const { payload } = message;
+        if (!payload) {
+          // 클립보드가 비어있을 시 사라짐
+          return;
         }
+
+        const text = message.payload?.trim();
         setLinkValue(text);
-        setIsLoading(false);
-      } else if (isClipboardErrorMessage(message)) {
+        return;
+      }
+
+      if (isClipboardErrorMessage(message)) {
         const clipboardError = new ClipboardBridgeError(
           message.error || 'Unknown clipboard error',
           'MESSAGE_FAILED'
         );
         setError(clipboardError);
-        setIsLoading(false);
       }
     } catch (err) {
       const clipboardError =
@@ -138,8 +139,10 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
               'INVALID_MESSAGE'
             );
       setError(clipboardError);
-      setIsLoading(false);
+
       console.error('[useClipboardBridge] Error:', clipboardError);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
