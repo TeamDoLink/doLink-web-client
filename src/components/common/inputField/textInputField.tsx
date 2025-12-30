@@ -24,6 +24,8 @@ export type TextInputFieldProps = {
   buttonLabel?: string;
   /** 입력 필드의 너비 (Tailwind CSS 클래스, 예: 'w-full', 'w-[335px]') */
   width?: string;
+
+  readOnly?: boolean;
 };
 
 export default function TextInputField({
@@ -37,6 +39,7 @@ export default function TextInputField({
   onButtonClick,
   buttonLabel,
   width = 'w-full',
+  readOnly = false,
 }: TextInputFieldProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange?.(e.target.value);
@@ -63,7 +66,8 @@ export default function TextInputField({
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
-          className='min-w-0 flex-1 border-none bg-transparent text-body-md text-grey-900 outline-none placeholder:text-grey-400'
+          readOnly={readOnly}
+          className={`min-w-0 flex-1 border-none bg-transparent text-body-md text-grey-900 outline-none placeholder:text-grey-400 ${readOnly ? 'cursor-default' : ''}`}
         />
         <button
           onClick={onButtonClick}
