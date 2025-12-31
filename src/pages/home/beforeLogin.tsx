@@ -32,6 +32,7 @@ const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: '두링크(DoLink) 튜토리얼',
     category: '기타',
     itemCount: 1,
+    createdAt: '2025-01-07T16:45:00',
   },
 ];
 
