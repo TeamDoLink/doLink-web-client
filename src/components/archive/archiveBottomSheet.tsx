@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react';
-
+import { useNavigate } from 'react-router-dom';
 import closeIcon from '@/assets/icons/common/close-36.svg';
 import { Button } from '@/components/common';
 import { ArchiveInput } from './archiveInput';
@@ -38,6 +38,7 @@ export const ArchiveBottomSheet = ({
   onSubmit,
   onClose,
 }: ArchiveBottomSheetProps) => {
+  const navigate = useNavigate();
   const preset = MODE_PRESET[mode];
 
   const [name, setName] = useState(initialName);
@@ -56,6 +57,11 @@ export const ArchiveBottomSheet = ({
     onSubmit?.({ name: name.trim(), category: selectedCategory });
   };
 
+  const handleClose = () => {
+    onClose?.();
+    navigate(-1);
+  };
+
   return (
     <div className='flex min-h-screen w-full items-end bg-black/60'>
       <form
@@ -70,7 +76,7 @@ export const ArchiveBottomSheet = ({
           <button
             type='button'
             aria-label='닫기'
-            onClick={onClose}
+            onClick={handleClose}
             className='flex h-9 w-9 items-center justify-center'
             style={{ color: '#212121' }}
           >
