@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { TAB_ROUTE_MAP } from '@/constants/routes';
@@ -9,12 +8,9 @@ import { TAB_ROUTE_MAP } from '@/constants/routes';
 export const useBottomTabNavigation = () => {
   const navigate = useNavigate();
 
-  const handleTabChange = useCallback(
-    (next: TabKey) => {
-      navigate(TAB_ROUTE_MAP[next]);
-    },
-    [navigate]
-  );
+  const handleTabChange = (next: TabKey) => {
+    navigate(TAB_ROUTE_MAP[next]);
+  };
 
   return { handleTabChange };
 };
