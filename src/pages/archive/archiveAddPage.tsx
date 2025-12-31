@@ -1,6 +1,7 @@
 import { ArchiveBottomSheet } from '@/components/archive';
 import type { ArchiveCategoryKey } from '@/components/archive';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/constants/routes';
 
 const ArchiveAddPage = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const ArchiveAddPage = () => {
     // TODO: 성공 시 Toast 메시지
     // toast.success(`"${payload.name}" 모음이 생성되었습니다.`);
 
-    navigate('/archives');
+    navigate(ROUTES.archives);
   };
 
   return <ArchiveBottomSheet onSubmit={handleSubmit} />;
