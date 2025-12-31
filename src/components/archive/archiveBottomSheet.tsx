@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import closeIcon from '@/assets/icons/common/close-36.svg';
 import { Button } from '@/components/common';
@@ -26,7 +26,6 @@ interface ArchiveBottomSheetProps {
   initialName?: string;
   initialCategory?: ArchiveCategoryKey | null;
   onSubmit?: (payload: { name: string; category: ArchiveCategoryKey }) => void;
-  onClose?: () => void;
 }
 
 const MAX_NAME_LENGTH = 20;
@@ -36,7 +35,6 @@ export const ArchiveBottomSheet = ({
   initialName = '',
   initialCategory = null,
   onSubmit,
-  onClose,
 }: ArchiveBottomSheetProps) => {
   const navigate = useNavigate();
   const preset = MODE_PRESET[mode];
@@ -45,10 +43,7 @@ export const ArchiveBottomSheet = ({
   const [selectedCategory, setSelectedCategory] =
     useState<ArchiveCategoryKey | null>(initialCategory);
 
-  const isSubmittable = useMemo(
-    () => name.trim().length > 0 && selectedCategory !== null,
-    [name, selectedCategory]
-  );
+  const isSubmittable = name.trim().length > 0 && selectedCategory !== null;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -58,7 +53,6 @@ export const ArchiveBottomSheet = ({
   };
 
   const handleClose = () => {
-    onClose?.();
     navigate(-1);
   };
 
