@@ -31,17 +31,12 @@ const ArchiveEditPage = () => {
     navigate(ROUTES.archives);
   };
 
-  const handleClose = () => {
-    navigate(-1);
-  };
-
   return (
     <ArchiveBottomSheet
       mode='edit'
       initialName={testArchive.name}
       initialCategory={testArchive.category}
       onSubmit={handleSubmit}
-      onClose={handleClose}
     />
   );
 };
