@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { InputField, Button, AppBar, FeedBack } from '@/components/common';
 import { CollectionChipSelector, type CollectionChip } from '@/components/task';
 import { useClipboardBridge } from '@/hooks/useClipboardBridge';
 import { useDraftBridge } from '@/hooks/useDraftBridge';
 import type { TaskDraft } from '@/types/draft';
 import { ModalLayout } from '@/components/common/feedBack';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+// 임시저장 키
+const DRAFT_KEY = 'task-create-draft';
 
 // 임시 데이터 - 실제로는 API에서 받아올 데이터
 const MOCK_COLLECTIONS: CollectionChip[] = [
@@ -33,24 +37,17 @@ const MOCK_COLLECTIONS: CollectionChip[] = [
 function TaskCreatePage() {
   const MAX_LENGTH = 100; // 가장 일반적인 경우
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const {
-    linkValue,
-    requestClipboard,
-    pasteFromClipboard,
-    hasClipboardLink,
-    error,
-  } = useClipboardBridge();
+  const { clipboardLinkValue, requestClipboard, hasClipboardLink, error } =
+    useClipboardBridge();
 
   // TODO 임시저장 불러오기 시  isLoading  error 화면 UI 처리
-  const {
-    saveDraft,
-    loadDraft,
-    isLoading: isDraftLoading,
-    error: draftError,
-  } = useDraftBridge<TaskDraft>();
+  const { saveDraft, loadDraft, deleteDraft } = useDraftBridge<TaskDraft>();
 
   const [title, setTitle] = useState('');
   const [memo, setMemo] = useState('');
+  const [linkValue, setLinkValue] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // 선택된 아카이브 모음 상태
   const [selectedArchiveCollection, setSelectedArchiveCollection] = useState<{
@@ -59,6 +56,55 @@ function TaskCreatePage() {
   } | null>(null);
   const [titleFocused, setTitleFocused] = useState(false);
   const [linkFocused, setLinkFocused] = useState(false);
+
+  /**
+   * 페이지 진입 시 임시저장 복구
+   */
+  useEffect(() => {
+    const restoreDraft = async () => {
+      // location.state로 전달된 restoreDraft 확인
+      const shouldRestore = location.state?.restoreDraft;
+
+      if (shouldRestore === false) {
+        // 새로 작성 선택 시 임시저장 삭제
+        try {
+          await deleteDraft(DRAFT_KEY);
+        } catch (err) {
+          console.error('임시저장 삭제 실패:', err);
+        }
+        return;
+      }
+
+      if (shouldRestore === true) {
+        // 이어서 작성 선택 시 임시저장 복구
+        try {
+          const draft = await loadDraft(DRAFT_KEY);
+          if (draft) {
+            setTitle(draft.title || '');
+            setLinkValue(draft.link || '');
+            setMemo(draft.memo || '');
+            if (draft.archive) {
+              // archive 이름으로 collection 찾기
+              const collection = MOCK_COLLECTIONS.find(
+                (c) => c.label === draft.archive
+              );
+              if (collection) {
+                setSelectedArchiveCollection({
+                  id: collection.id,
+                  name: collection.label,
+                });
+              }
+            }
+          }
+        } catch (err) {
+          console.error('임시저장 복구 실패:', err);
+        }
+      }
+    };
+
+    restoreDraft();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * 제목 입력필드 focus 핸들러
@@ -97,6 +143,13 @@ function TaskCreatePage() {
   };
 
   /**
+   * 클립보드에서 붙여넣기
+   */
+  const handlePasteFromClipboard = () => {
+    setLinkValue(clipboardLinkValue);
+  };
+
+  /**
    * 제목 입력값 변경 핸들러
    */
   const handleTitleChange = (value: string) => {
@@ -124,41 +177,6 @@ function TaskCreatePage() {
   };
 
   /**
-   * 임시저장 데이터 불러오기
-   */
-  useEffect(() => {
-    // TODO 테스트 위해 이 곳에 넣어놓음 -> + 플로팅 버튼 눌렀을 시 불러오기로 변경 예정 (대시보드 반영 시 작업 예정)
-    const loadDraftData = async () => {
-      try {
-        const draftData = await loadDraft('task-create-draft');
-        if (draftData) {
-          setTitle(draftData.title);
-          setLinkValue(draftData.link);
-          setMemo(draftData.memo);
-
-          // archive 정보로 collection 찾아서 설정
-          const collection = MOCK_COLLECTIONS.find(
-            (item) => item.label === draftData.archive
-          );
-
-          if (collection) {
-            setSelectedArchiveCollection({
-              id: collection.id,
-              name: collection.label,
-            });
-          } else {
-            setSelectedArchiveCollection(null);
-          }
-        }
-      } catch (err) {
-        console.error('임시저장 데이터 불러오기 실패:', err);
-      }
-    };
-
-    loadDraftData();
-  }, [loadDraft, setLinkValue]);
-
-  /**
    * 임시저장 버튼 클릭 핸들러
    */
   const handleDraftAddClick = async () => {
@@ -170,19 +188,56 @@ function TaskCreatePage() {
         memo,
       };
 
-      await saveDraft('task-create-draft', draftData);
+      await saveDraft(DRAFT_KEY, draftData);
       console.log('임시저장 완료:', draftData);
+      navigate(-1);
     } catch (err) {
       console.error('임시저장 실패:', err);
     }
   };
 
   const handleAddClick = () => {
-    // TODO 추가하기 시 , 할 일 API 로직 연결 예정
-    // TODO 이전에 할 일 추가 동작한 화면으로 Return
+    // TODO 추가하기 시 , 할 일 API 로직 연결 예
+    const data = {
+      archive: selectedArchiveCollection?.name || '',
+      title,
+      link: linkValue,
+      memo,
+    };
+    alert('debug 할 일 추가 완료: ' + JSON.stringify(data));
+
+    navigate(-1);
   };
-  // [ ] TEST 지워야함
-  // setShowConfirmDialog(true);
+
+  /**
+   * 뒤로가기 버튼 클릭 핸들러
+   */
+  const handleBackClick = () => {
+    // 입력된 내용이 있으면 확인 모달 표시
+    if (isDraftSaveEnabled) {
+      setShowConfirmDialog(true);
+    } else {
+      // 입력된 내용이 없으면 바로 이동
+      navigate(-1);
+    }
+  };
+
+  /**
+   * 저장하고 나가기
+   */
+  const handleSaveAndExit = async () => {
+    try {
+      await handleDraftAddClick();
+      navigate(-1);
+    } catch (err) {
+      console.error('저장 후 나가기 실패:', err);
+    }
+  };
+
+  const hanldeCancelAndExit = () => {
+    setShowConfirmDialog(false);
+    navigate(-1);
+  };
 
   /**
    * 임시저장 버튼 활성화 조건: title, linkValue, memo 중 한글자라도 입력하거나 모음 선택
@@ -252,13 +307,8 @@ function TaskCreatePage() {
           title={`작성 중인 할 일을\n저장하고 나갈까요?`}
           positiveLabel='저장하고 나가기'
           negativeLabel='취소'
-          onPositive={() => {
-            // TODO 임시저장하고 나가기 이전 화면으로 이동
-          }}
-          onNegative={() => {
-            // 모달 창만 사라지기
-            setShowConfirmDialog(false);
-          }}
+          onPositive={handleSaveAndExit}
+          onNegative={hanldeCancelAndExit}
         />
       </ModalLayout>
 
@@ -267,6 +317,7 @@ function TaskCreatePage() {
         rightIcons={['save']}
         isSaveDisabled={!isDraftSaveEnabled}
         onClickSave={handleDraftAddClick}
+        onClickBack={handleBackClick}
       />
 
       <div className='flex h-full flex-col gap-6 overflow-y-auto bg-white px-5 py-4'>
@@ -327,7 +378,9 @@ function TaskCreatePage() {
             onChange={handleLinkChange}
             onFocus={handleLinkFocus}
             onBlur={handleLinkBlur}
-            onButtonClick={hasClipboardLink ? pasteFromClipboard : undefined}
+            onButtonClick={
+              hasClipboardLink ? handlePasteFromClipboard : undefined
+            }
             width='w-full'
           />
         </div>
