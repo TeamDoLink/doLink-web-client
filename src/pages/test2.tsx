@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { TodoBottomSheet } from '@/components/common/bottomSheet/todoBottomSheet';
+import { ArchiveAddBottomSheet } from '@/components/common/bottomSheet/archiveAddBottomSheet';
 import { CtaSecondButton } from '@/components/common/button/ctaSecondButton';
 import { FlagLabel } from '@/components/common/label/flagLabel';
 import { LinkCapsuleButton } from '@/components/common/button/linkCapsuleButton';
@@ -54,6 +55,39 @@ const TodoBottomSheetShowcase = () => {
           </p>
           <CtaSecondButton onClick={() => setOpen(true)}>
             바텀시트 열기
+          </CtaSecondButton>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ArchiveAddBottomSheetShowcase = () => {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <div className='flex w-full max-w-md flex-col gap-4 rounded-3xl bg-grey-100 p-6'>
+      {open ? (
+        <ArchiveAddBottomSheet
+          title='모음 추가'
+          onClickBack={() => setOpen(false)}
+          onClickSave={() => undefined}
+          onClickSearch={() => undefined}
+          onClickOption={() => undefined}
+          onClose={() => setOpen(false)}
+        >
+          <div className='flex flex-col gap-2 rounded-2xl bg-grey-50 p-4 text-body-sm text-grey-600'>
+            <p>모음 추가 바텀시트 레이아웃입니다.</p>
+            <p>children 영역에 콘텐츠를 넣으면 높이가 확장됩니다.</p>
+          </div>
+        </ArchiveAddBottomSheet>
+      ) : (
+        <div className='flex flex-col items-start gap-2'>
+          <p className='text-body-sm text-grey-600'>
+            드래그로 닫은 후 다시 열어보세요.
+          </p>
+          <CtaSecondButton onClick={() => setOpen(true)}>
+            모음 추가 시트 열기
           </CtaSecondButton>
         </div>
       )}
@@ -124,6 +158,12 @@ const sections = [
     description:
       '상단 핸들바와 “모음 추가” 액션을 포함한 할 일 담기 바텀시트 래퍼입니다.',
     component: <TodoBottomSheetShowcase />,
+  },
+  {
+    title: 'Archive Add Bottom Sheet',
+    description:
+      '모음 추가 시나리오 전용 바텀시트. 뒤로가기와 임시저장/검색/옵션 버튼을 옵션으로 제어할 수 있습니다.',
+    component: <ArchiveAddBottomSheetShowcase />,
   },
 ];
 
