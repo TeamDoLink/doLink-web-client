@@ -7,6 +7,7 @@ import { LinkCapsuleButton } from '@/components/common/button/linkCapsuleButton'
 import { ShareCapsuleButton } from '@/components/common/button/shareCapsuleButton';
 import { TabButton } from '@/components/common/button/tabButton';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
+import { LoadingSpinner } from '@/components/common/loading/loadingSpinner';
 import Test_yj1 from './test_yj1';
 
 const TabButtonShowcase = () => {
@@ -109,6 +110,16 @@ const CapsuleButtonShowcase = () => (
 );
 
 const sections = [
+  {
+    title: 'Loading Spinner Row',
+    description:
+      '어두운 배경 위에서 회전하는 단일 링 스피너입니다. 필요에 따라 스타일만 변경하면 다른 배경에서도 바로 사용할 수 있습니다.',
+    component: (
+      <div className='flex flex-col items-center gap-3 rounded-3xl bg-grey-900 p-6'>
+        <LoadingSpinner />
+      </div>
+    ),
+  },
   {
     title: 'Option Menu',
     description:
