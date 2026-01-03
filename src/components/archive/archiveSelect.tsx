@@ -20,18 +20,12 @@ import tipsSelected from '@/assets/icons/category/editor/tips-selected.svg';
 import tipsUnselected from '@/assets/icons/category/editor/tips-unselected.svg';
 import etcSelected from '@/assets/icons/category/editor/etc-selected.svg';
 import etcUnselected from '@/assets/icons/category/editor/etc-unselected.svg';
+import {
+  getArchiveCategoryLabel,
+  type ArchiveCategoryKey,
+} from '@/utils/archiveCategory';
 
-export type ArchiveCategoryKey =
-  | 'restaurant'
-  | 'hobby'
-  | 'travel'
-  | 'money'
-  | 'shopping'
-  | 'exercise'
-  | 'career'
-  | 'study'
-  | 'tips'
-  | 'etc';
+export type { ArchiveCategoryKey };
 
 interface ArchiveSelectProps {
   selected?: ArchiveCategoryKey | null;
@@ -40,67 +34,56 @@ interface ArchiveSelectProps {
 
 const CATEGORY_ITEMS: Array<{
   key: ArchiveCategoryKey;
-  label: string;
   selectedIcon: string;
   unselectedIcon: string;
 }> = [
   {
     key: 'restaurant',
-    label: '맛집',
     selectedIcon: restaurantSelected,
     unselectedIcon: restaurantUnselected,
   },
   {
     key: 'hobby',
-    label: '취미',
     selectedIcon: hobbySelected,
     unselectedIcon: hobbyUnselected,
   },
   {
     key: 'travel',
-    label: '여행',
     selectedIcon: travelSelected,
     unselectedIcon: travelUnselected,
   },
   {
     key: 'money',
-    label: '재테크',
     selectedIcon: moneySelected,
     unselectedIcon: moneyUnselected,
   },
   {
     key: 'shopping',
-    label: '쇼핑',
     selectedIcon: shoppingSelected,
     unselectedIcon: shoppingUnselected,
   },
   {
     key: 'exercise',
-    label: '운동',
     selectedIcon: exerciseSelected,
     unselectedIcon: exerciseUnselected,
   },
   {
     key: 'career',
-    label: '커리어',
     selectedIcon: careerSelected,
     unselectedIcon: careerUnselected,
   },
   {
     key: 'study',
-    label: '자기개발',
     selectedIcon: studySelected,
     unselectedIcon: studyUnselected,
   },
   {
     key: 'tips',
-    label: '꿀팁',
     selectedIcon: tipsSelected,
     unselectedIcon: tipsUnselected,
   },
   {
     key: 'etc',
-    label: '기타',
     selectedIcon: etcSelected,
     unselectedIcon: etcUnselected,
   },
@@ -122,8 +105,9 @@ export const ArchiveSelect = ({ selected, onSelect }: ArchiveSelectProps) => {
     <div className='flex flex-col'>
       <span className='text-body-xl text-black'>카테고리</span>
       <div className='mt-3 grid grid-cols-5 gap-x-4 gap-y-6'>
-        {CATEGORY_ITEMS.map(({ key, label, selectedIcon, unselectedIcon }) => {
+        {CATEGORY_ITEMS.map(({ key, selectedIcon, unselectedIcon }) => {
           const isSelected = selected === key;
+          const label = getArchiveCategoryLabel(key);
 
           return (
             <button

@@ -20,24 +20,20 @@ import StudySelectedIcon from '@/assets/icons/category/home/study-selected.svg';
 import StudyUnselectedIcon from '@/assets/icons/category/home/study-unselected.svg';
 import EtcSelectedIcon from '@/assets/icons/category/home/etc-selected.svg';
 import EtcUnselectedIcon from '@/assets/icons/category/home/etc-unselected.svg';
-import TipSelectedIcon from '@/assets/icons/category/home/tips-selected.svg';
-import TipUnselectedIcon from '@/assets/icons/category/home/tips-unselected.svg';
+import TipsSelectedIcon from '@/assets/icons/category/home/tips-selected.svg';
+import TipsUnselectedIcon from '@/assets/icons/category/home/tips-unselected.svg';
+import {
+  getArchiveCategoryLabel,
+  type ArchiveFilterCategoryKey,
+} from '@/utils/archiveCategory';
 
-const CATEGORY_LABEL_MAP = {
-  all: '전체',
-  restaurant: '맛집',
-  travel: '여행',
-  shopping: '쇼핑',
-  money: '재테크',
-  hobby: '취미',
-  exercise: '운동',
-  career: '커리어',
-  study: '자기개발',
-  tip: '꿀팁',
-  etc: '기타',
-} as const;
-
-const CATEGORY_ICON_MAP = {
+const CATEGORY_ICON_MAP: Record<
+  ArchiveFilterCategoryKey,
+  {
+    selected: string;
+    unselected: string;
+  }
+> = {
   all: {
     selected: AllSelectedIcon,
     unselected: AllUnselectedIcon,
@@ -74,9 +70,9 @@ const CATEGORY_ICON_MAP = {
     selected: StudySelectedIcon,
     unselected: StudyUnselectedIcon,
   },
-  tip: {
-    selected: TipSelectedIcon,
-    unselected: TipUnselectedIcon,
+  tips: {
+    selected: TipsSelectedIcon,
+    unselected: TipsUnselectedIcon,
   },
   etc: {
     selected: EtcSelectedIcon,
@@ -84,7 +80,7 @@ const CATEGORY_ICON_MAP = {
   },
 } as const;
 
-export type ArchiveCategoryKey = keyof typeof CATEGORY_LABEL_MAP;
+export type ArchiveCategoryKey = ArchiveFilterCategoryKey;
 
 type CategoryFilterButtonProps = {
   category: ArchiveCategoryKey;
@@ -113,7 +109,7 @@ export const CategoryFilterButton = ({
     >
       <img
         src={iconSrc}
-        alt={label ?? CATEGORY_LABEL_MAP[category]}
+        alt={label ?? getArchiveCategoryLabel(category)}
         className='h-14 w-14'
       />
       <span
@@ -121,7 +117,7 @@ export const CategoryFilterButton = ({
           selected ? 'text-grey-900' : 'text-grey-500'
         }`}
       >
-        {label ?? CATEGORY_LABEL_MAP[category]}
+        {label ?? getArchiveCategoryLabel(category)}
       </span>
     </button>
   );
