@@ -139,8 +139,6 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
         if (response.success) {
           setError(null);
           pending.resolve(response.data ?? null);
-          // TODO 테스트 위해 임시로 alert 사용
-          alert(`success : ${event.data}`);
         } else {
           const error = new DraftBridgeError(
             response.error || 'Unknown error',
