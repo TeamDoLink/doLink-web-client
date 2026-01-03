@@ -1,12 +1,29 @@
-import { TabBar } from '@/components/common';
+import { useState } from 'react';
+import { FeedBack, TabBar } from '@/components/common';
 import { FloatingButton } from '@/components/common/button';
 import { SettingMenuItem } from '@/components/common/setting/settingMenuItem';
 import { GreyLine } from '@/components/common/line/greyLine';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const SettingsPage = () => {
   const { handleTabChange } = useBottomTabNavigation();
+  const signOut = useAuthStore((state) => state.signOut);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+
+  const handleLogoutClick = () => {
+    setIsLogoutConfirmOpen(true);
+  };
+
+  const handleCancelLogout = () => {
+    setIsLogoutConfirmOpen(false);
+  };
+
+  const handleConfirmLogout = () => {
+    signOut();
+    setIsLogoutConfirmOpen(false);
+  };
 
   return (
     <div className='flex min-h-screen flex-col bg-grey-50'>
@@ -36,7 +53,9 @@ const SettingsPage = () => {
         </div>
 
         <div className='flex justify-center gap-12 text-body-md text-grey-500'>
-          <button type='button'>로그아웃</button>
+          <button type='button' onClick={handleLogoutClick}>
+            로그아웃
+          </button>
           {/* 추후 컴포넌트로 분리 예정 */}
           <div className='h-4 w-px bg-grey-200' />
           <button type='button'>회원탈퇴</button>
@@ -53,6 +72,19 @@ const SettingsPage = () => {
           <TabBar.BottomTabBar value='setting' onChange={handleTabChange} />
         </div>
       </footer>
+
+      <FeedBack.ModalLayout
+        open={isLogoutConfirmOpen}
+        onClose={handleCancelLogout}
+      >
+        <FeedBack.ConfirmDialog
+          title='정말 로그아웃할까요?'
+          positiveLabel='로그아웃하기'
+          negativeLabel='취소'
+          onPositive={handleConfirmLogout}
+          onNegative={handleCancelLogout}
+        />
+      </FeedBack.ModalLayout>
     </div>
   );
 };
