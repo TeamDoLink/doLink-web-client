@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from 'react';
 import rightIcon from '@/assets/icons/common/direction-right.svg';
 
-interface SettingAppBarProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface SettingMenuItemProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   // 왼쪽 텍스트
   leftText: string;
   // 오른쪽 텍스트
@@ -16,13 +16,13 @@ interface SettingAppBarProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  * - 우측 : 텍스트 + 화살표 아이콘
  */
 
-export const SettingAppBar = ({
+export const SettingMenuItem = ({
   leftText,
   rightText,
   showArrow = true,
   className = '',
   ...props
-}: SettingAppBarProps) => {
+}: SettingMenuItemProps) => {
   return (
     <button
       type='button'
