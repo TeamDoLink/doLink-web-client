@@ -11,40 +11,21 @@ import heroIllustration from '@/assets/icons/home/home1.svg';
 import { FloatingButton } from '@/components/common/button';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
-import { useTodoPreferenceStore } from '@/stores/useTodoPreferenceStore';
-import type { ArchiveItem, TodoItem } from '@/types';
-
-const TODO_ITEMS: TodoItem[] = [
-  {
-    id: 'welcome-guide',
-    title: '두링크(DoLink) 안내서 📚',
-    date: '오늘',
-    platform: '노션 (Notion)',
-    checked: false,
-  },
-];
-
-const ARCHIVE_ITEMS: ArchiveItem[] = [
-  {
-    id: 'tutorial',
-    title: '두링크(DoLink) 튜토리얼',
-    category: '기타',
-    itemCount: 1,
-    createdAt: '2025-01-07T16:45:00',
-  },
-];
+import { getArchiveCategoryLabel } from '@/utils/archiveCategory';
+import { formatRelativeDateLabel } from '@/utils/date';
+import { MOCK_ARCHIVES } from '@/mocks/archiveData';
+import { MOCK_TODOS } from '@/mocks/todoData';
 
 const HomeBeforeLogin = () => {
   const { handleTabChange } = useBottomTabNavigation();
   const [showToast, setShowToast] = useState(true);
-  const [todoItems, setTodoItems] = useState<TodoItem[]>(() =>
-    TODO_ITEMS.map((todo) => ({ ...todo }))
+  const [todoItems, setTodoItems] = useState(() =>
+    MOCK_TODOS.slice(0, 1).map((todo) => ({ ...todo }))
   );
-  const [archiveItems, setArchiveItems] = useState<ArchiveItem[]>(() =>
-    ARCHIVE_ITEMS.map((archive) => ({ ...archive }))
+  const [archiveItems, setArchiveItems] = useState(() =>
+    MOCK_ARCHIVES.slice(0, 3).map((archive) => ({ ...archive }))
   );
-  const { suppressCompleteModal, setSuppressCompleteModal } =
-    useTodoPreferenceStore();
+  const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
   const {
     isOpen: isModalOpen,
     type: modalType,
@@ -57,10 +38,6 @@ const HomeBeforeLogin = () => {
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
     string | null
   >(null);
-
-  useEffect(() => {
-    setSuppressCompleteModal(false);
-  }, [setSuppressCompleteModal]);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowToast(false), 3000);
@@ -153,15 +130,17 @@ const HomeBeforeLogin = () => {
             <section className='mt-5 space-y-4'>
               <h2 className='text-heading-sm text-black'>할 일</h2>
               <div className='space-y-4 rounded-2xl bg-white py-5 shadow-[0_4px_12px_rgba(0,0,0,0.03)]'>
-                {todoItems.map(({ id, title, date, platform, checked }) => (
-                  <List.TodoItem
-                    key={id}
-                    title={title}
-                    subtitle={`${date} · ${platform}`}
-                    checked={checked}
-                    onChange={(next) => handleTodoCheckbox(id, next)}
-                  />
-                ))}
+                {todoItems.map(
+                  ({ id, title, platform, checked, createdAt }) => (
+                    <List.TodoItem
+                      key={id}
+                      title={title}
+                      subtitle={`${formatRelativeDateLabel(createdAt)} · ${platform}`}
+                      checked={checked}
+                      onChange={(next) => handleTodoCheckbox(id, next)}
+                    />
+                  )
+                )}
               </div>
             </section>
 
@@ -173,7 +152,7 @@ const HomeBeforeLogin = () => {
                     <List.ArchiveCard
                       key={id}
                       title={title}
-                      category={category}
+                      category={getArchiveCategoryLabel(category)}
                       itemCount={itemCount}
                       images={images}
                       width='w-full'
