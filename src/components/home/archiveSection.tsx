@@ -1,5 +1,5 @@
 import { List } from '@/components/common';
-import type { ArchiveItem } from '@/stores/useArchiveStore';
+import type { ArchiveItem } from '@/types';
 
 type ArchiveSectionProps = {
   items: ArchiveItem[];

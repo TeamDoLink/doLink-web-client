@@ -1,84 +1,130 @@
-import { useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
 import { Background, FeedBack, TabBar } from '@/components/common';
-import { FloatingButton } from '@/components/common/button/floatingButton';
+import { FloatingButton } from '@/components/common/button';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
-import { TAB_ROUTE_MAP } from '@/constants/routes';
-import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
-import { useTodoStore, type TodoItem } from '@/stores/useTodoStore';
-import { useArchiveStore, type ArchiveItem } from '@/stores/useArchiveStore';
 import { GreetingSection } from '@/components/home/greetingSection';
 import { TodoSection } from '@/components/home/todoSection';
 import { ArchiveSection } from '@/components/home/archiveSection';
+import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
+import { useModalStore } from '@/stores/useModalStore';
+import { useTodoPreferenceStore } from '@/stores/useTodoPreferenceStore';
+import type { ArchiveItem, TodoItem } from '@/types';
 
 const TODO_ITEMS: TodoItem[] = [
   {
     id: 'welcome-guide',
     title: '두링크(DoLink) 안내서 📚',
     date: '오늘',
-    sns: '노션 (Notion)',
+    platform: '노션 (Notion)',
     checked: false,
   },
   {
     id: 'welcome-guide-2',
     title: '두링크(DoLink) 안내서 📚',
     date: '오늘',
-    sns: '노션 (Notion)',
+    platform: '노션 (Notion)',
     checked: false,
   },
   {
     id: 'welcome-guide-3',
     title: '두링크(DoLink) 안내서 📚',
     date: '오늘',
-    sns: '노션 (Notion)',
+    platform: '노션 (Notion)',
     checked: false,
   },
   {
     id: 'welcome-guide-4',
     title: '두링크(DoLink) 안내서 📚',
     date: '오늘',
-    sns: '노션 (Notion)',
+    platform: '노션 (Notion)',
     checked: false,
   },
   {
     id: 'welcome-guide-5',
     title: '두링크(DoLink) 안내서 📚',
     date: '오늘',
-    sns: '노션 (Notion)',
+    platform: '노션 (Notion)',
     checked: false,
   },
 ];
 
 const ARCHIVE_ITEMS: ArchiveItem[] = [
   {
-    id: 'tutorial',
-    title: '두링크(DoLink) 튜토리얼',
-    category: '기타',
-    itemCount: 1,
-  },
-  {
-    id: 'tutorial-2',
-    title: '두링크(DoLink) 튜토리얼',
-    category: '기타',
-    itemCount: 2,
-  },
-  {
-    id: 'tutorial-3',
-    title: '두링크(DoLink) 튜토리얼',
-    category: '기타',
-    itemCount: 4,
-  },
-  {
     id: 'tutorial-4',
-    title: '두링크(DoLink) 튜토리얼',
+    title: '두링크(DoLink) 튜토리얼 (01/07)',
     category: '기타',
     itemCount: 3,
+    createdAt: '2025-01-07T16:45:00',
   },
   {
     id: 'tutorial-5',
-    title: '두링크(DoLink) 튜토리얼',
+    title: '두링크(DoLink) 튜토리얼 (12/31)',
     category: '기타',
     itemCount: 1,
+    createdAt: '2024-12-31T17:30:28',
+  },
+  {
+    id: 'tutorial-2',
+    title: '두링크(DoLink) 튜토리얼 (01/09)',
+    category: '기타',
+    itemCount: 2,
+    createdAt: '2025-01-09T14:20:15',
+  },
+  {
+    id: 'tutorial-3',
+    title: '두링크(DoLink) 튜토리얼 (01/05)',
+    category: '기타',
+    itemCount: 4,
+    createdAt: '2025-01-05T13:25:10',
+  },
+  {
+    id: 'tutorial',
+    title: '두링크(DoLink) 튜토리얼 (01/10)',
+    category: '기타',
+    itemCount: 1,
+    createdAt: '2025-01-10T12:30:21',
+  },
+  {
+    id: 'tutorial-5',
+    title: '두링크(DoLink) 튜토리얼 (01/03)',
+    category: '기타',
+    itemCount: 1,
+    createdAt: '2025-01-03T15:40:33',
+  },
+  {
+    id: 'tutorial-4',
+    title: '두링크(DoLink) 튜토리얼 (01/01)',
+    category: '기타',
+    itemCount: 3,
+    createdAt: '2025-01-01T12:10:55',
+  },
+  {
+    id: 'tutorial-3',
+    title: '두링크(DoLink) 튜토리얼 (01/08)',
+    category: '기타',
+    itemCount: 4,
+    createdAt: '2025-01-08T09:15:30',
+  },
+  {
+    id: 'tutorial-5',
+    title: '두링크(DoLink) 튜토리얼 (01/06)',
+    category: '기타',
+    itemCount: 1,
+    createdAt: '2025-01-06T11:30:22',
+  },
+  {
+    id: 'tutorial-3',
+    title: '두링크(DoLink) 튜토리얼 (01/02)',
+    category: '기타',
+    itemCount: 4,
+    createdAt: '2025-01-02T08:20:17',
+  },
+  {
+    id: 'tutorial-4',
+    title: '두링크(DoLink) 튜토리얼 (01/04)',
+    category: '기타',
+    itemCount: 3,
+    createdAt: '2025-01-04T10:15:45',
   },
 ];
 
@@ -95,86 +141,109 @@ type HomeAfterLoginProps = {
 };
 
 const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
-  const navigate = useNavigate();
+  const { handleTabChange } = useBottomTabNavigation();
+  const { suppressCompleteModal, setSuppressCompleteModal } =
+    useTodoPreferenceStore();
   const {
-    showCompleteModal,
-    setShowCompleteModal,
-    setSuppressCompleteModal,
-    resetTodos,
-  } = useTodoStore();
+    isOpen: isModalOpen,
+    type: modalType,
+    alertConfig,
+    confirmConfig,
+    openAlert,
+    openConfirm,
+    close: closeModal,
+  } = useModalStore();
+  const [todoItems, setTodoItems] = useState<TodoItem[]>(() =>
+    TODO_ITEMS.map((todo) => ({ ...todo }))
+  );
+  const [archiveItems, setArchiveItems] = useState<ArchiveItem[]>(() =>
+    ARCHIVE_ITEMS.map((archive) => ({ ...archive }))
+  );
+  const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
+    string | null
+  >(null);
 
-  const {
-    items: archiveItems,
-    pendingDeleteArchiveId,
-    setPendingDeleteArchiveId,
-    removeArchive,
-    resetArchives,
-  } = useArchiveStore();
-
-  useEffect(() => {
-    resetTodos(TODO_ITEMS);
-    resetArchives(ARCHIVE_ITEMS);
-  }, [resetArchives, resetTodos]);
-
-  // 시간에 따른 인사 문구
   const greeting = useMemo(() => {
     const now = new Date();
     const period = getGreetingPeriod(now.getHours());
     return `좋은 ${period}이에요 😊`;
   }, []);
 
-  const handleCloseModal = () => {
-    setShowCompleteModal(false);
-  };
+  const latestArchiveItems = useMemo(() => {
+    return [...archiveItems].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [archiveItems]);
 
-  const handleDisableModal = () => {
-    setSuppressCompleteModal(true);
-    setShowCompleteModal(false);
-  };
+  const handleToggleTodo = (id: string, nextChecked: boolean) => {
+    setTodoItems((prev) =>
+      prev.map((todo) =>
+        todo.id === id ? { ...todo, checked: nextChecked } : todo
+      )
+    );
 
-  // 바텀 탭바 함수
-  const handleTabChange = (next: TabKey) => {
-    navigate(TAB_ROUTE_MAP[next]);
-  };
-
-  const handleRequestDeleteArchive = (id: string) => {
-    setPendingDeleteArchiveId(id);
+    if (nextChecked && !suppressCompleteModal) {
+      openAlert({
+        title: '할 일을 완료했어요',
+        subtitle: '완료한 일들은 해당 모음에서 확인할 수 있어요.',
+        primaryLabel: '확인',
+        secondaryLabel: '다시 보지 않기',
+        onSecondary: () => setSuppressCompleteModal(true),
+      });
+    }
   };
 
   const handleConfirmDeleteArchive = () => {
     if (!pendingDeleteArchiveId) return;
-    removeArchive(pendingDeleteArchiveId);
+    setArchiveItems((prev) =>
+      prev.filter((archive) => archive.id !== pendingDeleteArchiveId)
+    );
+    setPendingDeleteArchiveId(null);
   };
 
   const handleCancelDeleteArchive = () => {
     setPendingDeleteArchiveId(null);
   };
 
+  const handleRequestDeleteArchive = (id: string) => {
+    setPendingDeleteArchiveId(id);
+    openConfirm({
+      title: '모음을 삭제할까요?',
+      subtitle: '모음 내 할 일도 함께 삭제돼요.',
+      positiveLabel: '삭제하기',
+      negativeLabel: '취소',
+      onPositive: handleConfirmDeleteArchive,
+      onNegative: handleCancelDeleteArchive,
+    });
+  };
+
+  const handleModalClose = () => {
+    if (modalType === 'confirm') {
+      confirmConfig?.onNegative?.();
+    }
+    closeModal();
+  };
+
   return (
     <div className='relative flex min-h-screen flex-col'>
       <Background.GradientBackground>
-        {/* 앱바 헤더 */}
         <header className='sticky top-0 z-20'>
           <HomeAppBar />
         </header>
 
-        {/* 메인 컨텐츠 */}
         <main className='relative grow'>
           <div className='mx-auto flex flex-col px-5 py-2'>
-            {/* 상단 문구 + 일러스트 */}
             <GreetingSection memberName={memberName} greeting={greeting} />
-            {/* 하단 할 일 */}
-            <TodoSection></TodoSection>
-            {/* 하단 모음 */}
+            <TodoSection items={todoItems} onToggle={handleToggleTodo} />
             <ArchiveSection
-              items={archiveItems}
+              items={latestArchiveItems}
               onRequestDelete={handleRequestDeleteArchive}
             />
           </div>
         </main>
       </Background.GradientBackground>
 
-      {/* 바텀 탭바 */}
       <footer className='sticky bottom-0 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
         <div className='relative w-full'>
           <div className='pointer-events-none absolute -top-[76px] right-6 z-10 flex h-[52px] w-[52px] items-center justify-center'>
@@ -187,31 +256,43 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
         </div>
       </footer>
 
-      {/* 할 일 완료 모달 */}
-      <FeedBack.ModalLayout open={showCompleteModal} onClose={handleCloseModal}>
-        <FeedBack.AlertDialog
-          title='할 일을 완료했어요'
-          subtitle='완료한 일들은 해당 모음에서 확인할 수 있어요.'
-          primaryLabel='확인'
-          secondaryLabel='다시 보지 않기'
-          onPrimary={handleCloseModal}
-          onSecondary={handleDisableModal}
-        />
-      </FeedBack.ModalLayout>
-
-      {/* 모음 삭제 모달 */}
-      <FeedBack.ModalLayout
-        open={pendingDeleteArchiveId !== null}
-        onClose={handleCancelDeleteArchive}
-      >
-        <FeedBack.ConfirmDialog
-          title='모음을 삭제할까요?'
-          subtitle='모음 내 할 일도 함께 삭제돼요.'
-          positiveLabel='삭제하기'
-          negativeLabel='취소'
-          onPositive={handleConfirmDeleteArchive}
-          onNegative={handleCancelDeleteArchive}
-        />
+      <FeedBack.ModalLayout open={isModalOpen} onClose={handleModalClose}>
+        {modalType === 'alert' && alertConfig && (
+          <FeedBack.AlertDialog
+            title={alertConfig.title}
+            subtitle={alertConfig.subtitle}
+            primaryLabel={alertConfig.primaryLabel}
+            secondaryLabel={alertConfig.secondaryLabel}
+            onPrimary={() => {
+              alertConfig.onPrimary?.();
+              closeModal();
+            }}
+            onSecondary={
+              alertConfig.secondaryLabel
+                ? () => {
+                    alertConfig.onSecondary?.();
+                    closeModal();
+                  }
+                : undefined
+            }
+          />
+        )}
+        {modalType === 'confirm' && confirmConfig && (
+          <FeedBack.ConfirmDialog
+            title={confirmConfig.title}
+            subtitle={confirmConfig.subtitle}
+            positiveLabel={confirmConfig.positiveLabel}
+            negativeLabel={confirmConfig.negativeLabel}
+            onPositive={() => {
+              confirmConfig.onPositive?.();
+              closeModal();
+            }}
+            onNegative={() => {
+              confirmConfig.onNegative?.();
+              closeModal();
+            }}
+          />
+        )}
       </FeedBack.ModalLayout>
     </div>
   );
