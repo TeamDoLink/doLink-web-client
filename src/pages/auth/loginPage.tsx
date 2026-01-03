@@ -18,15 +18,14 @@ const LoginPage = () => {
     <div className='flex min-h-screen flex-col bg-white'>
       <BackDetailBar title='' rightIcons={[]} onClickBack={handleBack} />
 
-      <main className='flex grow flex-col items-center p-10'>
-        <section className='flex grow flex-col items-center justify-center gap-5'>
-          <p className='self-start text-heading-xl text-grey-800'>
-            담고, 실천하기
-          </p>
+      <main className='flex grow flex-col px-6 pb-40 pt-24'>
+        <section className='mx-auto flex w-fit flex-col items-start gap-3'>
+          <p className='text-heading-xl text-grey-800'>담고, 실천하기</p>
           <img src={logo} alt='DoLink 로고' className='h-[52px] w-[164px]' />
         </section>
 
-        <section className='flex flex-col items-center gap-6 pb-28'>
+        <div className='flex-1' />
+        <section className='flex flex-col items-center gap-5'>
           <p className='text-body-lg text-grey-500'>
             SNS 계정으로 간편 가입하기
           </p>
