@@ -359,7 +359,7 @@ function TaskCreatePage() {
             placeholder='메모를 입력해주세요.'
             value={memo}
             onChange={(e) => handleMemoChange(e.target.value)}
-            className='h-[132px] w-full resize-none rounded-[10px] border border-grey-200 bg-white px-4 py-4 text-body-md text-grey-900 outline-none placeholder:text-grey-400'
+            className='h-[132px] w-full resize-none rounded-[10px] border border-grey-200 bg-white px-4 py-4 text-body-md text-grey-900 outline-none placeholder:text-grey-400 focus:border-grey-800'
           />
         </div>
 
