@@ -8,6 +8,7 @@ import { ShareCapsuleButton } from '@/components/common/button/shareCapsuleButto
 import { TabButton } from '@/components/common/button/tabButton';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
 import { LoadingSpinner } from '@/components/common/loading/loadingSpinner';
+import { GreyVerticalLine } from '@/components/common/line/greyVerticalLine';
 import Test_yj1 from './test_yj1';
 
 const TabButtonShowcase = () => {
@@ -127,6 +128,16 @@ const sections = [
     component: (
       <div className='flex flex-wrap gap-3 rounded-3xl bg-grey-100 p-6'>
         <OptionMenu />
+      </div>
+    ),
+  },
+  {
+    title: 'Grey Vertical Line',
+    description:
+      '높이 48px, 두께 2px의 세로 구분선입니다. 좌우 여백을 className으로 조정할 수 있습니다.',
+    component: (
+      <div className='flex h-16 items-center justify-center rounded-3xl bg-grey-100 p-6'>
+        <GreyVerticalLine />
       </div>
     ),
   },
