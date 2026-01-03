@@ -10,10 +10,7 @@ import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
 import { useArchiveMockStore } from '@/stores/useArchiveMockStore';
 import { MOCK_TODOS } from '@/mocks/todoData';
-import {
-  getArchiveCategoryLabel,
-  toEditorCategory,
-} from '@/utils/archiveCategory';
+import { getArchiveCategoryLabel } from '@/utils/archiveCategory';
 import { ROUTES } from '@/constants/routes';
 
 // 시간 계산 함수
@@ -125,7 +122,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
         archive: {
           id: targetArchive.id,
           title: targetArchive.title,
-          category: toEditorCategory(targetArchive.category),
+          category: targetArchive.category,
         },
         origin: ROUTES.home,
       },

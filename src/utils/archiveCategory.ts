@@ -33,7 +33,3 @@ const ARCHIVE_CATEGORY_LABEL: Record<ArchiveFilterCategoryKey, string> = {
 
 export const getArchiveCategoryLabel = (category: ArchiveFilterCategoryKey) =>
   ARCHIVE_CATEGORY_LABEL[category];
-
-export const toEditorCategory = (category: ArchiveFilterCategory) => category;
-
-export const toFilterCategory = (category: ArchiveCategoryKey) => category;

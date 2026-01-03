@@ -6,7 +6,6 @@ import {
   type ArchiveSelectCategoryKey as ArchiveCategoryKey,
 } from '@/components/archive';
 import { ROUTES } from '@/constants/routes';
-import { toEditorCategory, toFilterCategory } from '@/utils/archiveCategory';
 import {
   useArchiveMockStore,
   type MockArchive,
@@ -35,7 +34,7 @@ const ArchiveEditPage = () => {
         archives.find((item) => item.id === archive.id) ?? {
           id: archive.id,
           title: archive.title,
-          category: toFilterCategory(archive.category),
+          category: archive.category,
           itemCount: 0,
           images: [],
           createdAt: new Date().toISOString(),
@@ -61,12 +60,10 @@ const ArchiveEditPage = () => {
     name: string;
     category: ArchiveCategoryKey;
   }) => {
-    if (targetArchive) {
-      updateArchive(targetArchive.id, {
-        title: payload.name,
-        category: toFilterCategory(payload.category),
-      });
-    }
+    updateArchive(targetArchive.id, {
+      title: payload.name,
+      category: payload.category,
+    });
     const fallbackPath = origin ?? ROUTES.archives;
     navigate(fallbackPath, { replace: true });
   };
@@ -75,7 +72,7 @@ const ArchiveEditPage = () => {
     <ArchiveBottomSheet
       mode='edit'
       initialName={targetArchive.title}
-      initialCategory={toEditorCategory(targetArchive.category)}
+      initialCategory={targetArchive.category}
       onSubmit={handleSubmit}
     />
   );

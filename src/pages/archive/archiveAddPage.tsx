@@ -5,7 +5,6 @@ import {
 } from '@/components/archive';
 import { ROUTES } from '@/constants/routes';
 import { useArchiveMockStore } from '@/stores/useArchiveMockStore';
-import { toFilterCategory } from '@/utils/archiveCategory';
 
 const ArchiveAddPage = () => {
   const navigate = useNavigate();
@@ -17,7 +16,7 @@ const ArchiveAddPage = () => {
   }) => {
     addArchive({
       title: payload.name,
-      category: toFilterCategory(payload.category),
+      category: payload.category,
       itemCount: 0,
       images: [],
     });

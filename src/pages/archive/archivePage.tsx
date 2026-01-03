@@ -9,10 +9,7 @@ import {
 } from '@/components/archive';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { ROUTES } from '@/constants/routes';
-import {
-  getArchiveCategoryLabel,
-  toEditorCategory,
-} from '@/utils/archiveCategory';
+import { getArchiveCategoryLabel } from '@/utils/archiveCategory';
 import { useArchiveMockStore } from '@/stores/useArchiveMockStore';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveFilterCategoryKey[] = [
@@ -113,7 +110,7 @@ const ArchivePage = () => {
                     archive: {
                       id: archive.id,
                       title: archive.title,
-                      category: toEditorCategory(archive.category),
+                      category: archive.category,
                     },
                     origin: ROUTES.archives,
                   },
