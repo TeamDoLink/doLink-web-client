@@ -36,14 +36,8 @@ const MOCK_COLLECTIONS: CollectionChip[] = [
 function TestTaskCreatePage() {
   const MAX_LENGTH = 100; // 가장 일반적인 경우
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const {
-    linkValue,
-    setLinkValue,
-    requestClipboard,
-    isLoading,
-    error,
-    clearError,
-  } = useClipboardBridge();
+  const { linkValue, setLinkValue, requestClipboard, isLoading, error } =
+    useClipboardBridge();
 
   // TODO 임시저장 불러오기 시  isLoading  error 화면 UI 처리
   const {
@@ -97,7 +91,6 @@ function TestTaskCreatePage() {
    * 붙여넣기 버튼 클릭 핸들러
    */
   const handlePasteClick = () => {
-    clearError();
     requestClipboard();
   };
 
@@ -106,7 +99,6 @@ function TestTaskCreatePage() {
    */
   const handleLinkChange = (value: string) => {
     setLinkValue(value);
-    clearError();
   };
 
   /**
