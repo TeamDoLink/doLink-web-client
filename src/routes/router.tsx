@@ -6,7 +6,6 @@ import SettingsPage from '@/pages/settings/settingsPage';
 import Test from '@/pages/test';
 import Test2 from '@/pages/test2';
 import TaskCreatePage from '@/pages/task/taskCreatePage';
-import TestTaskCreatePage from '@/pages/task/testTaskCreatePage';
 
 const AppRouter = () => {
   return (
@@ -15,8 +14,6 @@ const AppRouter = () => {
       <Route path='/archives' element={<ArchivePage />} />
       <Route path='/settings' element={<SettingsPage />} />
       <Route path='/task/create' element={<TaskCreatePage />} />
-      {/* 네이티브 할일 추가 테스트 페이지  */}
-      <Route path='/task/create/test' element={<TestTaskCreatePage />} />
 
       {/* 공통 컴포넌트 테스트 페이지 */}
       <Route path='/test' element={<Test />} />
