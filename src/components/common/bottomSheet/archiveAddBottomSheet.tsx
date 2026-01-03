@@ -70,7 +70,7 @@ export const ArchiveAddBottomSheet = ({
               className='flex h-9 w-9 items-center justify-center rounded-lg transition-opacity hover:opacity-80'
               aria-label='검색'
             >
-              <img src={searchIcon} alt='검색' className='h-6 w-6' />
+              <img src={searchIcon} alt='검색' />
             </button>
           )}
           {onClickOption && (
@@ -80,7 +80,7 @@ export const ArchiveAddBottomSheet = ({
               className='flex h-9 w-9 items-center justify-center rounded-lg transition-opacity hover:opacity-80'
               aria-label='옵션'
             >
-              <img src={optionIcon} alt='옵션' className='h-6 w-6' />
+              <img src={optionIcon} alt='옵션' />
             </button>
           )}
         </div>
