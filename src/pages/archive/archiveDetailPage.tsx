@@ -48,8 +48,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: '우선순위 높음',
     status: false,
     inout: true,
-    createdAt: '2025-02-10T13:10:00',
-    modifiedAt: '2025-02-10T13:10:00',
+    createdAt: '2025-01-10T13:10:00',
+    modifiedAt: '2025-01-10T13:10:00',
   },
   {
     taskId: 102,
@@ -58,8 +58,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: null,
     status: true,
     inout: false,
-    createdAt: '2025-02-10T13:10:00',
-    modifiedAt: '2025-02-12T18:40:10',
+    createdAt: '2025-12-10T13:10:00',
+    modifiedAt: '2025-12-12T18:40:10',
   },
   {
     taskId: 103,
@@ -386,9 +386,9 @@ const ArchiveDetailPage = () => {
     });
 
     const result = Array.from(grouped.entries()).sort(([aKey], [bKey]) => {
-      return sortOption === 'newest'
-        ? Number(bKey) - Number(aKey)
-        : Number(aKey) - Number(bKey);
+      const aDate = new Date(aKey).getTime();
+      const bDate = new Date(bKey).getTime();
+      return sortOption === 'newest' ? bDate - aDate : aDate - bDate;
     });
 
     return result;
