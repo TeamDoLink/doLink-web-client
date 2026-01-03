@@ -379,6 +379,7 @@ function TaskCreatePage() {
         <Button.CtaButton
           disabled={!isAddButtonEnabled}
           onClick={handleAddClick}
+          className='w-full'
         >
           추가하기
         </Button.CtaButton>
