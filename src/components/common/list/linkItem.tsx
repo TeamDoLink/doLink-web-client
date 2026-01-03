@@ -15,7 +15,7 @@ export type LinkItemProps = {
   checked?: boolean;
   isEditMode?: boolean;
   onChange?: (checked: boolean) => void;
-  onEditModeChange?: (isEditMode: boolean) => void;
+
   onOriginalClick?: () => void;
   onShareClick?: () => void;
   onEditClick?: () => void;
@@ -40,7 +40,6 @@ export default function LinkItem({
   checked = false,
   isEditMode = false,
   onChange,
-  onEditModeChange,
   onOriginalClick,
   onShareClick,
   onEditClick,
@@ -48,25 +47,6 @@ export default function LinkItem({
   width = 'w-full',
 }: LinkItemProps) {
   const itemRef = useRef<HTMLDivElement>(null);
-
-  // 편집 모드에서 외부 클릭 시 이전 상태로 복귀
-  useEffect(() => {
-    const handlePointerDown = (e: PointerEvent) => {
-      const target = e.target as HTMLElement;
-
-      if (!itemRef.current?.contains(target)) {
-        onEditModeChange?.(false);
-      }
-    };
-
-    if (isEditMode) {
-      document.addEventListener('pointerdown', handlePointerDown, true);
-    }
-
-    return () => {
-      document.removeEventListener('pointerdown', handlePointerDown, true);
-    };
-  }, [isEditMode, onEditModeChange]);
 
   const handleCheckboxClick = () => {
     if (!isEditMode) {
@@ -121,6 +101,7 @@ export default function LinkItem({
       {/* Right Icons */}
       {isEditMode ? (
         <div className='flex flex-shrink-0 items-center gap-2.5'>
+          {/* Edit Button */}
           <button
             type='button'
             onClick={onEditClick}
@@ -128,6 +109,7 @@ export default function LinkItem({
           >
             <img alt='edit' className='h-6 w-6' src={imgEditIcon} />
           </button>
+          {/* Delete Button */}
           <button
             onClick={onDeleteClick}
             className='flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden'

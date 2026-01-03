@@ -164,6 +164,34 @@ export const SwipeableDeleteCard = ({
   };
 
   /**
+   * 카드 클릭 핸들러
+   * edit/delete 버튼이 아닌 영역을 클릭했을 때 모든 children의 editMode를 false로 변경
+   */
+  const handleCardClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+
+    // Edit/Delete 버튼 클릭인지 확인
+    const isEditOrDeleteButton =
+      (target.tagName === 'IMG' &&
+        (target.getAttribute('alt') === 'edit' ||
+          target.getAttribute('alt') === 'delete')) ||
+      (target.tagName === 'BUTTON' &&
+        target.querySelector('img[alt="edit"], img[alt="delete"]'));
+
+    // Edit/Delete 버튼이면 editMode를 유지
+    if (isEditOrDeleteButton) {
+      return;
+    }
+
+    // 현재 editMode가 true인 child가 있는지 확인
+    const hasEditModeActive = links.some((link) => linkEditModes[link.id]);
+
+    if (hasEditModeActive) {
+      onEditModeChange(false);
+    }
+  };
+
+  /**
    * 터치/마우스 다운 핸들러
    * 스와이프 시작 지점을 기록
    */
@@ -237,6 +265,7 @@ export const SwipeableDeleteCard = ({
           transform: `translateX(${swipeOffset}px)`,
           transition: isDragging ? 'none' : 'transform 0.3s ease-out',
         }}
+        onClick={handleCardClick}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -271,7 +300,6 @@ export const SwipeableDeleteCard = ({
               checked={linkStates[link.id]} // 체크박스 상태
               isEditMode={linkEditModes[link.id]} // 수정 모드 상태
               onChange={(checked) => onCheck(link.id, checked)} // 체크박스 변경 핸들러
-              onEditModeChange={onEditModeChange} // 수정 모드 변경 핸들러
               onOriginalClick={() => onOriginalClick(link.id)} // 원본 보기 클릭 핸들러
               onShareClick={() => onShareClick(link.id)} // 공유 클릭 핸들러
               onEditClick={() => onEditClick(link.id)} // 편집 클릭 핸들러
