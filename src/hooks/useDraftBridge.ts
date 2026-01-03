@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type {
-  DraftMessageType,
-  ReactNativeWebView,
-  TaskDraft,
-  WebViewMessage,
-} from '@/types/draft';
+import type { DraftMessageType, WebViewMessage } from '@/types/draft';
 import { isDraftMessageType, isDraftSuccess } from '@/types/draft';
+import { detectPlatform, getWebView } from '@/utils/webview';
 
 /**
  * Draft Bridge 에러 타입
@@ -35,7 +31,7 @@ export class DraftBridgeError extends Error {
  * useDraftBridge Hook의 반환 타입
  */
 interface UseDraftBridgeReturn<T> {
-  saveDraft: (key: string, data: TaskDraft) => Promise<void>;
+  saveDraft: (key: string, data: T) => Promise<void>;
   loadDraft: (key: string) => Promise<T | null>;
   deleteDraft: (key: string) => Promise<void>;
   isLoading: boolean;
@@ -79,105 +75,87 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
   >(new Map());
 
   /**
-   * Platform 감지 (iOS vs Android)
-   */
-  const detectPlatform = useCallback((): 'ios' | 'android' => {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const isIOS =
-      /ipad|iphone|ipod/.test(userAgent) ||
-      (/macintosh/.test(userAgent) && 'ontouchend' in document);
-    return isIOS ? 'ios' : 'android';
-  }, []);
-
-  /**
-   * WebView 객체 가져오기
-   */
-  const getWebView = useCallback((): ReactNativeWebView | null => {
-    return (
-      (window as Window & { ReactNativeWebView?: ReactNativeWebView })
-        .ReactNativeWebView ?? null
-    );
-  }, []);
-
-  /**
-   * 메시지 핸들러 - Native로부터 수신
-   */
-  const handleMessage = useCallback((event: MessageEvent<unknown>): void => {
-    try {
-      // 데이터 추출
-      const data = event.data;
-      if (!data) {
-        console.error('[useDraftBridge] Empty message received');
-        return;
-      }
-
-      // JSON 파싱
-      let response: unknown;
-      if (typeof data === 'string') {
-        try {
-          response = JSON.parse(data);
-        } catch (parseError) {
-          console.error(
-            '[useDraftBridge] Failed to parse message:',
-            parseError
-          );
-          return;
-        }
-      } else {
-        response = data;
-      }
-
-      // Draft 메시지 타입 확인
-      if (!isDraftMessageType(response)) {
-        return;
-      }
-
-      // 메시지 유효성 검증
-      if (!isDraftSuccess(response)) {
-        console.error('[useDraftBridge] Invalid response type:', response);
-        return;
-      }
-
-      // 메시지 타입으로 해당 요청의 Promise resolver 가져오기
-      const messageType = response.type;
-      const pending = pendingPromisesRef.current.get(messageType);
-      if (!pending) {
-        console.error('[useDraftBridge] No pending promise for:', messageType);
-        return;
-      }
-
-      // Timeout 해제
-      clearTimeout(pending.timeout);
-      pendingPromisesRef.current.delete(messageType);
-
-      // 로딩 상태 업데이트
-      setIsLoading(pendingPromisesRef.current.size > 0);
-
-      // 응답 처리
-      if (response.success) {
-        setError(null);
-        pending.resolve(response.data ?? null);
-        // TODO 테스트 위해 임시로 alert 사용
-        alert(`success : ${event.data}`);
-      } else {
-        const error = new DraftBridgeError(
-          response.error || 'Unknown error',
-          'MESSAGE_FAILED'
-        );
-        setError(error);
-        pending.reject(error);
-        alert(`error : ${event.data}`);
-      }
-    } catch (err) {
-      console.error('[useDraftBridge] Error handling message:', err);
-      alert(`[useDraftBridge] Error handling message: : ${event.data}`);
-    }
-  }, []);
-
-  /**
    * 메시지 리스너 등록/정리
    */
   useEffect(() => {
+    /**
+     * 메시지 핸들러 - Native로부터 수신
+     */
+    const handleMessage = (event: MessageEvent<unknown>): void => {
+      try {
+        // 데이터 추출
+        const data = event.data;
+        if (!data) {
+          console.error('[useDraftBridge] Empty message received');
+          return;
+        }
+
+        // JSON 파싱
+        let response: unknown;
+        if (typeof data === 'string') {
+          try {
+            response = JSON.parse(data);
+          } catch (parseError) {
+            console.error(
+              '[useDraftBridge] Failed to parse message:',
+              parseError
+            );
+            return;
+          }
+        } else {
+          response = data;
+        }
+
+        // Draft 메시지 타입 확인
+        if (!isDraftMessageType(response)) {
+          return;
+        }
+
+        // 메시지 유효성 검증
+        if (!isDraftSuccess(response)) {
+          console.error('[useDraftBridge] Invalid response type:', response);
+          return;
+        }
+
+        // 메시지 타입으로 해당 요청의 Promise resolver 가져오기
+        const messageType = response.type;
+        const pending = pendingPromisesRef.current.get(messageType);
+        if (!pending) {
+          console.error(
+            '[useDraftBridge] No pending promise for:',
+            messageType
+          );
+          return;
+        }
+
+        // Timeout 해제
+        clearTimeout(pending.timeout);
+        pendingPromisesRef.current.delete(messageType);
+
+        // 로딩 상태 업데이트
+        setIsLoading(pendingPromisesRef.current.size > 0);
+
+        // 응답 처리
+        if (response.success) {
+          setError(null);
+          pending.resolve(response.data ?? null);
+          // TODO 테스트 위해 임시로 alert 사용
+          alert(`success : ${event.data}`);
+        } else {
+          const error = new DraftBridgeError(
+            response.error || 'Unknown error',
+            'MESSAGE_FAILED'
+          );
+          setError(error);
+          pending.reject(error);
+          alert(`error : ${event.data}`);
+        }
+      } catch (err) {
+        console.error('[useDraftBridge] Error handling message:', err);
+        alert(`[useDraftBridge] Error handling message: : ${event.data}`);
+      }
+    };
+
     const platform = detectPlatform();
     const receiver =
       platform === 'ios' ? window : (document as unknown as Window);
@@ -199,7 +177,7 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
       });
       pendingPromises.clear();
     };
-  }, [detectPlatform, handleMessage]);
+  }, []);
 
   /**
    * WebView에 메시지 전송 (Promise 기반)
@@ -208,7 +186,7 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
     <R = unknown>(
       type: DraftMessageType,
       key: string,
-      data?: T
+      data?: unknown
     ): Promise<R | null> => {
       return new Promise<R | null>((resolve, reject) => {
         try {
@@ -279,7 +257,7 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
         }
       });
     },
-    [getWebView]
+    []
   );
 
   /**
@@ -316,9 +294,9 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
   /**
    * 에러 초기화
    */
-  const clearError = useCallback((): void => {
+  const clearError = (): void => {
     setError(null);
-  }, []);
+  };
 
   return {
     saveDraft,
