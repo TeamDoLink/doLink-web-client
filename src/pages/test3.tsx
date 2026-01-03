@@ -6,32 +6,26 @@ import { ShareCapsuleButton } from '@/components/common/button/shareCapsuleButto
 import { OptionMenu } from '@/components/common/menu/optionMenu';
 import Test_yj1 from './test_yj1';
 import {
-  sendMessageToRN,
+  openLink,
   addTypedMessageListener,
   isReactNativeWebView,
 } from '@/utils/nativeBridge';
 
 const Test3 = () => {
-  // RN에서 메시지 수신 리스너 등록
+  // Native에서 테스트 메시지 수신 리스너 (예시)
   useEffect(() => {
     const cleanup = addTypedMessageListener('TEST_MESSAGE', (payload) => {
-      console.log('Received from RN:', payload);
+      console.log('Received from Native:', payload);
     });
 
-    // 컴포넌트 언마운트 시 리스너 제거
     return cleanup;
   }, []);
 
-  // 공통 클릭 핸들러
+  // Link 열기 핸들러 - openLink 함수를 사용하여 Native에 요청
   const handleLinkClick = (url: string, appName: string) => {
     if (isReactNativeWebView()) {
-      sendMessageToRN({
-        type: 'LINK_BUTTON_CLICKED',
-        payload: {
-          url,
-          timestamp: Date.now(),
-        },
-      });
+      console.log(`🔗 ${appName} 링크 열기 요청:`, url);
+      openLink(url);
     } else {
       alert(`${appName} 링크 클릭 (Not in RN WebView)\nURL: ${url}`);
     }

@@ -4,6 +4,14 @@
  * React Native WebView와 통신하기 위한 브릿지 유틸리티
  */
 
+import type {
+  LinkPayload,
+  LinkResponse,
+  LinkError,
+  LinkCanOpenPayload,
+  NativeToWebMessage,
+} from '@/types/native';
+
 // WebView 메시지 타입 정의
 export interface WebViewMessage {
   type: string;
@@ -26,10 +34,10 @@ export const isReactNativeWebView = (): boolean => {
  * Web에서 RN으로 메시지 전송
  * @param message 전송할 메시지 객체 (type, payload)
  * @example
- * // 버튼 클릭 이벤트를 RN으로 전송
+ * // Link 열기 요청을 RN으로 전송
  * sendMessageToRN({
- *   type: 'BUTTON_CLICKED',
- *   payload: { buttonId: 'submit', timestamp: Date.now() }
+ *   type: 'link:open',
+ *   payload: { url: 'https://example.com' }
  * });
  */
 export const sendMessageToRN = (message: WebViewMessage): void => {
@@ -45,10 +53,13 @@ export const sendMessageToRN = (message: WebViewMessage): void => {
  * @param handler 메시지 이벤트 핸들러
  * @returns cleanup 함수 (리스너 제거용)
  * @example
- * // 컴포넌트에서 사용
+ * // Native에서 오는 응답 수신
  * useEffect(() => {
  *   const cleanup = addMessageListener((event) => {
- *     console.log('메시지 수신:', event.data);
+ *     const data = JSON.parse(event.data);
+ *     if (data.type === 'link:response') {
+ *       console.log('Link 열기 성공:', data.url);
+ *     }
  *   });
  *   return cleanup; // 컴포넌트 언마운트 시 리스너 제거
  * }, []);
@@ -72,22 +83,21 @@ export const addMessageListener = (
  * @param handler 페이로드를 처리하는 핸들러
  * @returns cleanup 함수 (리스너 제거용)
  * @example
- * // 타입 안전하게 특정 메시지만 수신
+ * // Link 응답 메시지 수신 (직접 사용 대신 openLink 권장)
  * useEffect(() => {
- *   const cleanup = addTypedMessageListener('USER_INFO', (payload) => {
- *     console.log('사용자 정보:', payload.name, payload.email);
+ *   const cleanup = addTypedMessageListener('link:response', (payload) => {
+ *     console.log('Link 응답:', payload.url, payload.success);
  *   });
  *   return cleanup;
  * }, []);
  *
  * @example
  * // 타입 지정하여 사용
- * interface UserPayload {
- *   userId: string;
- *   name: string;
+ * interface CustomPayload {
+ *   data: string;
  * }
- * const cleanup = addTypedMessageListener<UserPayload>('USER_LOGIN', (payload) => {
- *   console.log(`${payload.name}님 환영합니다!`);
+ * const cleanup = addTypedMessageListener<CustomPayload>('CUSTOM_MESSAGE', (payload) => {
+ *   console.log('커스텀 메시지:', payload.data);
  * });
  */
 export const addTypedMessageListener = <T = any>(
@@ -118,3 +128,115 @@ declare global {
     };
   }
 }
+
+// ============================================
+// Link-specific utilities
+// ============================================
+
+/**
+ * Promise 기반 응답 처리를 위한 pending requests 맵
+ */
+const pendingLinkRequests = new Map<
+  string,
+  {
+    resolve: (value: LinkResponse) => void;
+    reject: (error: LinkError) => void;
+    timeoutId: NodeJS.Timeout;
+  }
+>();
+
+/**
+ * Native에서 오는 link 응답을 처리하는 리스너
+ */
+const setupLinkResponseListener = (() => {
+  let isSetup = false;
+
+  return () => {
+    if (isSetup) return;
+    isSetup = true;
+
+    addMessageListener((event: MessageEvent<any>) => {
+      try {
+        const data =
+          typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+
+        if (data.type === 'link:response' || data.type === 'link:error') {
+          const message = data as NativeToWebMessage;
+          const url =
+            message.type === 'link:response' ? message.url : message.url || '';
+
+          const pending = pendingLinkRequests.get(url);
+          if (pending) {
+            clearTimeout(pending.timeoutId);
+            pendingLinkRequests.delete(url);
+
+            if (message.type === 'link:response') {
+              pending.resolve(message);
+            } else {
+              pending.reject(message);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to parse link response from Native:', error);
+      }
+    });
+  };
+})();
+
+/**
+ * Native에 URL 열기 요청을 보냄 (Fire-and-Forget)
+ * @param url 열 URL
+ * @example
+ * // 링크 열기 (응답 대기 없음)
+ * openLink('https://example.com');
+ */
+export const openLink = (url: string): void => {
+  const payload: LinkPayload = { url };
+  sendMessageToRN({
+    type: 'link:open',
+    payload,
+  });
+};
+
+/**
+ * Native에 URL 열기 가능 여부 확인 요청
+ * @param url 확인할 URL
+ * @param timeout 응답 대기 시간 (기본값: 3000ms)
+ * @returns Promise<LinkResponse>
+ * @throws LinkError
+ * @example
+ * try {
+ *   const response = await canOpenLink('https://example.com');
+ *   if (response.canOpen) {
+ *     console.log('이 URL을 열 수 있습니다');
+ *   }
+ * } catch (error) {
+ *   console.error('확인 실패:', error.error);
+ * }
+ */
+export const canOpenLink = (
+  url: string,
+  timeout: number = 3000
+): Promise<LinkResponse> => {
+  setupLinkResponseListener();
+
+  return new Promise<LinkResponse>((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      pendingLinkRequests.delete(url);
+      reject({
+        type: 'link:error',
+        error: 'Request timeout',
+        url,
+      } as LinkError);
+    }, timeout);
+
+    pendingLinkRequests.set(url, { resolve, reject, timeoutId });
+
+    const payload: LinkCanOpenPayload = { url };
+    sendMessageToRN({
+      type: 'link:canOpen',
+      payload,
+    });
+  });
+};
