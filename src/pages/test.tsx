@@ -7,7 +7,7 @@ import { BlueButton } from '@/components/common/button/blueButton';
 import { GreyButton } from '@/components/common/button/greyButton';
 import { IconButton } from '@/components/common/button/iconButton';
 import { BackDetailBar } from '@/components/common/appBar/backDetailAppBar';
-import { SettingMenuItem } from '@/components/common/setting/settingAppBar';
+import { SettingMenuItem } from '@/components/common/setting/settingMenuItem';
 import { GreyLine } from '@/components/common/line/greyLine';
 import { GradientBackground } from '@/components/common/background/gradientBackground';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';

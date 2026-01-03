@@ -1,1 +1,1 @@
-export { SettingMenuItem } from '../setting/settingAppBar';
+export { SettingMenuItem } from './settingMenuItem';
