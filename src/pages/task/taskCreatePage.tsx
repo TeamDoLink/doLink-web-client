@@ -35,13 +35,10 @@ function TaskCreatePage() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
     linkValue,
-    setLinkValue,
     requestClipboard,
     pasteFromClipboard,
     hasClipboardLink,
-    isLoading,
     error,
-    clearError,
   } = useClipboardBridge();
 
   // TODO 임시저장 불러오기 시  isLoading  error 화면 UI 처리
@@ -97,7 +94,6 @@ function TaskCreatePage() {
    */
   const handleLinkChange = (value: string) => {
     setLinkValue(value);
-    clearError();
   };
 
   /**

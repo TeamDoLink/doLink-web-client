@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   isClipboardDataMessage,
   isClipboardErrorMessage,
@@ -28,14 +28,11 @@ export class ClipboardBridgeError extends Error {
  * useClipboardBridge Hook의 반환 타입
  */
 interface UseClipboardBridgeReturn {
-  linkValue: string;
-  setLinkValue: (value: string) => void;
+  clipboardLinkValue: string;
   requestClipboard: () => void;
-  pasteFromClipboard: () => void;
   hasClipboardLink: boolean;
   isLoading: boolean;
   error: ClipboardBridgeError | null;
-  clearError: () => void;
 }
 
 /**
@@ -46,13 +43,10 @@ interface UseClipboardBridgeReturn {
  * const { linkValue, requestClipboard, isLoading, error } = useClipboardBridge();
  */
 export const useClipboardBridge = (): UseClipboardBridgeReturn => {
-  const [linkValue, setLinkValue] = useState<string>('');
+  const [clipboardLinkValue, setClipboardLinkValue] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<ClipboardBridgeError | null>(null);
   const [hasClipboardLink, setHasClipboardLink] = useState<boolean>(false);
-
-  // ✅ useState → useRef로 변경 (리렌더링 불필요, 최신 값 참조)
-  const shouldPasteRef = useRef<boolean>(false);
 
   /**
    * 메시지 리스너 등록/정리
@@ -109,13 +103,10 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
           // 링크 유효성 검사
           if (isValidUrl(text)) {
             setHasClipboardLink(true);
-            // ✅ useRef 사용으로 최신 값 참조
-            if (shouldPasteRef.current) {
-              setLinkValue(text);
-              shouldPasteRef.current = false;
-            }
+            setClipboardLinkValue(text);
           } else {
             setHasClipboardLink(false);
+            setClipboardLinkValue('');
           }
           return;
         }
@@ -192,37 +183,11 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
     }
   }, []);
 
-  /**
-   * 입력 값 직접 설정
-   */
-  const setValue = (value: string): void => {
-    setLinkValue(value);
-    setError(null);
-  };
-
-  /**
-   * 에러 초기화
-   */
-  const clearError = (): void => {
-    setError(null);
-  };
-
-  /**
-   * 클립보드에서 붙여넣기
-   */
-  const pasteFromClipboard = useCallback((): void => {
-    shouldPasteRef.current = true;
-    requestClipboard();
-  }, [requestClipboard]);
-
   return {
-    linkValue,
-    setLinkValue: setValue,
+    clipboardLinkValue,
     requestClipboard,
-    pasteFromClipboard,
     hasClipboardLink,
     isLoading,
     error,
-    clearError,
   };
 };
