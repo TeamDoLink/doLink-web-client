@@ -4,15 +4,23 @@ import {
   type ArchiveSelectCategoryKey as ArchiveCategoryKey,
 } from '@/components/archive';
 import { ROUTES } from '@/constants/routes';
+import { useArchiveMockStore } from '@/stores/useArchiveMockStore';
+import { toFilterCategory } from '@/utils/archiveCategory';
 
 const ArchiveAddPage = () => {
   const navigate = useNavigate();
+  const addArchive = useArchiveMockStore((state) => state.addArchive);
 
   const handleSubmit = (payload: {
     name: string;
     category: ArchiveCategoryKey;
   }) => {
-    console.log('모음 생성 요청(Mock):', payload);
+    addArchive({
+      title: payload.name,
+      category: toFilterCategory(payload.category),
+      itemCount: 0,
+      images: [],
+    });
     navigate(ROUTES.archives);
   };
 

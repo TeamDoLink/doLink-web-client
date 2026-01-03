@@ -8,7 +8,7 @@ import { TodoSection } from '@/components/home/todoSection';
 import { ArchiveSection } from '@/components/home/archiveSection';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
-import { MOCK_ARCHIVES } from '@/mocks/archiveData';
+import { useArchiveMockStore } from '@/stores/useArchiveMockStore';
 import { MOCK_TODOS } from '@/mocks/todoData';
 import {
   getArchiveCategoryLabel,
@@ -35,9 +35,8 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   const [todoItems, setTodoItems] = useState(() =>
     MOCK_TODOS.map((todo) => ({ ...todo }))
   );
-  const [archiveItems, setArchiveItems] = useState(() =>
-    MOCK_ARCHIVES.map((archive) => ({ ...archive }))
-  );
+  const archiveItems = useArchiveMockStore((state) => state.archives);
+  const deleteArchive = useArchiveMockStore((state) => state.deleteArchive);
   const {
     isOpen: isModalOpen,
     type: modalType,
@@ -94,9 +93,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
 
   const handleConfirmDeleteArchive = () => {
     if (!pendingDeleteArchiveId) return;
-    setArchiveItems((prevArchives) =>
-      prevArchives.filter((archive) => archive.id !== pendingDeleteArchiveId)
-    );
+    deleteArchive(pendingDeleteArchiveId);
     setPendingDeleteArchiveId(null);
   };
 

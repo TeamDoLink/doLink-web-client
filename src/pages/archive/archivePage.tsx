@@ -13,7 +13,7 @@ import {
   getArchiveCategoryLabel,
   toEditorCategory,
 } from '@/utils/archiveCategory';
-import { MOCK_ARCHIVES } from '@/mocks/archiveData';
+import { useArchiveMockStore } from '@/stores/useArchiveMockStore';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveFilterCategoryKey[] = [
   'all',
@@ -34,10 +34,11 @@ const ARCHIVE_CATEGORIES = ARCHIVE_CATEGORY_KEYS.map((key) => ({
   label: getArchiveCategoryLabel(key),
 }));
 
-const useArchivePageModel = () => {
-  const [archives, setArchives] = useState(() =>
-    MOCK_ARCHIVES.map((archive) => ({ ...archive }))
-  );
+const ArchivePage = () => {
+  const { handleTabChange } = useBottomTabNavigation();
+  const navigate = useNavigate();
+  const archives = useArchiveMockStore((state) => state.archives);
+  const deleteArchive = useArchiveMockStore((state) => state.deleteArchive);
   const [selectedCategory, setSelectedCategory] =
     useState<ArchiveFilterCategoryKey>('all');
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
@@ -57,40 +58,13 @@ const useArchivePageModel = () => {
 
   const handleConfirmDelete = () => {
     if (!pendingDeleteArchiveId) return;
-    setArchives((prev) =>
-      prev.filter((archive) => archive.id !== pendingDeleteArchiveId)
-    );
+    deleteArchive(pendingDeleteArchiveId);
     setPendingDeleteArchiveId(null);
   };
 
   const handleCancelDelete = () => {
     setPendingDeleteArchiveId(null);
   };
-
-  return {
-    archives,
-    filteredArchives,
-    selectedCategory,
-    setSelectedCategory,
-    pendingDeleteArchiveId,
-    handleRequestDelete,
-    handleConfirmDelete,
-    handleCancelDelete,
-  };
-};
-
-const ArchivePage = () => {
-  const { handleTabChange } = useBottomTabNavigation();
-  const navigate = useNavigate();
-  const {
-    filteredArchives,
-    selectedCategory,
-    setSelectedCategory,
-    pendingDeleteArchiveId,
-    handleRequestDelete,
-    handleConfirmDelete,
-    handleCancelDelete,
-  } = useArchivePageModel();
   const handleClickAdd = () => {
     navigate(ROUTES.archiveAdd);
   };

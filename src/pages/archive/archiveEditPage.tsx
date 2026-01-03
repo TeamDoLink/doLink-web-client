@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import {
@@ -6,12 +6,11 @@ import {
   type ArchiveSelectCategoryKey as ArchiveCategoryKey,
 } from '@/components/archive';
 import { ROUTES } from '@/constants/routes';
-import { MOCK_ARCHIVES } from '@/mocks/archiveData';
+import { toEditorCategory, toFilterCategory } from '@/utils/archiveCategory';
 import {
-  toEditorCategory,
-  toFilterCategory,
-  type ArchiveFilterCategory,
-} from '@/utils/archiveCategory';
+  useArchiveMockStore,
+  type MockArchive,
+} from '@/stores/useArchiveMockStore';
 
 type ArchiveEditLocationState = {
   origin?: string;
@@ -25,23 +24,26 @@ type ArchiveEditLocationState = {
 const ArchiveEditPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const archives = useArchiveMockStore((state) => state.archives);
+  const updateArchive = useArchiveMockStore((state) => state.updateArchive);
   const { archive, origin } =
     (location.state as ArchiveEditLocationState | undefined) ?? {};
 
-  const fallbackArchive = MOCK_ARCHIVES[0];
-  const targetArchive:
-    | {
-        id: string;
-        title: string;
-        category: ArchiveFilterCategory;
-      }
-    | undefined = archive
-    ? {
-        id: archive.id,
-        title: archive.title,
-        category: toFilterCategory(archive.category),
-      }
-    : fallbackArchive;
+  const targetArchive = useMemo<MockArchive | undefined>(() => {
+    if (archive) {
+      return (
+        archives.find((item) => item.id === archive.id) ?? {
+          id: archive.id,
+          title: archive.title,
+          category: toFilterCategory(archive.category),
+          itemCount: 0,
+          images: [],
+          createdAt: new Date().toISOString(),
+        }
+      );
+    }
+    return archives[0];
+  }, [archive, archives]);
 
   const hasArchive = Boolean(targetArchive);
 
@@ -59,10 +61,12 @@ const ArchiveEditPage = () => {
     name: string;
     category: ArchiveCategoryKey;
   }) => {
-    console.log('모음 수정 요청(Mock):', {
-      ...payload,
-      id: targetArchive.id,
-    });
+    if (targetArchive) {
+      updateArchive(targetArchive.id, {
+        title: payload.name,
+        category: toFilterCategory(payload.category),
+      });
+    }
     const fallbackPath = origin ?? ROUTES.archives;
     navigate(fallbackPath, { replace: true });
   };
