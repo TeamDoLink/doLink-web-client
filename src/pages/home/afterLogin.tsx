@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Background, FeedBack, TabBar } from '@/components/common';
 import { FloatingButton } from '@/components/common/button';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
@@ -7,126 +8,13 @@ import { TodoSection } from '@/components/home/todoSection';
 import { ArchiveSection } from '@/components/home/archiveSection';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
-import { useTodoPreferenceStore } from '@/stores/useTodoPreferenceStore';
-import type { ArchiveItem, TodoItem } from '@/types';
-
-const TODO_ITEMS: TodoItem[] = [
-  {
-    id: 'welcome-guide',
-    title: '두링크(DoLink) 안내서 📚',
-    date: '오늘',
-    platform: '노션 (Notion)',
-    checked: false,
-  },
-  {
-    id: 'welcome-guide-2',
-    title: '두링크(DoLink) 안내서 📚',
-    date: '오늘',
-    platform: '노션 (Notion)',
-    checked: false,
-  },
-  {
-    id: 'welcome-guide-3',
-    title: '두링크(DoLink) 안내서 📚',
-    date: '오늘',
-    platform: '노션 (Notion)',
-    checked: false,
-  },
-  {
-    id: 'welcome-guide-4',
-    title: '두링크(DoLink) 안내서 📚',
-    date: '오늘',
-    platform: '노션 (Notion)',
-    checked: false,
-  },
-  {
-    id: 'welcome-guide-5',
-    title: '두링크(DoLink) 안내서 📚',
-    date: '오늘',
-    platform: '노션 (Notion)',
-    checked: false,
-  },
-];
-
-const ARCHIVE_ITEMS: ArchiveItem[] = [
-  {
-    id: 'tutorial-4',
-    title: '두링크(DoLink) 튜토리얼 (01/07)',
-    category: '기타',
-    itemCount: 3,
-    createdAt: '2025-01-07T16:45:00',
-  },
-  {
-    id: 'tutorial-5',
-    title: '두링크(DoLink) 튜토리얼 (12/31)',
-    category: '기타',
-    itemCount: 1,
-    createdAt: '2024-12-31T17:30:28',
-  },
-  {
-    id: 'tutorial-2',
-    title: '두링크(DoLink) 튜토리얼 (01/09)',
-    category: '기타',
-    itemCount: 2,
-    createdAt: '2025-01-09T14:20:15',
-  },
-  {
-    id: 'tutorial-3',
-    title: '두링크(DoLink) 튜토리얼 (01/05)',
-    category: '기타',
-    itemCount: 4,
-    createdAt: '2025-01-05T13:25:10',
-  },
-  {
-    id: 'tutorial',
-    title: '두링크(DoLink) 튜토리얼 (01/10)',
-    category: '기타',
-    itemCount: 1,
-    createdAt: '2025-01-10T12:30:21',
-  },
-  {
-    id: 'tutorial-5',
-    title: '두링크(DoLink) 튜토리얼 (01/03)',
-    category: '기타',
-    itemCount: 1,
-    createdAt: '2025-01-03T15:40:33',
-  },
-  {
-    id: 'tutorial-4',
-    title: '두링크(DoLink) 튜토리얼 (01/01)',
-    category: '기타',
-    itemCount: 3,
-    createdAt: '2025-01-01T12:10:55',
-  },
-  {
-    id: 'tutorial-3',
-    title: '두링크(DoLink) 튜토리얼 (01/08)',
-    category: '기타',
-    itemCount: 4,
-    createdAt: '2025-01-08T09:15:30',
-  },
-  {
-    id: 'tutorial-5',
-    title: '두링크(DoLink) 튜토리얼 (01/06)',
-    category: '기타',
-    itemCount: 1,
-    createdAt: '2025-01-06T11:30:22',
-  },
-  {
-    id: 'tutorial-3',
-    title: '두링크(DoLink) 튜토리얼 (01/02)',
-    category: '기타',
-    itemCount: 4,
-    createdAt: '2025-01-02T08:20:17',
-  },
-  {
-    id: 'tutorial-4',
-    title: '두링크(DoLink) 튜토리얼 (01/04)',
-    category: '기타',
-    itemCount: 3,
-    createdAt: '2025-01-04T10:15:45',
-  },
-];
+import { MOCK_ARCHIVES } from '@/mocks/archiveData';
+import { MOCK_TODOS } from '@/mocks/todoData';
+import {
+  getArchiveCategoryLabel,
+  toEditorCategory,
+} from '@/utils/archiveCategory';
+import { ROUTES } from '@/constants/routes';
 
 // 시간 계산 함수
 const getGreetingPeriod = (hour: number) => {
@@ -141,9 +29,15 @@ type HomeAfterLoginProps = {
 };
 
 const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
+  const navigate = useNavigate();
   const { handleTabChange } = useBottomTabNavigation();
-  const { suppressCompleteModal, setSuppressCompleteModal } =
-    useTodoPreferenceStore();
+  const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
+  const [todoItems, setTodoItems] = useState(() =>
+    MOCK_TODOS.map((todo) => ({ ...todo }))
+  );
+  const [archiveItems, setArchiveItems] = useState(() =>
+    MOCK_ARCHIVES.map((archive) => ({ ...archive }))
+  );
   const {
     isOpen: isModalOpen,
     type: modalType,
@@ -153,12 +47,6 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     openConfirm,
     close: closeModal,
   } = useModalStore();
-  const [todoItems, setTodoItems] = useState<TodoItem[]>(() =>
-    TODO_ITEMS.map((todo) => ({ ...todo }))
-  );
-  const [archiveItems, setArchiveItems] = useState<ArchiveItem[]>(() =>
-    ARCHIVE_ITEMS.map((archive) => ({ ...archive }))
-  );
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
     string | null
   >(null);
@@ -170,15 +58,25 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   }, []);
 
   const latestArchiveItems = useMemo(() => {
-    return [...archiveItems].sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    return archiveItems
+      .slice()
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      .map((archive) => ({
+        id: archive.id,
+        title: archive.title,
+        category: getArchiveCategoryLabel(archive.category),
+        itemCount: archive.itemCount,
+        images: archive.images,
+        createdAt: archive.createdAt,
+      }));
   }, [archiveItems]);
 
   const handleToggleTodo = (id: string, nextChecked: boolean) => {
-    setTodoItems((prev) =>
-      prev.map((todo) =>
+    setTodoItems((prevTodos) =>
+      prevTodos.map((todo) =>
         todo.id === id ? { ...todo, checked: nextChecked } : todo
       )
     );
@@ -196,8 +94,8 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
 
   const handleConfirmDeleteArchive = () => {
     if (!pendingDeleteArchiveId) return;
-    setArchiveItems((prev) =>
-      prev.filter((archive) => archive.id !== pendingDeleteArchiveId)
+    setArchiveItems((prevArchives) =>
+      prevArchives.filter((archive) => archive.id !== pendingDeleteArchiveId)
     );
     setPendingDeleteArchiveId(null);
   };
@@ -215,6 +113,24 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
       negativeLabel: '취소',
       onPositive: handleConfirmDeleteArchive,
       onNegative: handleCancelDeleteArchive,
+    });
+  };
+
+  const handleRequestEditArchive = (id: string) => {
+    const targetArchive = archiveItems.find((archive) => archive.id === id);
+    if (!targetArchive) {
+      return;
+    }
+
+    navigate(ROUTES.archiveEdit, {
+      state: {
+        archive: {
+          id: targetArchive.id,
+          title: targetArchive.title,
+          category: toEditorCategory(targetArchive.category),
+        },
+        origin: ROUTES.home,
+      },
     });
   };
 
@@ -239,6 +155,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
             <ArchiveSection
               items={latestArchiveItems}
               onRequestDelete={handleRequestDeleteArchive}
+              onRequestEdit={handleRequestEditArchive}
             />
           </div>
         </main>
