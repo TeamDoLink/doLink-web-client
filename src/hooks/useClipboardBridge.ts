@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
-import type { ReactNativeWebView } from '@/types/clipboard';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   isClipboardDataMessage,
   isClipboardErrorMessage,
   isClipboardMessage,
 } from '@/types/clipboard';
+import { detectPlatform, getWebView } from '@/utils/webview';
+import { isValidUrl } from '@/utils/validation';
 
 // TODO RN과 타입 연동 필요
 /**
@@ -49,50 +50,18 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<ClipboardBridgeError | null>(null);
   const [hasClipboardLink, setHasClipboardLink] = useState<boolean>(false);
-  const [shouldPaste, setShouldPaste] = useState<boolean>(false);
+
+  // ✅ useState → useRef로 변경 (리렌더링 불필요, 최신 값 참조)
+  const shouldPasteRef = useRef<boolean>(false);
 
   /**
-   * URL 유효성 검사
+   * 메시지 리스너 등록/정리
    */
-  const isValidUrl = useCallback((text: string): boolean => {
-    if (!text) return false;
-
-    try {
-      const url = new URL(text);
-      // http와 https 프로토콜만 허용
-      return url.protocol === 'http:' || url.protocol === 'https:';
-    } catch {
-      return false;
-    }
-  }, []);
-
-  /**
-   * Platform 감지 (iOS vs Android)
-   */
-  // TODO 공통 utils로 이동
-  const detectPlatform = useCallback((): 'ios' | 'android' => {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const isIOS =
-      /ipad|iphone|ipod/.test(userAgent) ||
-      (/macintosh/.test(userAgent) && 'ontouchend' in document);
-    return isIOS ? 'ios' : 'android';
-  }, []);
-
-  /**
-   * WebView 객체 가져오기
-   */
-  const getWebView = useCallback((): ReactNativeWebView | null => {
-    return (
-      (window as Window & { ReactNativeWebView?: ReactNativeWebView })
-        .ReactNativeWebView ?? null
-    );
-  }, []);
-
-  /**
-   * 메시지 핸들러 - Native로부터 수신
-   */
-  const handleMessage = useCallback(
-    (event: MessageEvent<unknown>): void => {
+  useEffect(() => {
+    /**
+     * 메시지 핸들러 - Native로부터 수신
+     */
+    const handleMessage = (event: MessageEvent<unknown>): void => {
       try {
         setError(null);
 
@@ -124,10 +93,6 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
         // clipboard 관련 메시지만 처리하게 함
         if (!isClipboardMessage(message)) {
           return;
-          // throw new ClipboardBridgeError(
-          //   `Invalid message type: ${typeof (message as Record<string, unknown>)?.type}`,
-          //   'INVALID_MESSAGE'
-          // );
         }
 
         // 메시지 타입별 처리
@@ -144,10 +109,10 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
           // 링크 유효성 검사
           if (isValidUrl(text)) {
             setHasClipboardLink(true);
-            // 붙여넣기 모드일 때만 값 설정
-            if (shouldPaste) {
+            // ✅ useRef 사용으로 최신 값 참조
+            if (shouldPasteRef.current) {
               setLinkValue(text);
-              setShouldPaste(false);
+              shouldPasteRef.current = false;
             }
           } else {
             setHasClipboardLink(false);
@@ -176,14 +141,8 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
       } finally {
         setIsLoading(false);
       }
-    },
-    [isValidUrl, shouldPaste]
-  );
+    };
 
-  /**
-   * 메시지 리스너 등록/정리
-   */
-  useEffect(() => {
     const platform = detectPlatform();
     const receiver =
       platform === 'ios' ? window : (document as unknown as Window);
@@ -193,7 +152,7 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
     return () => {
       receiver.removeEventListener('message', handleMessage);
     };
-  }, [detectPlatform, handleMessage]);
+  }, []);
 
   /**
    * 클립보드 읽기 요청
@@ -231,28 +190,28 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
       setIsLoading(false);
       console.error('[useClipboardBridge] Request failed:', clipboardError);
     }
-  }, [getWebView]);
+  }, []);
 
   /**
    * 입력 값 직접 설정
    */
-  const setValue = useCallback((value: string): void => {
+  const setValue = (value: string): void => {
     setLinkValue(value);
     setError(null);
-  }, []);
+  };
 
   /**
    * 에러 초기화
    */
-  const clearError = useCallback((): void => {
+  const clearError = (): void => {
     setError(null);
-  }, []);
+  };
 
   /**
    * 클립보드에서 붙여넣기
    */
   const pasteFromClipboard = useCallback((): void => {
-    setShouldPaste(true);
+    shouldPasteRef.current = true;
     requestClipboard();
   }, [requestClipboard]);
 

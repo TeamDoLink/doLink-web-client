@@ -6,6 +6,9 @@ import { useDraftBridge } from '@/hooks/useDraftBridge';
 import type { TaskDraft } from '@/types/draft';
 import { ModalLayout } from '@/components/common/feedBack';
 
+// 임시저장 키
+const DRAFT_KEY = 'task-create-draft';
+
 // 임시 데이터 - 실제로는 API에서 받아올 데이터
 const MOCK_COLLECTIONS: CollectionChip[] = [
   { id: '1', label: '2025 연말 도쿄 여행' },
@@ -27,18 +30,16 @@ const MOCK_COLLECTIONS: CollectionChip[] = [
 ];
 
 /**
- * 업무 생성 페이지
+ * 업무 생성 페이지 (테스트용)
  * 할일 추가를 위한 전체 폼 페이지
  */
-function TaskCreatePage() {
+function TestTaskCreatePage() {
   const MAX_LENGTH = 100; // 가장 일반적인 경우
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
     linkValue,
     setLinkValue,
     requestClipboard,
-    pasteFromClipboard,
-    hasClipboardLink,
     isLoading,
     error,
     clearError,
@@ -48,6 +49,7 @@ function TaskCreatePage() {
   const {
     saveDraft,
     loadDraft,
+    deleteDraft,
     isLoading: isDraftLoading,
     error: draftError,
   } = useDraftBridge<TaskDraft>();
@@ -82,7 +84,6 @@ function TaskCreatePage() {
    */
   const handleLinkFocus = () => {
     setLinkFocused(true);
-    requestClipboard();
   };
 
   /**
@@ -90,6 +91,14 @@ function TaskCreatePage() {
    */
   const handleLinkBlur = () => {
     setLinkFocused(false);
+  };
+
+  /**
+   * 붙여넣기 버튼 클릭 핸들러
+   */
+  const handlePasteClick = () => {
+    clearError();
+    requestClipboard();
   };
 
   /**
@@ -128,39 +137,73 @@ function TaskCreatePage() {
   };
 
   /**
-   * 임시저장 데이터 불러오기
+   * 임시저장 데이터 불러오기 (수동)
    */
-  useEffect(() => {
-    // TODO 테스트 위해 이 곳에 넣어놓음 -> + 플로팅 버튼 눌렀을 시 불러오기로 변경 예정 (대시보드 반영 시 작업 예정)
-    const loadDraftData = async () => {
-      try {
-        const draftData = await loadDraft('task-create-draft');
-        if (draftData) {
-          setTitle(draftData.title);
+  const handleLoadDraft = async () => {
+    try {
+      const draftData = await loadDraft(DRAFT_KEY);
+
+      if (draftData) {
+        setTitle(draftData.title);
+
+        if (draftData.link && draftData.memo) {
           setLinkValue(draftData.link);
           setMemo(draftData.memo);
-
-          // archive 정보로 collection 찾아서 설정
-          const collection = MOCK_COLLECTIONS.find(
-            (item) => item.label === draftData.archive
-          );
-
-          if (collection) {
-            setSelectedArchiveCollection({
-              id: collection.id,
-              name: collection.label,
-            });
-          } else {
-            setSelectedArchiveCollection(null);
-          }
         }
-      } catch (err) {
-        console.error('임시저장 데이터 불러오기 실패:', err);
+
+        // archive 정보로 collection 찾아서 설정
+        const collection = MOCK_COLLECTIONS.find(
+          (item) => item.label === draftData.archive
+        );
+
+        if (collection) {
+          setSelectedArchiveCollection({
+            id: collection.id,
+            name: collection.label,
+          });
+        } else {
+          setSelectedArchiveCollection(null);
+        }
+        console.log('✅ 임시저장 데이터 불러오기 성공:', draftData);
+      } else {
+        console.log('⚠️ 저장된 임시저장 데이터가 없습니다.');
       }
+    } catch (err) {
+      console.error('❌ 임시저장 데이터 불러오기 실패:', err);
+    }
+  };
+
+  /**
+   * 테스트용 임시저장 데이터 생성
+   */
+  const handleCreateTestDraft = async () => {
+    const testDraft: TaskDraft = {
+      archive: '2025 연말 도쿄 여행',
+      title: '테스트 할일 제목입니다',
+      link: 'https://example.com/test-link',
+      memo: '이것은 테스트용 메모입니다.',
     };
 
-    loadDraftData();
-  }, [loadDraft, setLinkValue]);
+    try {
+      await saveDraft(DRAFT_KEY, testDraft);
+      console.log('✅ 테스트 임시저장 데이터 생성 완료:', testDraft);
+      alert('테스트 데이터가 저장되었습니다!');
+    } catch (err) {
+      console.error('❌ 테스트 데이터 저장 실패:', err);
+    }
+  };
+
+  /**
+   * 임시저장 데이터 삭제
+   */
+  const handleClearDraft = async () => {
+    try {
+      await deleteDraft(DRAFT_KEY);
+      console.log('🗑️ 임시저장 데이터가 삭제되었습니다.');
+    } catch (err) {
+      console.error('❌ 임시저장 데이터 삭제 실패:', err);
+    }
+  };
 
   /**
    * 임시저장 버튼 클릭 핸들러
@@ -174,7 +217,7 @@ function TaskCreatePage() {
         memo,
       };
 
-      await saveDraft('task-create-draft', draftData);
+      await saveDraft(DRAFT_KEY, draftData);
       console.log('임시저장 완료:', draftData);
     } catch (err) {
       console.error('임시저장 실패:', err);
@@ -222,10 +265,9 @@ function TaskCreatePage() {
     | 'Error'
     | 'Link' => {
     if (error) return 'Error';
+    if (linkFocused) return 'Focused';
     if (linkValue) return 'Activated';
-    if (hasClipboardLink) return 'Link'; // 클립보드에 링크 있으면 버튼 표시
-    if (linkFocused) return 'Focused'; // 포커스했지만 클립보드에 링크 없음
-    return 'Enabled'; // 기본 상태
+    return 'Link';
   };
 
   /**
@@ -267,13 +309,43 @@ function TaskCreatePage() {
       </ModalLayout>
 
       <AppBar.BackDetailBar
-        title='할 일 추가'
+        title='할 일 추가 (테스트)'
         rightIcons={['save']}
         isSaveDisabled={!isDraftSaveEnabled}
         onClickSave={handleDraftAddClick}
       />
 
       <div className='flex h-full flex-col gap-6 overflow-y-auto bg-white px-5 py-4'>
+        {/* 테스트 패널 - 임시저장 테스트용 */}
+        <div className='rounded-lg border-2 border-dashed border-blue-400 bg-blue-50 p-4'>
+          <p className='mb-3 text-body-md font-bold text-blue-900'>
+            🧪 임시저장 테스트 패널
+          </p>
+          <div className='flex flex-col gap-2'>
+            <button
+              onClick={handleCreateTestDraft}
+              className='rounded-lg bg-blue-500 px-4 py-2 text-body-sm font-semibold text-white hover:bg-blue-600'
+            >
+              1️⃣ 테스트 데이터 저장하기
+            </button>
+            <button
+              onClick={handleLoadDraft}
+              className='rounded-lg bg-green-500 px-4 py-2 text-body-sm font-semibold text-white hover:bg-green-600'
+            >
+              2️⃣ 임시저장 불러오기
+            </button>
+            <button
+              onClick={handleClearDraft}
+              className='rounded-lg bg-red-500 px-4 py-2 text-body-sm font-semibold text-white hover:bg-red-600'
+            >
+              3️⃣ 임시저장 삭제하기
+            </button>
+          </div>
+          <p className='mt-2 text-body-xs text-blue-700'>
+            💡 순서: 테스트 데이터 저장 → 임시저장 불러오기 → 데이터 확인
+          </p>
+        </div>
+
         {/* 담을 모음 선택 섹션 */}
         <CollectionChipSelector
           items={MOCK_COLLECTIONS}
@@ -285,10 +357,7 @@ function TaskCreatePage() {
         {/* 제목 섹션 */}
         <div className='flex flex-col gap-2'>
           <div className='flex items-center justify-between'>
-            <label
-              htmlFor='task-title'
-              className='text-body-lg font-semibold text-black'
-            >
+            <label className='text-body-lg font-semibold text-black'>
               제목
             </label>
             <span
@@ -300,8 +369,6 @@ function TaskCreatePage() {
             </span>
           </div>
           <InputField.TextInputField
-            id='task-title'
-            name='title'
             state={getTitleState()}
             placeholder='제목을 입력해주세요.'
             value={title}
@@ -314,24 +381,19 @@ function TaskCreatePage() {
 
         {/* 링크(선택) 섹션 */}
         <div className='flex flex-col gap-2'>
-          <label
-            htmlFor='task-link'
-            className='text-body-lg font-semibold text-black'
-          >
+          <label className='text-body-lg font-semibold text-black'>
             링크(선택)
           </label>
           <InputField.TextInputField
-            id='task-link'
-            name='link'
             state={getLinkState()}
             placeholder='링크를 입력해주세요.'
             errorMessage={error ? showErrorMessage() : undefined}
-            buttonLabel={hasClipboardLink ? '붙여넣기' : undefined}
+            buttonLabel={isLoading ? '로딩 중...' : '붙여넣기'}
             value={linkValue}
             onChange={handleLinkChange}
             onFocus={handleLinkFocus}
             onBlur={handleLinkBlur}
-            onButtonClick={hasClipboardLink ? pasteFromClipboard : undefined}
+            onButtonClick={handlePasteClick}
             width='w-full'
           />
         </div>
@@ -339,10 +401,7 @@ function TaskCreatePage() {
         {/* 메모(선택) 섹션 */}
         <div className='flex flex-col gap-2'>
           <div className='flex items-center justify-between'>
-            <label
-              htmlFor='task-memo'
-              className='text-body-lg font-semibold text-black'
-            >
+            <label className='text-body-lg font-semibold text-black'>
               메모(선택)
             </label>
             <span
@@ -354,8 +413,6 @@ function TaskCreatePage() {
             </span>
           </div>
           <textarea
-            id='task-memo'
-            name='memo'
             placeholder='메모를 입력해주세요.'
             value={memo}
             onChange={(e) => handleMemoChange(e.target.value)}
@@ -367,7 +424,6 @@ function TaskCreatePage() {
         <Button.CtaButton
           disabled={!isAddButtonEnabled}
           onClick={handleAddClick}
-          className='w-full'
         >
           추가하기
         </Button.CtaButton>
@@ -376,4 +432,4 @@ function TaskCreatePage() {
   );
 }
 
-export default TaskCreatePage;
+export default TestTaskCreatePage;
