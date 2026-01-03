@@ -76,11 +76,11 @@ export const BaseBottomSheet = ({
   return (
     <div
       ref={sheetRef}
-      className={`w-full rounded-t-3xl bg-white p-6 pt-4 shadow-[0_-10px_40px_rgba(0,0,0,0.08)] ${className}`}
+      className={`w-full rounded-t-3xl bg-white px-5 pb-6 pt-5 shadow-[0_-10px_40px_rgba(0,0,0,0.08)] ${className}`}
       style={sheetStyle}
       onTransitionEnd={handleTransitionEnd}
     >
-      <div className='flex justify-center'>
+      <div className='mb-4 flex justify-center'>
         <span
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
@@ -90,7 +90,7 @@ export const BaseBottomSheet = ({
         />
       </div>
 
-      <div className={`mt-4 flex flex-col gap-4 ${contentClassName}`.trim()}>
+      <div className={`flex flex-col gap-4 ${contentClassName}`.trim()}>
         {children}
       </div>
     </div>
