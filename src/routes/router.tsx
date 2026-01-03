@@ -7,6 +7,7 @@ import Test from '@/pages/test';
 import Test2 from '@/pages/test2';
 import Test3 from '@/pages/test3';
 import ArchiveDetailPage from '@/pages/archive/archiveDetailPage';
+import TaskDetailPage from '@/pages/task/detail';
 
 const AppRouter = () => {
   return (
@@ -17,6 +18,8 @@ const AppRouter = () => {
 
       {/* TODO 추후 id 생성*/}
       <Route path='/archives/detail' element={<ArchiveDetailPage />} />
+      {/* TODO  task 추후 id 생성*/}
+      <Route path='/task/detail' element={<TaskDetailPage />} />
 
       {/* 공통 컴포넌트 테스트 페이지 */}
       <Route path='/test' element={<Test />} />
