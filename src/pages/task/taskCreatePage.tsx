@@ -37,6 +37,8 @@ function TaskCreatePage() {
     linkValue,
     setLinkValue,
     requestClipboard,
+    pasteFromClipboard,
+    hasClipboardLink,
     isLoading,
     error,
     clearError,
@@ -80,7 +82,8 @@ function TaskCreatePage() {
    */
   const handleLinkFocus = useCallback(() => {
     setLinkFocused(true);
-  }, []);
+    requestClipboard();
+  }, [requestClipboard]);
 
   /**
    * 링크 입력필드 blur 핸들러
@@ -93,9 +96,8 @@ function TaskCreatePage() {
    * 붙여넣기 버튼 클릭 핸들러
    */
   const handlePasteClick = useCallback(() => {
-    clearError();
-    requestClipboard();
-  }, [requestClipboard, clearError]);
+    pasteFromClipboard();
+  }, [pasteFromClipboard]);
 
   /**
    * 링크 입력값 변경 핸들러
@@ -232,9 +234,10 @@ function TaskCreatePage() {
     | 'Error'
     | 'Link' => {
     if (error) return 'Error';
-    if (linkFocused) return 'Focused';
     if (linkValue) return 'Activated';
-    return 'Link';
+    if (hasClipboardLink) return 'Link'; // 클립보드에 링크 있으면 버튼 표시
+    if (linkFocused) return 'Focused'; // 포커스했지만 클립보드에 링크 없음
+    return 'Enabled'; // 기본 상태
   };
 
   /**
@@ -294,7 +297,10 @@ function TaskCreatePage() {
         {/* 제목 섹션 */}
         <div className='flex flex-col gap-2'>
           <div className='flex items-center justify-between'>
-            <label className='text-body-lg font-semibold text-black'>
+            <label
+              htmlFor='task-title'
+              className='text-body-lg font-semibold text-black'
+            >
               제목
             </label>
             <span
@@ -306,6 +312,8 @@ function TaskCreatePage() {
             </span>
           </div>
           <InputField.TextInputField
+            id='task-title'
+            name='title'
             state={getTitleState()}
             placeholder='제목을 입력해주세요.'
             value={title}
@@ -318,19 +326,24 @@ function TaskCreatePage() {
 
         {/* 링크(선택) 섹션 */}
         <div className='flex flex-col gap-2'>
-          <label className='text-body-lg font-semibold text-black'>
+          <label
+            htmlFor='task-link'
+            className='text-body-lg font-semibold text-black'
+          >
             링크(선택)
           </label>
           <InputField.TextInputField
+            id='task-link'
+            name='link'
             state={getLinkState()}
             placeholder='링크를 입력해주세요.'
             errorMessage={error ? showErrorMessage() : undefined}
-            buttonLabel={isLoading ? '로딩 중...' : '붙여넣기'}
+            buttonLabel={hasClipboardLink ? '붙여넣기' : undefined}
             value={linkValue}
             onChange={handleLinkChange}
             onFocus={handleLinkFocus}
             onBlur={handleLinkBlur}
-            onButtonClick={handlePasteClick}
+            onButtonClick={hasClipboardLink ? handlePasteClick : undefined}
             width='w-full'
           />
         </div>
@@ -338,7 +351,10 @@ function TaskCreatePage() {
         {/* 메모(선택) 섹션 */}
         <div className='flex flex-col gap-2'>
           <div className='flex items-center justify-between'>
-            <label className='text-body-lg font-semibold text-black'>
+            <label
+              htmlFor='task-memo'
+              className='text-body-lg font-semibold text-black'
+            >
               메모(선택)
             </label>
             <span
@@ -350,6 +366,8 @@ function TaskCreatePage() {
             </span>
           </div>
           <textarea
+            id='task-memo'
+            name='memo'
             placeholder='메모를 입력해주세요.'
             value={memo}
             onChange={(e) => handleMemoChange(e.target.value)}
