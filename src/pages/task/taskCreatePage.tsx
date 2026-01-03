@@ -234,7 +234,26 @@ function TaskCreatePage() {
     }
   };
 
-  const hanldeCancelAndExit = () => {
+  const checkHasDraft = async () => {
+    try {
+      return (await loadDraft(DRAFT_KEY)) !== null;
+    } catch (err) {
+      console.error('임시저장 확인 실패:', err);
+      return false;
+    }
+  };
+
+  const hanldeCancelAndExit = async () => {
+    const hasDraft = await checkHasDraft();
+
+    if (hasDraft) {
+      // 새로 작성 선택 시 임시저장 삭제
+      try {
+        await deleteDraft(DRAFT_KEY);
+      } catch (err) {
+        console.error('임시저장 삭제 실패:', err);
+      }
+    }
     setShowConfirmDialog(false);
     navigate(-1);
   };
