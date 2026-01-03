@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FeedBack, TabBar } from '@/components/common';
 import { FloatingButton } from '@/components/common/button';
 import { SettingMenuItem } from '@/components/common/setting/settingMenuItem';
@@ -6,11 +6,66 @@ import { GreyLine } from '@/components/common/line/greyLine';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { APP_VERSION } from '@/constants/appVersion';
+import { fetchAppVersionInfo } from '@/api/appVersion';
+import { isLatestVersion } from '@/utils/versionCompare';
 
 const SettingsPage = () => {
   const { handleTabChange } = useBottomTabNavigation();
   const signOut = useAuthStore((state) => state.signOut);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [latestVersion, setLatestVersion] = useState<string | null>(null);
+  const [versionFetchState, setVersionFetchState] = useState<
+    'loading' | 'success' | 'error'
+  >('loading');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadVersionInfo = async () => {
+      try {
+        const data = await fetchAppVersionInfo();
+
+        if (!isMounted) return;
+
+        setLatestVersion(data.latest);
+        setVersionFetchState('success');
+      } catch (error) {
+        if (!isMounted) return;
+
+        setVersionFetchState('error');
+      }
+    };
+
+    loadVersionInfo();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const versionLabel = `버전 ${APP_VERSION}`;
+  const versionRightText = useMemo(() => {
+    if (versionFetchState === 'loading') {
+      return '확인 중…';
+    }
+
+    if (versionFetchState === 'error') {
+      return '확인 불가';
+    }
+
+    if (!latestVersion) {
+      return '확인 불가';
+    }
+
+    const latestCheck = isLatestVersion(APP_VERSION, latestVersion);
+
+    if (latestCheck === null) {
+      return '확인 불가';
+    }
+
+    return latestCheck ? '최신 버전입니다' : '최신 버전이 아닙니다';
+  }, [latestVersion, versionFetchState]);
 
   const openExternalLink = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -64,8 +119,9 @@ const SettingsPage = () => {
               }
             />
             <SettingMenuItem
-              leftText='버전 1.0.0'
-              rightText='최신 버전입니다'
+              leftText={versionLabel}
+              rightText={versionRightText}
+              showArrow={false}
             />
           </div>
         </div>
