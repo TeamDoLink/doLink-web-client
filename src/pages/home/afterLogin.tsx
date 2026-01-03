@@ -63,6 +63,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
+      .slice(0, 8)
       .map((archive) => ({
         id: archive.id,
         title: archive.title,
