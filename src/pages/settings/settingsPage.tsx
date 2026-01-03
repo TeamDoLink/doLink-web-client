@@ -12,6 +12,10 @@ const SettingsPage = () => {
   const signOut = useAuthStore((state) => state.signOut);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
+  const openExternalLink = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   const handleLogoutClick = () => {
     setIsLogoutConfirmOpen(true);
   };
@@ -43,8 +47,22 @@ const SettingsPage = () => {
             <SettingMenuItem leftText='공지사항' rightText='노션(Notion)' />
             <SettingMenuItem leftText='고객문의' rightText='카카오 채널' />
             <GreyLine className='my-1' />
-            <SettingMenuItem leftText='개인정보 처리 방침' rightText='' />
-            <SettingMenuItem leftText='서비스 이용약관' rightText='' />
+            <SettingMenuItem
+              leftText='개인정보 처리 방침'
+              onClick={() =>
+                openExternalLink(
+                  'https://www.notion.so/2c947f96a7fc8031afe9ee012bf5821b'
+                )
+              }
+            />
+            <SettingMenuItem
+              leftText='서비스 이용약관'
+              onClick={() =>
+                openExternalLink(
+                  'https://www.notion.so/2c947f96a7fc80cb9d44db05cd96bf05?source=copy_link'
+                )
+              }
+            />
             <SettingMenuItem
               leftText='버전 1.0.0'
               rightText='최신 버전입니다'
