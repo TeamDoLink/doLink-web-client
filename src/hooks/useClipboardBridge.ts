@@ -30,6 +30,8 @@ interface UseClipboardBridgeReturn {
   linkValue: string;
   setLinkValue: (value: string) => void;
   requestClipboard: () => void;
+  pasteFromClipboard: () => void;
+  hasClipboardLink: boolean;
   isLoading: boolean;
   error: ClipboardBridgeError | null;
   clearError: () => void;
@@ -46,6 +48,23 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
   const [linkValue, setLinkValue] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<ClipboardBridgeError | null>(null);
+  const [hasClipboardLink, setHasClipboardLink] = useState<boolean>(false);
+  const [shouldPaste, setShouldPaste] = useState<boolean>(false);
+
+  /**
+   * URL 유효성 검사
+   */
+  const isValidUrl = useCallback((text: string): boolean => {
+    if (!text) return false;
+
+    try {
+      const url = new URL(text);
+      // http와 https 프로토콜만 허용
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }, []);
 
   /**
    * Platform 감지 (iOS vs Android)
@@ -72,79 +91,94 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
   /**
    * 메시지 핸들러 - Native로부터 수신
    */
-  const handleMessage = useCallback((event: MessageEvent<unknown>): void => {
-    try {
-      setError(null);
+  const handleMessage = useCallback(
+    (event: MessageEvent<unknown>): void => {
+      try {
+        setError(null);
 
-      // 데이터 추출
-      const data = event.data;
-      if (!data) {
-        throw new ClipboardBridgeError(
-          'Empty message received',
-          'INVALID_MESSAGE'
-        );
-      }
-
-      // JSON 파싱
-      let message: unknown;
-      if (typeof data === 'string') {
-        try {
-          message = JSON.parse(data);
-        } catch (parseError) {
+        // 데이터 추출
+        const data = event.data;
+        if (!data) {
           throw new ClipboardBridgeError(
-            `Failed to parse message: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`,
+            'Empty message received',
             'INVALID_MESSAGE'
           );
         }
-      } else {
-        message = data;
-      }
 
-      // 메시지 유효성 검증
-      // clipboard 관련 메시지만 처리하게 함
-      if (!isClipboardMessage(message)) {
-        return;
-        // throw new ClipboardBridgeError(
-        //   `Invalid message type: ${typeof (message as Record<string, unknown>)?.type}`,
-        //   'INVALID_MESSAGE'
-        // );
-      }
+        // JSON 파싱
+        let message: unknown;
+        if (typeof data === 'string') {
+          try {
+            message = JSON.parse(data);
+          } catch (parseError) {
+            throw new ClipboardBridgeError(
+              `Failed to parse message: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`,
+              'INVALID_MESSAGE'
+            );
+          }
+        } else {
+          message = data;
+        }
 
-      // 메시지 타입별 처리
-      if (isClipboardDataMessage(message)) {
-        const { payload } = message;
-        if (!payload) {
-          // 클립보드가 비어있을 시 사라짐
+        // 메시지 유효성 검증
+        // clipboard 관련 메시지만 처리하게 함
+        if (!isClipboardMessage(message)) {
+          return;
+          // throw new ClipboardBridgeError(
+          //   `Invalid message type: ${typeof (message as Record<string, unknown>)?.type}`,
+          //   'INVALID_MESSAGE'
+          // );
+        }
+
+        // 메시지 타입별 처리
+        if (isClipboardDataMessage(message)) {
+          const { payload } = message;
+          if (!payload) {
+            // 클립보드가 비어있을 시
+            setHasClipboardLink(false);
+            return;
+          }
+
+          const text = message.payload?.trim();
+
+          // 링크 유효성 검사
+          if (isValidUrl(text)) {
+            setHasClipboardLink(true);
+            // 붙여넣기 모드일 때만 값 설정
+            if (shouldPaste) {
+              setLinkValue(text);
+              setShouldPaste(false);
+            }
+          } else {
+            setHasClipboardLink(false);
+          }
           return;
         }
 
-        const text = message.payload?.trim();
-        setLinkValue(text);
-        return;
-      }
-
-      if (isClipboardErrorMessage(message)) {
-        const clipboardError = new ClipboardBridgeError(
-          message.error || 'Unknown clipboard error',
-          'MESSAGE_FAILED'
-        );
+        if (isClipboardErrorMessage(message)) {
+          const clipboardError = new ClipboardBridgeError(
+            message.error || 'Unknown clipboard error',
+            'MESSAGE_FAILED'
+          );
+          setError(clipboardError);
+        }
+      } catch (err) {
+        const clipboardError =
+          err instanceof ClipboardBridgeError
+            ? err
+            : new ClipboardBridgeError(
+                err instanceof Error ? err.message : 'Unknown error',
+                'INVALID_MESSAGE'
+              );
         setError(clipboardError);
-      }
-    } catch (err) {
-      const clipboardError =
-        err instanceof ClipboardBridgeError
-          ? err
-          : new ClipboardBridgeError(
-              err instanceof Error ? err.message : 'Unknown error',
-              'INVALID_MESSAGE'
-            );
-      setError(clipboardError);
 
-      console.error('[useClipboardBridge] Error:', clipboardError);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+        console.error('[useClipboardBridge] Error:', clipboardError);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isValidUrl, shouldPaste]
+  );
 
   /**
    * 메시지 리스너 등록/정리
@@ -214,10 +248,20 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
     setError(null);
   }, []);
 
+  /**
+   * 클립보드에서 붙여넣기
+   */
+  const pasteFromClipboard = useCallback((): void => {
+    setShouldPaste(true);
+    requestClipboard();
+  }, [requestClipboard]);
+
   return {
     linkValue,
     setLinkValue: setValue,
     requestClipboard,
+    pasteFromClipboard,
+    hasClipboardLink,
     isLoading,
     error,
     clearError,
