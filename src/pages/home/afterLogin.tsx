@@ -250,10 +250,9 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
 
     if (hasDraft) {
       openConfirm({
-        title: '임시저장한 할 일이 있어요',
-        subtitle: '이어서 작성할까요?',
-        positiveLabel: '이어서 작성',
-        negativeLabel: '새로 작성',
+        title: '작성 중인 할 일이 있어요. 이어서 작성할까요?',
+        positiveLabel: '이어서 쓰기',
+        negativeLabel: '새로 쓰기',
         onPositive: () => {
           // 임시저장 복구
           navigate(ROUTES.taskCreate, { state: { restoreDraft: true } });
