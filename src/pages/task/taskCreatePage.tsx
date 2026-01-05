@@ -176,10 +176,7 @@ function TaskCreatePage() {
     }
   };
 
-  /**
-   * 임시저장 버튼 클릭 핸들러
-   */
-  const handleDraftAddClick = async () => {
+  const handleSaveDraft = async () => {
     try {
       const draftData: TaskDraft = {
         archive: selectedArchiveCollection?.name || '',
@@ -190,7 +187,6 @@ function TaskCreatePage() {
 
       await saveDraft(DRAFT_KEY, draftData);
       console.log('임시저장 완료:', draftData);
-      navigate(-1);
     } catch (err) {
       console.error('임시저장 실패:', err);
     }
@@ -225,9 +221,9 @@ function TaskCreatePage() {
   /**
    * 저장하고 나가기
    */
-  const handleSaveAndExit = async () => {
+  const handleSave = async () => {
     try {
-      await handleDraftAddClick();
+      await handleSaveDraft();
       navigate(-1);
     } catch (err) {
       console.error('저장 후 나가기 실패:', err);
@@ -243,7 +239,7 @@ function TaskCreatePage() {
     }
   };
 
-  const hanldeCancelAndExit = async () => {
+  const hanldeCancel = async () => {
     const hasDraft = await checkHasDraft();
 
     if (hasDraft) {
@@ -326,8 +322,8 @@ function TaskCreatePage() {
           title={`작성 중인 할 일을\n저장하고 나갈까요?`}
           positiveLabel='저장하고 나가기'
           negativeLabel='취소'
-          onPositive={handleSaveAndExit}
-          onNegative={hanldeCancelAndExit}
+          onPositive={handleSave}
+          onNegative={hanldeCancel}
         />
       </ModalLayout>
 
@@ -335,7 +331,7 @@ function TaskCreatePage() {
         title='할 일 추가'
         rightIcons={['save']}
         isSaveDisabled={!isDraftSaveEnabled}
-        onClickSave={handleDraftAddClick}
+        onClickSave={() => setShowConfirmDialog(true)}
         onClickBack={handleBackClick}
       />
 
