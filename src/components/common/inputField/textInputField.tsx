@@ -24,6 +24,12 @@ export type TextInputFieldProps = {
   buttonLabel?: string;
   /** 입력 필드의 너비 (Tailwind CSS 클래스, 예: 'w-full', 'w-[335px]') */
   width?: string;
+  /** 입력 필드의 고유 ID (label 연결 및 접근성) */
+  id?: string;
+  /** 입력 필드의 name 속성 (폼 제출 및 자동완성) */
+  name?: string;
+
+  readOnly?: boolean;
 };
 
 export default function TextInputField({
@@ -37,6 +43,9 @@ export default function TextInputField({
   onButtonClick,
   buttonLabel,
   width = 'w-full',
+  id,
+  name,
+  readOnly = false,
 }: TextInputFieldProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange?.(e.target.value);
@@ -54,20 +63,24 @@ export default function TextInputField({
   if (state === 'Link') {
     return (
       <div
-        className={`flex ${width} items-center justify-between rounded-[10px] border border-grey-200 bg-white px-4 py-[10px]`}
+        className={`flex ${width} items-center justify-between rounded-[10px] border border-grey-200 bg-white px-[16px] py-[10px]`}
       >
         <input
           type='text'
+          id={id}
+          name={name}
           value={value}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
+          readOnly={readOnly}
           className='min-w-0 flex-1 border-none bg-transparent text-body-md text-grey-900 outline-none placeholder:text-grey-400'
         />
+
         <button
           onClick={onButtonClick}
-          className='rounded-[8px] px-2 py-[7px] text-body-xs font-medium text-point transition-colors hover:opacity-80'
+          className='rounded-[8px] px-[8px] py-[7px] text-body-xs font-medium text-point transition-colors hover:opacity-80'
           style={{ backgroundColor: 'rgba(57, 76, 255, 0.15)' }}
         >
           {buttonLabel}
@@ -83,6 +96,8 @@ export default function TextInputField({
         <div className='flex items-center justify-center rounded-[10px] border border-error bg-white px-4 py-4'>
           <input
             type='text'
+            id={id}
+            name={name}
             value={value}
             onChange={handleChange}
             onFocus={handleFocus}
@@ -105,6 +120,8 @@ export default function TextInputField({
       >
         <input
           type='text'
+          id={id}
+          name={name}
           value={value}
           onChange={handleChange}
           onFocus={handleFocus}
@@ -125,6 +142,8 @@ export default function TextInputField({
       >
         <input
           type='text'
+          id={id}
+          name={name}
           value={value}
           onChange={handleChange}
           onFocus={handleFocus}
@@ -143,6 +162,8 @@ export default function TextInputField({
     >
       <input
         type='text'
+        id={id}
+        name={name}
         value={value}
         onChange={handleChange}
         onFocus={handleFocus}
