@@ -5,14 +5,17 @@ language: ko-KR
 # CodeRabbit 리뷰 언어를 한국어로 설정
 
 tone_instructions: >
-  이 저장소의 목표는 React 프론트엔드 개발자로서의 코드 품질과 설계 역량을
-  팀 단위로 향상시키는 것입니다.
-  리뷰는 명확하고 친절하게 작성하며,
-  문제의 원인과 개선 방향을 함께 제시해 주세요.
-  React와 TypeScript 공식 문서 및 권장 패턴을 근거로 설명하고,
-  유지보수와 협업 관점의 이유를 간단히 언급해 주세요.
+  React/TypeScript 기반으로 명확하고 친절하게 리뷰하고, 원인과 개선 방향을 함께 제시해 주세요.
 # CodeRabbit의 리뷰 톤 가이드
 reviews:
+  path_instructions:
+    - path: 'src/**/*'
+      instructions: >
+        이 저장소의 목표는 React 프론트엔드 개발자로서의 코드 품질과 설계 역량을
+        팀 단위로 향상시키는 것입니다. 리뷰는 명확하고 친절하게 작성하며,
+        문제의 원인과 개선 방향을 함께 제시해 주세요. React와 TypeScript 공식 문서 및
+        권장 패턴을 근거로 설명하고, 유지보수와 협업 관점의 이유를 간단히 언급해 주세요.
+
   collapse_walkthrough: false
   # PR 상단의 변경 요약(walkthrough)을 항상 펼쳐서 표시
 
@@ -20,10 +23,9 @@ reviews:
   # 시 작성 비활성화
 
   path_filters:
-    - '!**/.xml'
+    - '!**/*.xml'
     - '!**/__generated__/**'
     - '!**/generated/**'
-    - '!**/*.json'
     - '!**/*.svg'
     - '!**/*.png'
     - '!**/*.jpg'
@@ -59,6 +61,5 @@ reviews:
 knowledge_base:
   code_guidelines:
     filePatterns:
-      - src/**/*.{ts,tsx,js,jsx}
       - README.md
-      # React/TypeScript 핵심 코드 위주로 컨텍스트 강화
+      # 공통 코드 가이드라인 문서 참조
