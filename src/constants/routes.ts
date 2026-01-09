@@ -4,7 +4,6 @@ export const ROUTES = {
   settings: '/settings',
   test: '/test',
   test2: '/test2',
-  taskCreate: '/task/create',
 } as const;
 
 export const TAB_ROUTE_MAP = {
