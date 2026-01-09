@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit v2 스키마 사용 선언 (에디터 자동완성 / 검증용)
+
+language: ko-KR
+# CodeRabbit 리뷰 언어를 한국어로 설정
+
+tone_instructions: >
+  이 저장소의 목표는 React 프론트엔드 개발자로서의 코드 품질과 설계 역량을
+  팀 단위로 향상시키는 것입니다.
+  리뷰는 명확하고 친절하게 작성하며,
+  문제의 원인과 개선 방향을 함께 제시해 주세요.
+  React와 TypeScript 공식 문서 및 권장 패턴을 근거로 설명하고,
+  유지보수와 협업 관점의 이유를 간단히 언급해 주세요.
+# CodeRabbit의 리뷰 톤 가이드
+reviews:
+  collapse_walkthrough: false
+  # PR 상단의 변경 요약(walkthrough)을 항상 펼쳐서 표시
+
+  poem: false
+  # 시 작성 비활성화
+
+  path_filters:
+    - '!**/.xml'
+    - '!**/__generated__/**'
+    - '!**/generated/**'
+    - '!**/*.json'
+    - '!**/*.svg'
+    - '!**/*.png'
+    - '!**/*.jpg'
+    - '!**/*.gif'
+    - '!**/*.lock'
+    # 사람이 직접 판단해야 하는 코드에만 리뷰 집중
+
+  auto_review:
+    enabled: false
+    # PR 생성 시 자동 리뷰 비활성화
+    # 👉 필요할 때만 `@coderabbitai review`로 수동 호출
+
+    ignore_title_keywords:
+      - WIP
+      # 작업 중 PR 보호
+
+    base_branches:
+      - develop
+      - main
+      - release/.*
+      - feat/.*
+      # 자동 리뷰 활성화 시 적용될 base 브랜치 범위
+
+  tools:
+    hadolint:
+      enabled: false
+      # 프론트엔드 레포이므로 Docker 린트 비활성화
+
+    golangci-lint:
+      enabled: false
+      # Go 린트 비활성화
+
+knowledge_base:
+  code_guidelines:
+    filePatterns:
+      - src/**/*.{ts,tsx,js,jsx}
+      - README.md
+      # React/TypeScript 핵심 코드 위주로 컨텍스트 강화
