@@ -35,29 +35,21 @@ const LoginPage = () => {
               className={`flex ${SOCIAL_BUTTON_SIZE} items-center justify-center rounded-full bg-transparent`}
               aria-label='카카오로 로그인'
             >
-              <img
-                src={kakaoIcon}
-                alt='카카오'
-                className={SOCIAL_BUTTON_SIZE}
-              />
+              <img src={kakaoIcon} alt='' className={SOCIAL_BUTTON_SIZE} />
             </button>
             <button
               type='button'
               className={`flex ${SOCIAL_BUTTON_SIZE} items-center justify-center rounded-full bg-transparent`}
               aria-label='네이버로 로그인'
             >
-              <img
-                src={naverIcon}
-                alt='네이버'
-                className={SOCIAL_BUTTON_SIZE}
-              />
+              <img src={naverIcon} alt='' className={SOCIAL_BUTTON_SIZE} />
             </button>
             <button
               type='button'
               className={`flex ${SOCIAL_BUTTON_SIZE} items-center justify-center rounded-full bg-transparent`}
               aria-label='애플로 로그인'
             >
-              <img src={appleIcon} alt='애플' className={SOCIAL_BUTTON_SIZE} />
+              <img src={appleIcon} alt='' className={SOCIAL_BUTTON_SIZE} />
             </button>
           </div>
         </section>
