@@ -29,26 +29,17 @@ const ArchiveEditPage = () => {
     (location.state as ArchiveEditLocationState | undefined) ?? {};
 
   const targetArchive = useMemo<MockArchive | undefined>(() => {
-    if (archive) {
-      return (
-        archives.find((item) => item.id === archive.id) ?? {
-          id: archive.id,
-          title: archive.title,
-          category: archive.category,
-          itemCount: 0,
-          images: [],
-          createdAt: new Date().toISOString(),
-        }
-      );
+    if (!archive) {
+      return undefined;
     }
-    return archives[0];
+    return archives.find((item) => item.id === archive.id);
   }, [archive, archives]);
 
   const hasArchive = Boolean(targetArchive);
 
   useEffect(() => {
     if (!hasArchive) {
-      navigate(ROUTES.archives);
+      navigate(ROUTES.archives, { replace: true });
     }
   }, [hasArchive, navigate]);
 
