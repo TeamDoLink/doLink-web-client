@@ -30,9 +30,10 @@ const SettingsPage = () => {
 
         setLatestVersion(data.latest);
         setVersionFetchState('success');
-      } catch {
+      } catch (error) {
         if (!isMounted) return;
 
+        console.error('Failed to fetch version info', error);
         setVersionFetchState('error');
       }
     };
