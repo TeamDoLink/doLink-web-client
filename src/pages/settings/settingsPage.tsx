@@ -30,7 +30,7 @@ const SettingsPage = () => {
 
         setLatestVersion(data.latest);
         setVersionFetchState('success');
-      } catch (error) {
+      } catch {
         if (!isMounted) return;
 
         setVersionFetchState('error');
