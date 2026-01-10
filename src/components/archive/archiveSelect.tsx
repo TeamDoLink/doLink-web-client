@@ -120,7 +120,7 @@ export const ArchiveSelect = ({ selected, onSelect }: ArchiveSelectProps) => {
               <img
                 src={isSelected ? selectedIcon : unselectedIcon}
                 alt={label}
-                className={`h-10 w-10${isSelected ? 'drop-shadow-[0_4px_12px_rgba(57,76,255,0.25)]' : ''}`}
+                className={`h-10 w-10 ${isSelected ? 'drop-shadow-[0_4px_12px_rgba(57,76,255,0.25)]' : ''}`}
               />
               <span className='text-body-sm text-grey-800'>{label}</span>
             </button>
