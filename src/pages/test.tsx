@@ -266,7 +266,7 @@ const sections = [
   {
     title: 'Setting Menu Item',
     description:
-      '세팅 화면 전용 상단바입니다. 좌측 큰 텍스트와 우측 보조 텍스트/화살표를 조합해 렌더링합니다.',
+      '설정 화면 전용 메뉴 아이템입니다. 좌측 큰 텍스트와 우측 보조 텍스트/화살표를 조합해 렌더링합니다.',
     component: (
       <div className='w-full max-w-md space-y-3 rounded-3xl bg-grey-100 p-6'>
         <SettingMenuItem leftText='텍스트' rightText='텍스트' />
