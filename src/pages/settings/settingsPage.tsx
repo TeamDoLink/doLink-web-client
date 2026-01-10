@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { APP_VERSION } from '@/constants/appVersion';
 import { fetchAppVersionInfo } from '@/api/appVersion';
 import { isLatestVersion } from '@/utils/versionCompare';
+import { openExternalLink } from '@/utils/openExternalLink';
 
 const SettingsPage = () => {
   const { handleTabChange } = useBottomTabNavigation();
@@ -67,10 +68,6 @@ const SettingsPage = () => {
 
     return latestCheck ? '최신 버전입니다' : '최신 버전이 아닙니다';
   }, [latestVersion, versionFetchState]);
-
-  const openExternalLink = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
 
   const handleLogoutClick = () => {
     setIsLogoutConfirmOpen(true);
