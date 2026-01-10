@@ -99,7 +99,15 @@ const SettingsPage = () => {
           </div>
 
           <div className='mt-6 overflow-hidden rounded-[16px] bg-white py-2 shadow-[0_4px_12px_rgba(0,0,0,0.03)]'>
-            <SettingMenuItem leftText='공지사항' rightText='노션(Notion)' />
+            <SettingMenuItem
+              leftText='공지사항'
+              onClick={() =>
+                openExternalLink(
+                  'https://www.notion.so/2c947f96a7fc80bbb8d4d8009d570b6a'
+                )
+              }
+              rightText='노션(Notion)'
+            />
             <SettingMenuItem leftText='고객문의' rightText='카카오 채널' />
             <GreyLine className='my-1' />
             <SettingMenuItem
