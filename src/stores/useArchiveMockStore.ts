@@ -1,15 +1,6 @@
 import { create } from 'zustand';
-import { MOCK_ARCHIVES } from '@/mocks/archiveData';
-import type { ArchiveFilterCategory } from '@/utils/archiveCategory';
-
-export type MockArchive = {
-  id: string;
-  title: string;
-  category: ArchiveFilterCategory;
-  itemCount: number;
-  images?: string[];
-  createdAt: string;
-};
+import { MOCK_ARCHIVES, type MockArchive } from '@/mocks/archiveData';
+export type { MockArchive } from '@/mocks/archiveData';
 
 type ArchiveMockStore = {
   archives: MockArchive[];

@@ -1,6 +1,6 @@
 import type { ArchiveFilterCategory } from '@/utils/archiveCategory';
 
-type MockArchive = {
+export type MockArchive = {
   id: string;
   title: string;
   category: ArchiveFilterCategory;
