@@ -1,4 +1,8 @@
 import { List } from '@/components/common';
+import {
+  ARCHIVE_CATEGORY_LABEL,
+  type ArchiveFilterCategoryKey,
+} from '@/utils/archiveCategory';
 import type { ArchiveItem } from '@/types';
 
 type ArchiveSectionProps = {
@@ -29,18 +33,24 @@ export const ArchiveSection = ({
     <section className={`mt-7 space-y-4 pb-20 ${className}`}>
       <h2 className='text-heading-sm text-black'>모음</h2>
       <div className='space-y-3'>
-        {items.map(({ id, title, category, itemCount, images }) => (
-          <List.ArchiveCard
-            key={id}
-            title={title}
-            category={category}
-            itemCount={itemCount}
-            images={images}
-            width='w-full'
-            onEditClick={() => handleEditClick(id)}
-            onDeleteClick={() => handleDeleteClick(id)}
-          />
-        ))}
+        {items.map(({ id, title, category, itemCount, images }) => {
+          const label =
+            ARCHIVE_CATEGORY_LABEL[category as ArchiveFilterCategoryKey] ??
+            category;
+
+          return (
+            <List.ArchiveCard
+              key={id}
+              title={title}
+              category={label}
+              itemCount={itemCount}
+              images={images}
+              width='w-full'
+              onEditClick={() => handleEditClick(id)}
+              onDeleteClick={() => handleDeleteClick(id)}
+            />
+          );
+        })}
       </div>
     </section>
   );

@@ -9,7 +9,7 @@ import {
 } from '@/components/archive';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { ROUTES } from '@/constants/routes';
-import { getArchiveCategoryLabel } from '@/utils/archiveCategory';
+import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import { useArchiveMockStore } from '@/stores/useArchiveMockStore';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveFilterCategoryKey[] = [
@@ -28,7 +28,7 @@ const ARCHIVE_CATEGORY_KEYS: ArchiveFilterCategoryKey[] = [
 
 const ARCHIVE_CATEGORIES = ARCHIVE_CATEGORY_KEYS.map((key) => ({
   key,
-  label: getArchiveCategoryLabel(key),
+  label: ARCHIVE_CATEGORY_LABEL[key],
 }));
 
 const ArchivePage = () => {
@@ -100,7 +100,7 @@ const ArchivePage = () => {
             <List.ArchiveCard
               key={archive.id}
               title={archive.title}
-              category={getArchiveCategoryLabel(archive.category)}
+              category={ARCHIVE_CATEGORY_LABEL[archive.category]}
               itemCount={archive.itemCount}
               images={archive.images}
               width='w-full'

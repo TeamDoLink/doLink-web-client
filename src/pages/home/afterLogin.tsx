@@ -10,7 +10,6 @@ import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
 import { useArchiveMockStore } from '@/stores/useArchiveMockStore';
 import { MOCK_TODOS } from '@/mocks/todoData';
-import { getArchiveCategoryLabel } from '@/utils/archiveCategory';
 import { ROUTES } from '@/constants/routes';
 
 // 시간 계산 함수
@@ -53,22 +52,14 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     return `좋은 ${period}이에요 😊`;
   }, []);
 
-  const latestArchiveItems = useMemo(() => {
+  const latestArchives = useMemo(() => {
     return archiveItems
       .slice()
       .sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
-      .slice(0, 8)
-      .map((archive) => ({
-        id: archive.id,
-        title: archive.title,
-        category: getArchiveCategoryLabel(archive.category),
-        itemCount: archive.itemCount,
-        images: archive.images,
-        createdAt: archive.createdAt,
-      }));
+      .slice(0, 8);
   }, [archiveItems]);
 
   const handleToggleTodo = (id: string, nextChecked: boolean) => {
@@ -148,7 +139,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
             <GreetingSection memberName={memberName} greeting={greeting} />
             <TodoSection items={todoItems} onToggle={handleToggleTodo} />
             <ArchiveSection
-              items={latestArchiveItems}
+              items={latestArchives}
               onRequestDelete={handleRequestDeleteArchive}
               onRequestEdit={handleRequestEditArchive}
             />

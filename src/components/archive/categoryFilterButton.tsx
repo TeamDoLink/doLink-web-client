@@ -23,7 +23,7 @@ import EtcUnselectedIcon from '@/assets/icons/category/home/etc-unselected.svg';
 import TipsSelectedIcon from '@/assets/icons/category/home/tips-selected.svg';
 import TipsUnselectedIcon from '@/assets/icons/category/home/tips-unselected.svg';
 import {
-  getArchiveCategoryLabel,
+  ARCHIVE_CATEGORY_LABEL,
   type ArchiveFilterCategoryKey,
 } from '@/utils/archiveCategory';
 
@@ -109,7 +109,7 @@ export const CategoryFilterButton = ({
     >
       <img
         src={iconSrc}
-        alt={label ?? getArchiveCategoryLabel(category)}
+        alt={label ?? ARCHIVE_CATEGORY_LABEL[category]}
         className='h-14 w-14'
       />
       <span
@@ -117,7 +117,7 @@ export const CategoryFilterButton = ({
           selected ? 'text-grey-900' : 'text-grey-500'
         }`}
       >
-        {label ?? getArchiveCategoryLabel(category)}
+        {label ?? ARCHIVE_CATEGORY_LABEL[category]}
       </span>
     </button>
   );

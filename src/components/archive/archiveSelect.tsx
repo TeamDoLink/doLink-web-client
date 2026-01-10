@@ -21,11 +21,11 @@ import tipsUnselected from '@/assets/icons/category/editor/tips-unselected.svg';
 import etcSelected from '@/assets/icons/category/editor/etc-selected.svg';
 import etcUnselected from '@/assets/icons/category/editor/etc-unselected.svg';
 import {
-  getArchiveCategoryLabel,
+  ARCHIVE_CATEGORY_LABEL,
   type ArchiveCategoryKey,
 } from '@/utils/archiveCategory';
 
-export type { ArchiveCategoryKey };
+export type { ArchiveCategoryKey } from '@/utils/archiveCategory';
 
 interface ArchiveSelectProps {
   selected?: ArchiveCategoryKey | null;
@@ -107,7 +107,7 @@ export const ArchiveSelect = ({ selected, onSelect }: ArchiveSelectProps) => {
       <div className='mt-3 grid grid-cols-5 gap-x-4 gap-y-6'>
         {CATEGORY_ITEMS.map(({ key, selectedIcon, unselectedIcon }) => {
           const isSelected = selected === key;
-          const label = getArchiveCategoryLabel(key);
+          const label = ARCHIVE_CATEGORY_LABEL[key];
 
           return (
             <button

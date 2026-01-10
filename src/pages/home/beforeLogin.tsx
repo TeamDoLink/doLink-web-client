@@ -11,7 +11,7 @@ import heroIllustration from '@/assets/icons/home/home1.svg';
 import { FloatingButton } from '@/components/common/button';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
-import { getArchiveCategoryLabel } from '@/utils/archiveCategory';
+import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import { formatRelativeDateLabel } from '@/utils/date';
 import { MOCK_ARCHIVES } from '@/mocks/archiveData';
 import { MOCK_TODOS } from '@/mocks/todoData';
@@ -152,7 +152,7 @@ const HomeBeforeLogin = () => {
                     <List.ArchiveCard
                       key={id}
                       title={title}
-                      category={getArchiveCategoryLabel(category)}
+                      category={ARCHIVE_CATEGORY_LABEL[category]}
                       itemCount={itemCount}
                       images={images}
                       width='w-full'
