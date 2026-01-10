@@ -19,8 +19,9 @@ export const ArchiveInput = ({
   placeholder,
   maxLength,
 }: ArchiveInputProps) => {
-  const counter = maxLength ? `${value.length}/${maxLength}` : undefined;
-  const isOverLimit = maxLength ? value.length >= maxLength : false;
+  const trimmedValue = value.trim();
+  const counter = maxLength ? `${trimmedValue.length}/${maxLength}` : undefined;
+  const isOverLimit = maxLength ? trimmedValue.length >= maxLength : false;
 
   return (
     <div className='flex flex-col'>

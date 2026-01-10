@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import closeIcon from '@/assets/icons/common/close-36.svg';
 import { Button } from '@/components/common';
 import { ArchiveInput } from './archiveInput';
-import { ArchiveSelect, type ArchiveCategoryKey } from './archiveSelect';
+import {
+  ArchiveSelect,
+  type ArchiveSelectableCategoryKey,
+} from './archiveSelect';
 
 type ArchiveBottomSheetMode = 'create' | 'edit';
 
@@ -24,8 +27,11 @@ const MODE_PRESET: Record<
 interface ArchiveBottomSheetProps {
   mode?: ArchiveBottomSheetMode;
   initialName?: string;
-  initialCategory?: ArchiveCategoryKey | null;
-  onSubmit?: (payload: { name: string; category: ArchiveCategoryKey }) => void;
+  initialCategory?: ArchiveSelectableCategoryKey | null;
+  onSubmit?: (payload: {
+    name: string;
+    category: ArchiveSelectableCategoryKey;
+  }) => void;
 }
 
 const MAX_NAME_LENGTH = 20;
@@ -41,15 +47,16 @@ export const ArchiveBottomSheet = ({
 
   const [name, setName] = useState(initialName);
   const [selectedCategory, setSelectedCategory] =
-    useState<ArchiveCategoryKey | null>(initialCategory);
+    useState<ArchiveSelectableCategoryKey | null>(initialCategory);
 
-  const isSubmittable = name.trim().length > 0 && selectedCategory !== null;
+  const trimmedName = name.trim();
+  const isSubmittable = trimmedName.length > 0 && selectedCategory !== null;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!isSubmittable || selectedCategory === null) return;
 
-    onSubmit?.({ name: name.trim(), category: selectedCategory });
+    onSubmit?.({ name: trimmedName, category: selectedCategory });
   };
 
   const handleClose = () => {
