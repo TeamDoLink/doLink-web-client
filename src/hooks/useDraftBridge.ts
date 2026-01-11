@@ -201,6 +201,7 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
       data?: unknown
     ): Promise<R | null> => {
       return new Promise<R | null>((resolve, reject) => {
+        let timeout: number | null = null;
         try {
           setIsLoading(true);
           setError(null);
@@ -247,7 +248,7 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
           webView.postMessage(JSON.stringify(message));
 
           // postMessage 성공 후 타임아웃 설정 (10초)
-          const timeout = setTimeout(() => {
+          timeout = setTimeout(() => {
             pendingPromisesRef.current.delete(type);
             setIsLoading(pendingPromisesRef.current.size > 0);
             const err = new DraftBridgeError('Request timeout', 'TIMEOUT');
@@ -262,6 +263,13 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
             timeout,
           });
         } catch (err) {
+          // timeout 취소 + Map 엔트리 제거
+          if (timeout !== null) {
+            clearTimeout(timeout);
+          }
+          pendingPromisesRef.current.delete(type);
+          setIsLoading(pendingPromisesRef.current.size > 0);
+
           const draftError =
             err instanceof DraftBridgeError
               ? err
