@@ -10,8 +10,7 @@
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "prepare": "husky",
-    "host": "vite --host"
+    "prepare": "husky"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

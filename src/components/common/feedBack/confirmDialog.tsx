@@ -29,14 +29,16 @@ export default function ConfirmDialog({
       <div className='flex w-full flex-col items-center gap-3'>
         {/* Primary CTA Button */}
         <button
+          type='button'
           onClick={onPositive}
-          className='text-body-xl flex h-11 w-full items-center justify-center rounded-[10px] bg-point text-white'
+          className='flex h-11 w-full items-center justify-center rounded-[10px] bg-point text-body-xl text-white'
         >
           {positiveLabel}
         </button>
 
         {/* Secondary Text Button */}
         <button
+          type='button'
           onClick={onNegative}
           className='w-full text-center text-body-md text-grey-800'
         >

@@ -1,3 +1,5 @@
+import type { ChangeEvent } from 'react';
+
 /**
  * TextInputField 컴포넌트의 Props 타입
  * 다양한 상태의 텍스트 입력 필드를 지원합니다.
@@ -47,7 +49,7 @@ export default function TextInputField({
   name,
   readOnly = false,
 }: TextInputFieldProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange?.(e.target.value);
   };
 
