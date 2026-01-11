@@ -63,7 +63,9 @@ function TaskCreatePage() {
   useEffect(() => {
     const restoreDraft = async () => {
       // location.state로 전달된 restoreDraft 확인
-      const shouldRestore = location.state?.restoreDraft;
+      const shouldRestore = (
+        location.state as { restoreDraft?: boolean } | null | undefined
+      )?.restoreDraft;
 
       if (shouldRestore === false) {
         // 새로 작성 선택 시 임시저장 삭제
@@ -72,6 +74,7 @@ function TaskCreatePage() {
         } catch (err) {
           console.error('임시저장 삭제 실패:', err);
         }
+
         return;
       }
 
@@ -104,7 +107,7 @@ function TaskCreatePage() {
 
     restoreDraft();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [location.state]);
 
   /**
    * 제목 입력필드 focus 핸들러
@@ -189,6 +192,7 @@ function TaskCreatePage() {
       console.log('임시저장 완료:', draftData);
     } catch (err) {
       console.error('임시저장 실패:', err);
+      throw err;
     }
   };
 
@@ -230,26 +234,7 @@ function TaskCreatePage() {
     }
   };
 
-  const checkHasDraft = async () => {
-    try {
-      return (await loadDraft(DRAFT_KEY)) !== null;
-    } catch (err) {
-      console.error('임시저장 확인 실패:', err);
-      return false;
-    }
-  };
-
   const hanldeCancel = async () => {
-    const hasDraft = await checkHasDraft();
-
-    if (hasDraft) {
-      // 새로 작성 선택 시 임시저장 삭제
-      try {
-        await deleteDraft(DRAFT_KEY);
-      } catch (err) {
-        console.error('임시저장 삭제 실패:', err);
-      }
-    }
     setShowConfirmDialog(false);
     navigate(-1);
   };
