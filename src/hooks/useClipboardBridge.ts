@@ -68,10 +68,12 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
     /**
      * 메시지 핸들러 - Native로부터 수신
      */
-    const handleMessage = (event: MessageEvent<unknown>): void => {
+    const handleMessage = (event: Event): void => {
+      if (!(event instanceof MessageEvent)) return;
+      const messageEvent = event as MessageEvent<unknown>;
       try {
         // 데이터 추출
-        const data = event.data;
+        const data = messageEvent.data;
         if (!data) {
           return;
         }
@@ -162,9 +164,9 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
       }
     };
 
+    // 플랫폼별 이벤트 타겟 설정 (iOS: window, Android: document)
     const platform = detectPlatform();
-    const receiver =
-      platform === 'ios' ? window : (document as unknown as Window);
+    const receiver: EventTarget = platform === 'ios' ? window : document;
 
     receiver.addEventListener('message', handleMessage);
 
