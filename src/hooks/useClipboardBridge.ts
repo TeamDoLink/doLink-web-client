@@ -57,15 +57,10 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
      */
     const handleMessage = (event: MessageEvent<unknown>): void => {
       try {
-        setError(null);
-
         // 데이터 추출
         const data = event.data;
         if (!data) {
-          throw new ClipboardBridgeError(
-            'Empty message received',
-            'INVALID_MESSAGE'
-          );
+          return;
         }
 
         // JSON 파싱
@@ -74,10 +69,8 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
           try {
             message = JSON.parse(data);
           } catch (parseError) {
-            throw new ClipboardBridgeError(
-              `Failed to parse message: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`,
-              'INVALID_MESSAGE'
-            );
+            console.log('[useClipboardBridge] JSON parse error:', parseError);
+            return;
           }
         } else {
           message = data;
@@ -89,16 +82,28 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
           return;
         }
 
+        // Only clear error for clipboard messages
+        setError(null);
+
         // 메시지 타입별 처리
         if (isClipboardDataMessage(message)) {
           const { payload } = message;
           if (!payload) {
             // 클립보드가 비어있을 시
             setHasClipboardLink(false);
+            setIsLoading(false);
             return;
           }
 
-          const text = message.payload?.trim();
+          // Validate payload is a string before trimming
+          if (typeof payload !== 'string') {
+            setHasClipboardLink(false);
+            setClipboardLinkValue('');
+            setIsLoading(false);
+            return;
+          }
+
+          const text = payload.trim();
 
           // 링크 유효성 검사
           if (isValidUrl(text)) {
@@ -108,6 +113,7 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
             setHasClipboardLink(false);
             setClipboardLinkValue('');
           }
+          setIsLoading(false);
           return;
         }
 
@@ -117,7 +123,12 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
             'MESSAGE_FAILED'
           );
           setError(clipboardError);
+          setIsLoading(false);
+          return;
         }
+
+        // If we reach here, it's a clipboard message but not a recognized type
+        setIsLoading(false);
       } catch (err) {
         const clipboardError =
           err instanceof ClipboardBridgeError
@@ -127,10 +138,8 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
                 'INVALID_MESSAGE'
               );
         setError(clipboardError);
-
-        console.error('[useClipboardBridge] Error:', clipboardError);
-      } finally {
         setIsLoading(false);
+        console.error('[useClipboardBridge] Error:', clipboardError);
       }
     };
 
