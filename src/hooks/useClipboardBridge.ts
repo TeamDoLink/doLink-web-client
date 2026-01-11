@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   isClipboardDataMessage,
   isClipboardErrorMessage,
@@ -6,35 +6,6 @@ import {
 } from '@/types/clipboard';
 import { detectPlatform, getWebView } from '@/utils/webview';
 import { isValidUrl } from '@/utils/validation';
-
-// TODO RN과 타입 연동 필요
-/**
- * 클립보드 요청 타임아웃 (ms)
- */
-const CLIPBOARD_TIMEOUT = 5000;
-/**
- * 클립보드 에러 타입
- */
-export class ClipboardBridgeError extends Error {
-  code:
-    | 'WEBVIEW_NOT_AVAILABLE'
-    | 'INVALID_MESSAGE'
-    | 'MESSAGE_FAILED'
-    | 'TIMEOUT';
-
-  constructor(
-    message: string,
-    code:
-      | 'WEBVIEW_NOT_AVAILABLE'
-      | 'INVALID_MESSAGE'
-      | 'MESSAGE_FAILED'
-      | 'TIMEOUT'
-  ) {
-    super(message);
-    this.name = 'ClipboardBridgeError';
-    this.code = code;
-  }
-}
 
 /**
  * useClipboardBridge Hook의 반환 타입
@@ -44,7 +15,6 @@ interface UseClipboardBridgeReturn {
   requestClipboard: () => void;
   hasClipboardLink: boolean;
   isLoading: boolean;
-  error: ClipboardBridgeError | null;
 }
 
 /**
@@ -52,14 +22,12 @@ interface UseClipboardBridgeReturn {
  * React Native WebView와 클립보드 통신을 관리합니다.
  *
  * @example
- * const { linkValue, requestClipboard, isLoading, error } = useClipboardBridge();
+ * const { clipboardLinkValue, requestClipboard, hasClipboardLink, isLoading } = useClipboardBridge();
  */
 export const useClipboardBridge = (): UseClipboardBridgeReturn => {
   const [clipboardLinkValue, setClipboardLinkValue] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<ClipboardBridgeError | null>(null);
   const [hasClipboardLink, setHasClipboardLink] = useState<boolean>(false);
-  const timeoutRef = useRef<number | null>(null);
 
   /**
    * 메시지 리스너 등록/정리
@@ -84,39 +52,29 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
           try {
             message = JSON.parse(data);
           } catch (parseError) {
-            console.log('[useClipboardBridge] JSON parse error:', parseError);
+            console.log('[useClipboardBridge] JSON 파싱 에러:', parseError);
             return;
           }
         } else {
           message = data;
         }
 
-        // 메시지 유효성 검증
-        // clipboard 관련 메시지만 처리하게 함
+        // 메시지 유효성 검증 - clipboard 관련 메시지만 처리
         if (!isClipboardMessage(message)) {
           return;
         }
-
-        // 클립보드 메시지 수신 시 타임아웃 정리
-        if (timeoutRef.current !== null) {
-          clearTimeout(timeoutRef.current);
-          timeoutRef.current = null;
-        }
-
-        // Only clear error for clipboard messages
-        setError(null);
 
         // 메시지 타입별 처리
         if (isClipboardDataMessage(message)) {
           const { payload } = message;
           if (!payload) {
-            // 클립보드가 비어있을 시
+            // 클립보드가 비어있을 경우
             setHasClipboardLink(false);
             setIsLoading(false);
             return;
           }
 
-          // Validate payload is a string before trimming
+          // payload가 문자열인지 검증
           if (typeof payload !== 'string') {
             setHasClipboardLink(false);
             setClipboardLinkValue('');
@@ -139,28 +97,23 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
         }
 
         if (isClipboardErrorMessage(message)) {
-          const clipboardError = new ClipboardBridgeError(
-            message.error || 'Unknown clipboard error',
-            'MESSAGE_FAILED'
+          // 클립보드 에러는 조용히 처리 (개발자 콘솔에만 기록)
+          console.error(
+            '[useClipboardBridge] 클립보드 에러:',
+            message.error || 'Unknown clipboard error'
           );
-          setError(clipboardError);
           setIsLoading(false);
+          setHasClipboardLink(false);
           return;
         }
 
-        // If we reach here, it's a clipboard message but not a recognized type
+        // 인식되지 않은 클립보드 메시지 타입
         setIsLoading(false);
       } catch (err) {
-        const clipboardError =
-          err instanceof ClipboardBridgeError
-            ? err
-            : new ClipboardBridgeError(
-                err instanceof Error ? err.message : 'Unknown error',
-                'INVALID_MESSAGE'
-              );
-        setError(clipboardError);
+        // 메시지 처리 중 에러 발생 시 조용히 처리 (개발자 콘솔에만 기록)
+        console.error('[useClipboardBridge] 메시지 처리 에러:', err);
         setIsLoading(false);
-        console.error('[useClipboardBridge] Error:', clipboardError);
+        setHasClipboardLink(false);
       }
     };
 
@@ -172,10 +125,6 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
 
     return () => {
       receiver.removeEventListener('message', handleMessage);
-      if (timeoutRef.current !== null) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
     };
   }, []);
 
@@ -185,33 +134,16 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
   const requestClipboard = useCallback((): void => {
     try {
       setIsLoading(true);
-      setError(null);
-
-      // 기존 타임아웃 정리
-      if (timeoutRef.current !== null) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      // 타임아웃 시작
-      timeoutRef.current = window.setTimeout(() => {
-        setIsLoading(false);
-        setError(new ClipboardBridgeError('Request timed out', 'TIMEOUT'));
-        timeoutRef.current = null;
-      }, CLIPBOARD_TIMEOUT);
 
       const webView = getWebView();
       if (!webView) {
-        const err = new ClipboardBridgeError(
-          'React Native WebView is not available',
-          'WEBVIEW_NOT_AVAILABLE'
+        // WebView가 없을 경우 조용히 처리 (개발자 콘솔에만 기록)
+        console.error(
+          '[useClipboardBridge] React Native WebView를 사용할 수 없습니다'
         );
-        setError(err);
         setIsLoading(false);
-        if (timeoutRef.current !== null) {
-          clearTimeout(timeoutRef.current);
-          timeoutRef.current = null;
-        }
-        throw err;
+        setHasClipboardLink(false);
+        return;
       }
 
       webView.postMessage(
@@ -220,20 +152,10 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
         })
       );
     } catch (err) {
-      const clipboardError =
-        err instanceof ClipboardBridgeError
-          ? err
-          : new ClipboardBridgeError(
-              err instanceof Error ? err.message : 'Unknown error',
-              'WEBVIEW_NOT_AVAILABLE'
-            );
-      setError(clipboardError);
+      // 클립보드 요청 실패 시 조용히 처리 (개발자 콘솔에만 기록)
+      console.error('[useClipboardBridge] 클립보드 요청 실패:', err);
       setIsLoading(false);
-      if (timeoutRef.current !== null) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-      console.error('[useClipboardBridge] Request failed:', clipboardError);
+      setHasClipboardLink(false);
     }
   }, []);
 
@@ -242,6 +164,5 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
     requestClipboard,
     hasClipboardLink,
     isLoading,
-    error,
   };
 };
