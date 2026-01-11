@@ -236,7 +236,6 @@ function TaskCreatePage() {
 
   const hanldeCancel = async () => {
     setShowConfirmDialog(false);
-    navigate(-1);
   };
 
   /**
