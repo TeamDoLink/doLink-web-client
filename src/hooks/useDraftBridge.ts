@@ -111,15 +111,29 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
           return;
         }
 
-        // 메시지 유효성 검증
-        if (!isDraftSuccess(response)) {
-          console.error('[useDraftBridge] Invalid response type:', response);
-          return;
-        }
-
         // 메시지 타입으로 해당 요청의 Promise resolver 가져오기
         const messageType = response.type;
         const pending = pendingPromisesRef.current.get(messageType);
+
+        // 메시지 유효성 검증
+        if (!isDraftSuccess(response)) {
+          console.error('[useDraftBridge] Invalid response format');
+
+          if (pending) {
+            clearTimeout(pending.timeout); // 1. 타임아웃 즉시 취소
+            pendingPromisesRef.current.delete(messageType); // 2. Map에서 제거
+            setIsLoading(pendingPromisesRef.current.size > 0); // 3. 로딩 상태 업데이트
+
+            const error = new DraftBridgeError(
+              'Invalid response format',
+              'INVALID_MESSAGE'
+            );
+            setError(error); // 4. 에러 상태 설정
+            pending.reject(error); // 5. Promise 즉시 reject
+          }
+
+          return;
+        }
         if (!pending) {
           console.error(
             '[useDraftBridge] No pending promise for:',
@@ -146,11 +160,9 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
           );
           setError(error);
           pending.reject(error);
-          alert(`error : ${event.data}`);
         }
       } catch (err) {
         console.error('[useDraftBridge] Error handling message:', err);
-        alert(`[useDraftBridge] Error handling message: : ${event.data}`);
       }
     };
 
@@ -203,6 +215,12 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
             return;
           }
 
+          // TODO: 설계 개선 필요
+          // 현재 문제: 메시지 타입만을 키로 사용하여 같은 타입의 요청을 동시에 보낼 수 없음
+          // 예: saveDraft('key1')과 saveDraft('key2')를 동시에 호출 불가
+          // 해결 방안:
+          // 1. Native 응답에 key 포함 → 복합 키 사용 (type:key)
+          // 2. requestId 패턴 도입 → 각 요청에 고유 ID 부여
           // 동일한 타입의 요청이 이미 대기 중이면 거부
           if (pendingPromisesRef.current.has(type)) {
             const err = new DraftBridgeError(
