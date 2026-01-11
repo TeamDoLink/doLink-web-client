@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   isClipboardDataMessage,
   isClipboardErrorMessage,
@@ -9,14 +9,26 @@ import { isValidUrl } from '@/utils/validation';
 
 // TODO RN과 타입 연동 필요
 /**
+ * 클립보드 요청 타임아웃 (ms)
+ */
+const CLIPBOARD_TIMEOUT = 5000;
+/**
  * 클립보드 에러 타입
  */
 export class ClipboardBridgeError extends Error {
-  code: 'WEBVIEW_NOT_AVAILABLE' | 'INVALID_MESSAGE' | 'MESSAGE_FAILED';
+  code:
+    | 'WEBVIEW_NOT_AVAILABLE'
+    | 'INVALID_MESSAGE'
+    | 'MESSAGE_FAILED'
+    | 'TIMEOUT';
 
   constructor(
     message: string,
-    code: 'WEBVIEW_NOT_AVAILABLE' | 'INVALID_MESSAGE' | 'MESSAGE_FAILED'
+    code:
+      | 'WEBVIEW_NOT_AVAILABLE'
+      | 'INVALID_MESSAGE'
+      | 'MESSAGE_FAILED'
+      | 'TIMEOUT'
   ) {
     super(message);
     this.name = 'ClipboardBridgeError';
@@ -47,6 +59,7 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<ClipboardBridgeError | null>(null);
   const [hasClipboardLink, setHasClipboardLink] = useState<boolean>(false);
+  const timeoutRef = useRef<number | null>(null);
 
   /**
    * 메시지 리스너 등록/정리
@@ -80,6 +93,12 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
         // clipboard 관련 메시지만 처리하게 함
         if (!isClipboardMessage(message)) {
           return;
+        }
+
+        // 클립보드 메시지 수신 시 타임아웃 정리
+        if (timeoutRef.current !== null) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
         }
 
         // Only clear error for clipboard messages
@@ -151,6 +170,10 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
 
     return () => {
       receiver.removeEventListener('message', handleMessage);
+      if (timeoutRef.current !== null) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -162,6 +185,18 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
       setIsLoading(true);
       setError(null);
 
+      // 기존 타임아웃 정리
+      if (timeoutRef.current !== null) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      // 타임아웃 시작
+      timeoutRef.current = window.setTimeout(() => {
+        setIsLoading(false);
+        setError(new ClipboardBridgeError('Request timed out', 'TIMEOUT'));
+        timeoutRef.current = null;
+      }, CLIPBOARD_TIMEOUT);
+
       const webView = getWebView();
       if (!webView) {
         const err = new ClipboardBridgeError(
@@ -170,6 +205,10 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
         );
         setError(err);
         setIsLoading(false);
+        if (timeoutRef.current !== null) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
         throw err;
       }
 
@@ -188,6 +227,10 @@ export const useClipboardBridge = (): UseClipboardBridgeReturn => {
             );
       setError(clipboardError);
       setIsLoading(false);
+      if (timeoutRef.current !== null) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       console.error('[useClipboardBridge] Request failed:', clipboardError);
     }
   }, []);

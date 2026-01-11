@@ -233,7 +233,18 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
             return;
           }
 
-          // Timeout 설정 (10초)
+          // 메시지 전송 (timeout 등록 전에 먼저 전송)
+          const message: WebViewMessage = {
+            type,
+            payload: {
+              key,
+              data,
+            },
+          };
+
+          webView.postMessage(JSON.stringify(message));
+
+          // postMessage 성공 후 타임아웃 설정 (10초)
           const timeout = setTimeout(() => {
             pendingPromisesRef.current.delete(type);
             setIsLoading(pendingPromisesRef.current.size > 0);
@@ -248,17 +259,6 @@ export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
             reject,
             timeout,
           });
-
-          // 메시지 전송
-          const message: WebViewMessage = {
-            type,
-            payload: {
-              key,
-              data,
-            },
-          };
-
-          webView.postMessage(JSON.stringify(message));
         } catch (err) {
           const draftError =
             err instanceof DraftBridgeError
