@@ -9,3 +9,21 @@ export interface ReactNativeWebView {
     handler: (event: Event) => void
   ) => void;
 }
+
+/**
+ * WebView에서 App으로 전송하는 메시지
+ */
+export interface WebViewMessage<T = unknown> {
+  type: DraftMessageType;
+  payload: DraftPayload<T>;
+}
+
+/**
+ * App에서 WebView로 전송하는 응답
+ */
+export interface AppResponse<T = unknown> {
+  type: DraftMessageType;
+  success: boolean;
+  data?: T;
+  error?: string;
+}

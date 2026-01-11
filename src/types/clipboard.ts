@@ -42,11 +42,10 @@ export const isClipboardMessage = (data: unknown): data is ClipboardMessage => {
   }
 
   const obj = data as Record<string, unknown>;
-  return (
-    obj.type === 'clipboard:data' ||
-    obj.type === 'clipboard:error' ||
-    obj.type === 'clipboard:read'
-  );
+  if (obj.type === 'clipboard:data') return typeof obj.payload === 'string';
+  if (obj.type === 'clipboard:error') return typeof obj.error === 'string';
+  if (obj.type === 'clipboard:read') return true;
+  return false;
 };
 
 /**

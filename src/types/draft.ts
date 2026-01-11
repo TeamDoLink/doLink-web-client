@@ -1,3 +1,4 @@
+export { type ReactNativeWebView } from './native';
 /**
  * React Native WebView와의 Draft 통신 관련 타입 정의
  */
@@ -46,34 +47,42 @@ export interface AppResponse<T = unknown> {
 }
 
 /**
- * React Native WebView의 postMessage 인터페이스
+ * Draft 메시지 타입을 가진 객체
  */
-export interface ReactNativeWebView {
-  postMessage: (message: string) => void;
-  addEventListener?: (event: string, handler: (event: Event) => void) => void;
-  removeEventListener?: (
-    event: string,
-    handler: (event: Event) => void
-  ) => void;
+export interface DraftMessage {
+  type: DraftMessageType;
 }
 
-export const isDraftMessageType = (data: unknown): data is AppResponse => {
+/**
+ * Success 필드를 포함한 Draft 응답
+ */
+export interface DraftSuccessCheck {
+  success: boolean;
+  data?: unknown;
+  error?: string;
+}
+
+/**
+ * 메시지가 유효한 Draft 메시지 타입을 가지고 있는지 확인
+ */
+export const isDraftMessageType = (data: unknown): data is DraftMessage => {
   if (typeof data !== 'object' || data === null) {
     return false;
   }
 
   const obj = data as Record<string, unknown>;
   return (
-    obj.type === 'SAVE_DRAFT' ||
-    obj.type === 'LOAD_DRAFT' ||
-    obj.type === 'DELETE_DRAFT'
+    typeof obj.type === 'string' &&
+    (obj.type === 'SAVE_DRAFT' ||
+      obj.type === 'LOAD_DRAFT' ||
+      obj.type === 'DELETE_DRAFT')
   );
 };
 
 /**
- * 메시지가 success AppResponse인지 확인
+ * 메시지가 success 필드를 포함하는지 확인
  */
-export const isDraftSuccess = (data: unknown): data is AppResponse => {
+export const isDraftSuccess = (data: unknown): data is DraftSuccessCheck => {
   if (typeof data !== 'object' || data === null) {
     return false;
   }
