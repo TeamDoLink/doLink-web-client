@@ -46,6 +46,7 @@ const MOCK_TASK_DATA = {
 const TaskDetailPage = () => {
   const navigate = useNavigate();
   const [isCompleted, setIsCompleted] = useState(MOCK_TASK_DATA.isCompleted);
+  const [imageError, setImageError] = useState(false);
   const [appBarHeight, setAppBarHeight] = useState(56); // 초기값: 앱바 예상 높이
   const [bottomHeight, setBottomHeight] = useState(104); // 초기값: 하단 버튼 영역 예상 높이
   const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
@@ -140,18 +141,13 @@ const TaskDetailPage = () => {
           className='sticky z-0 h-40 w-full shrink-0 overflow-hidden bg-grey-200'
           style={{ top: `${appBarHeight}px` }}
         >
-          {MOCK_TASK_DATA.thumbnail ? (
+          {MOCK_TASK_DATA.thumbnail && !imageError ? (
             <img
               src={MOCK_TASK_DATA.thumbnail}
               alt='task thumbnail'
               className='h-full w-full object-cover'
-              onError={(e) => {
-                // 이미지 로드 실패 시 기본 이미지로 대체
-                e.currentTarget.style.display = 'none';
-                const parent = e.currentTarget.parentElement;
-                if (parent) {
-                  parent.innerHTML = `<div class='flex h-full w-full items-center justify-center'><img src='${imgNoData}' alt='no image' class='h-auto w-auto' /></div>`;
-                }
+              onError={() => {
+                setImageError(true);
               }}
             />
           ) : (
