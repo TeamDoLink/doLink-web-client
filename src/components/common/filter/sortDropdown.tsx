@@ -13,7 +13,7 @@ export default function SortDropdown<T extends string = string>({
   options,
 }: SortDropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState(value ?? (options[0]?.value as T));
+  const [selected, setSelected] = useState<T | undefined>(value ?? (options[0]?.value as T | undefined));
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
