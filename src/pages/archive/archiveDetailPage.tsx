@@ -372,17 +372,17 @@ const ArchiveDetailPage = () => {
 
   // createdAt별로 링크를 필터링, 정렬, 그룹화
   const groupedLinks = useMemo(() => {
-    // 1. 필터링
+    // 1. 필터링 - linkStates를 기준으로 필터링하여 실시간 체크 상태 반영
     let filtered: Task[];
     switch (selectedTab) {
       case 'all':
         filtered = taskList;
         break;
       case 'incomplete':
-        filtered = taskList.filter((task) => !task.status);
+        filtered = taskList.filter((task) => !linkStates[task.taskId]);
         break;
       case 'complete':
-        filtered = taskList.filter((task) => task.status);
+        filtered = taskList.filter((task) => linkStates[task.taskId]);
         break;
       default:
         filtered = taskList;
@@ -405,7 +405,7 @@ const ArchiveDetailPage = () => {
     });
 
     return result;
-  }, [taskList, selectedTab, sortOption]);
+  }, [taskList, selectedTab, sortOption, linkStates]);
 
   const hasData = groupedLinks.length > 0;
 
