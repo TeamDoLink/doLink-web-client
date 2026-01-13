@@ -175,6 +175,14 @@ const setupLinkResponseListener = (() => {
             } else {
               pending.reject(message);
             }
+          } else {
+            console.warn(
+              `No pending request found for ${message.type}`,
+              'URL:',
+              url,
+              'Available pending URLs:',
+              Array.from(pendingLinkRequests.keys())
+            );
           }
         }
       } catch (error) {
