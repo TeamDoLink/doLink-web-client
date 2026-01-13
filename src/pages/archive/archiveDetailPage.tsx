@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { BackDetailBar } from '@/components/common/appBar';
 import { EmptyNotice } from '@/components/common/feedBack';
 import { FloatingButton } from '@/components/common/button/floatingButton';
@@ -252,6 +252,9 @@ const archiveData = {
 };
 
 const ArchiveDetailPage = () => {
+  // TODO API 호출로 id에 해당하는 모음 데이터 받아오기
+  const { id } = useParams<{ id: string }>();
+
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState<TabType>('all');
   const [sortOption, setSortOption] = useState<SortOption>('newest');
