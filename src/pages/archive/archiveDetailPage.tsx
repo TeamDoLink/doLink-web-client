@@ -265,21 +265,31 @@ const ArchiveDetailPage = () => {
   // 나중에 API로 데이터 받을 예정이면
   const [taskList, setTaskList] = useState<Task[]>([]);
 
+  // 각 링크의 완료/미완료 상태 관리
+  const [linkStates, setLinkStates] = useState<Record<number, boolean>>({});
+  // 각 링크의 편집 모드 상태 관리
+  const [linkEditModes, setLinkEditModes] = useState<Record<number, boolean>>(
+    {}
+  );
+
   // TODO API 호출 값 받아오기
   useEffect(() => {
     // API 호출 시 그대로 사용
     setTaskList(MOCK_TASK_ITEM);
+    // taskList 변경 시 linkStates와 linkEditModes도 초기화
+    setLinkStates(
+      MOCK_TASK_ITEM.reduce(
+        (acc, task) => ({ ...acc, [task.taskId]: task.status }),
+        {}
+      )
+    );
+    setLinkEditModes(
+      MOCK_TASK_ITEM.reduce(
+        (acc, task) => ({ ...acc, [task.taskId]: false }),
+        {}
+      )
+    );
   }, []);
-
-  const [linkStates, setLinkStates] = useState<Record<number, boolean>>(
-    MOCK_TASK_ITEM.reduce(
-      (acc, link) => ({ ...acc, [link.taskId]: link.status }),
-      {}
-    )
-  );
-  const [linkEditModes, setLinkEditModes] = useState<Record<number, boolean>>(
-    MOCK_TASK_ITEM.reduce((acc, link) => ({ ...acc, [link.taskId]: false }), {})
-  );
 
   const handleLinkCheck = (id: number, checked: boolean) => {
     setLinkStates((prev) => ({ ...prev, [id]: checked }));
