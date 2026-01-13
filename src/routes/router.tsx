@@ -15,8 +15,7 @@ const AppRouter = () => {
       <Route path='/archives' element={<ArchivePage />} />
       <Route path='/settings' element={<SettingsPage />} />
 
-      {/* TODO 추후 id 생성*/}
-      <Route path='/archives/detail' element={<ArchiveDetailPage />} />
+      <Route path='/archives/detail/:id' element={<ArchiveDetailPage />} />
 
       {/* 공통 컴포넌트 테스트 페이지 */}
       <Route path='/test' element={<Test />} />
