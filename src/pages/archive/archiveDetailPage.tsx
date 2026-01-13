@@ -504,7 +504,7 @@ const ArchiveDetailPage = () => {
                   const task = tasks.find((t) => t.taskId === taskId);
                   if (task && task.link) {
                     console.log('원본 클릭:', task.title);
-                    window.open(task.link, '_blank');
+                    window.open(task.link, '_blank', 'noopener,noreferrer');
                   }
                 }}
                 onShareClick={(taskId) => {
