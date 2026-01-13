@@ -178,8 +178,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: null,
     status: true,
     inout: false,
-    createdAt: '2025-02-23T14:00:00',
-    modifiedAt: '2025-02-24T10:30:00',
+    createdAt: '2026-02-23T14:00:00',
+    modifiedAt: '2026-02-24T10:30:00',
   },
   {
     taskId: 115,
@@ -188,8 +188,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: 'service 중심',
     status: false,
     inout: true,
-    createdAt: '2025-02-24T15:40:00',
-    modifiedAt: '2025-02-24T15:40:00',
+    createdAt: '2026-02-24T15:40:00',
+    modifiedAt: '2026-02-24T15:40:00',
   },
   {
     taskId: 116,
@@ -198,8 +198,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: null,
     status: true,
     inout: false,
-    createdAt: '2025-02-25T11:10:00',
-    modifiedAt: '2025-02-26T09:55:00',
+    createdAt: '2026-02-25T11:10:00',
+    modifiedAt: '2026-02-26T09:55:00',
   },
   {
     taskId: 117,
@@ -208,8 +208,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: 'GitHub Actions',
     status: false,
     inout: true,
-    createdAt: '2025-02-26T16:30:00',
-    modifiedAt: '2025-02-26T16:30:00',
+    createdAt: '2026-02-26T16:30:00',
+    modifiedAt: '2026-02-26T16:30:00',
   },
   {
     taskId: 118,
@@ -218,8 +218,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: null,
     status: true,
     inout: false,
-    createdAt: '2025-02-27T10:00:00',
-    modifiedAt: '2025-02-28T13:20:00',
+    createdAt: '2026-02-27T10:00:00',
+    modifiedAt: '2026-02-28T13:20:00',
   },
   {
     taskId: 119,
@@ -228,8 +228,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: 'rollback 고려',
     status: false,
     inout: true,
-    createdAt: '2025-02-28T15:00:00',
-    modifiedAt: '2025-02-28T15:00:00',
+    createdAt: '2026-02-28T15:00:00',
+    modifiedAt: '2026-02-28T15:00:00',
   },
   {
     taskId: 120,
@@ -238,8 +238,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: null,
     status: true,
     inout: false,
-    createdAt: '2025-03-01T09:30:00',
-    modifiedAt: '2025-03-02T11:45:00',
+    createdAt: '2024-03-01T09:30:00',
+    modifiedAt: '2024-03-02T11:45:00',
   },
 ];
 

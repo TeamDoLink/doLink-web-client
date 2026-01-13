@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import imgEditIcon from '@/assets/icons/common/edit-24.svg';
 import imgDeleteIcon from '@/assets/icons/common/delete-24.svg';
 import imgNoData from '@/assets/icons/common/no-img-data.svg';
