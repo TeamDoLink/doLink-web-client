@@ -391,7 +391,7 @@ const ArchiveDetailPage = () => {
     const grouped = new Map<string, Task[]>();
 
     filtered.forEach((link) => {
-      const key = link.createdAt;
+      const key = link.createdAt.split('T')[0];
       if (!grouped.has(key)) {
         grouped.set(key, []);
       }
