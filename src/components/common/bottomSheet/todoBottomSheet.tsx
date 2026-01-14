@@ -4,7 +4,7 @@ import { BaseBottomSheet } from '@/components/common/bottomSheet/baseBottomSheet
 
 interface TodoBottomSheetProps extends PropsWithChildren {
   title: string;
-  onClickAddCollection?: () => void;
+  onClickAddCollection: () => void;
   onClose?: () => void;
   dismissThreshold?: number;
 }
