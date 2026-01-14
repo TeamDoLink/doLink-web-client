@@ -66,17 +66,18 @@ const TodoBottomSheetShowcase = () => {
 
 const ArchiveAddBottomSheetShowcase = () => {
   const [open, setOpen] = useState(true);
+  const handleClose = () => setOpen(false);
 
   return (
     <div className='flex w-full max-w-md flex-col gap-4 rounded-3xl bg-grey-100 p-6'>
       {open ? (
         <ArchiveAddBottomSheet
           title='모음 추가'
-          onClickBack={() => setOpen(false)}
+          onClickBack={handleClose}
           onClickSave={() => undefined}
           onClickSearch={() => undefined}
           onClickOption={() => undefined}
-          onClose={() => setOpen(false)}
+          onClose={handleClose}
         >
           <div className='flex flex-col gap-2 rounded-2xl bg-grey-50 p-4 text-body-sm text-grey-600'>
             <p>모음 추가 바텀시트 레이아웃입니다.</p>
