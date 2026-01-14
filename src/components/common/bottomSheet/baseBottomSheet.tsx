@@ -49,13 +49,21 @@ export const BaseBottomSheet = ({
     if (!isDragging) return;
     event.currentTarget.releasePointerCapture(event.pointerId);
 
-    const shouldDismiss = dragOffset > dismissThreshold;
+    const currentDelta =
+      startYRef.current === null
+        ? 0
+        : Math.max(0, event.clientY - startYRef.current);
+    const shouldDismiss = currentDelta > dismissThreshold;
     setIsDragging(false);
     startYRef.current = null;
 
     if (shouldDismiss) {
-      setIsClosing(true);
       const sheetHeight = sheetRef.current?.offsetHeight ?? 0;
+      if (!sheetHeight) {
+        onClose();
+        return;
+      }
+      setIsClosing(true);
       setDragOffset(sheetHeight);
     } else {
       setDragOffset(0);
@@ -86,7 +94,7 @@ export const BaseBottomSheet = ({
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerEnd}
           onPointerCancel={handlePointerEnd}
-          className='h-1 w-12 cursor-grab rounded-[2px] bg-[#D2D9DD] active:cursor-grabbing'
+          className='h-1 w-12 cursor-grab touch-none rounded-[2px] bg-[#D2D9DD] active:cursor-grabbing'
         />
       </div>
 
