@@ -16,7 +16,7 @@ interface ArchiveAddBottomSheetProps extends PropsWithChildren {
 }
 
 /**
- * 모음 관련 바텀시트 헤더 컴포넌트
+ * 모음 관련 전체 바텀시트 컴포넌트
  * - 드래그로 닫기 가능
  * - 뒤로, 임시저장(optional), 검색(optional), 옵션(optional) 버튼 제공
  */
