@@ -9,12 +9,6 @@
   }
 }
 
-.loading-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
 .loading-spinner {
   width: 44px;
   height: 44px;
