@@ -5,7 +5,7 @@ import { BaseBottomSheet } from '@/components/common/bottomSheet/baseBottomSheet
 interface TodoBottomSheetProps extends PropsWithChildren {
   title: string;
   onClickAddCollection: () => void;
-  onClose?: () => void;
+  onClose: () => void;
   dismissThreshold?: number;
 }
 
@@ -21,11 +21,9 @@ export const TodoBottomSheet = ({
   dismissThreshold = 80,
   children,
 }: TodoBottomSheetProps) => {
-  const handleClose = onClose ?? (() => {});
-
   return (
     <BaseBottomSheet
-      onClose={handleClose}
+      onClose={onClose}
       dismissThreshold={dismissThreshold}
       contentClassName='gap-4'
     >
