@@ -3,6 +3,7 @@ import type {
   CSSProperties,
   PointerEvent as ReactPointerEvent,
   PropsWithChildren,
+  TransitionEvent as ReactTransitionEvent,
 } from 'react';
 
 const DEFAULT_DISMISS_THRESHOLD = 80;
@@ -70,7 +71,9 @@ export const BaseBottomSheet = ({
     }
   };
 
-  const handleTransitionEnd = () => {
+  const handleTransitionEnd = (event: ReactTransitionEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.propertyName !== 'transform') return;
     if (!isClosing) return;
     setIsClosing(false);
     onClose();
