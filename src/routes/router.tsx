@@ -8,6 +8,7 @@ import Test from '@/pages/test';
 import Test2 from '@/pages/test2';
 import Test3 from '@/pages/test3';
 import ArchiveDetailPage from '@/pages/archive/archiveDetailPage';
+import TaskDetailPage from '@/pages/task/detail';
 
 const AppRouter = () => {
   return (
@@ -16,6 +17,7 @@ const AppRouter = () => {
       <Route path='/archives' element={<ArchivePage />} />
       <Route path='/settings' element={<SettingsPage />} />
       <Route path='/login' element={<LoginPage />} />
+      <Route path='/task/detail' element={<TaskDetailPage />} />
 
       <Route path='/archives/detail/:id' element={<ArchiveDetailPage />} />
 
