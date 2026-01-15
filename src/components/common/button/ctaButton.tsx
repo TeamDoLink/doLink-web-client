@@ -20,7 +20,7 @@ export const CtaButton = ({
   return (
     <button
       disabled={disabled}
-      className={`h-14 w-80 rounded-xl text-heading-md ${stateClass} ${className}`}
+      className={`h-14 w-full rounded-xl text-heading-md ${stateClass} ${className}`}
       {...props}
     >
       {children}
