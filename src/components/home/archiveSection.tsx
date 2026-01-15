@@ -1,7 +1,7 @@
 import { List } from '@/components/common';
 import {
   ARCHIVE_CATEGORY_LABEL,
-  type ArchiveFilterCategoryKey,
+  type ArchiveCategoryKey,
 } from '@/utils/archiveCategory';
 import type { ArchiveItem } from '@/types';
 
@@ -35,8 +35,7 @@ export const ArchiveSection = ({
       <div className='space-y-3'>
         {items.map(({ id, title, category, itemCount, images }) => {
           const label =
-            ARCHIVE_CATEGORY_LABEL[category as ArchiveFilterCategoryKey] ??
-            category;
+            ARCHIVE_CATEGORY_LABEL[category as ArchiveCategoryKey] ?? category;
 
           return (
             <List.ArchiveCard

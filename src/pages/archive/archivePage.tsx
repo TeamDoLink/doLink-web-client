@@ -4,15 +4,15 @@ import { TabBar, List, FeedBack } from '@/components/common';
 import { SearchAppBar } from '@/components/common/appBar/searchAppBar';
 import {
   CategoryFilterButton,
-  type ArchiveCategoryKey as ArchiveFilterCategoryKey,
   ArchiveSummaryBar,
+  type ArchiveCategoryKey,
 } from '@/components/archive';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { ROUTES } from '@/constants/routes';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import { useArchiveMockStore } from '@/stores/useArchiveMockStore';
 
-const ARCHIVE_CATEGORY_KEYS: ArchiveFilterCategoryKey[] = [
+const ARCHIVE_CATEGORY_KEYS: ArchiveCategoryKey[] = [
   'all',
   'restaurant',
   'hobby',
@@ -37,7 +37,7 @@ const ArchivePage = () => {
   const archives = useArchiveMockStore((state) => state.archives);
   const deleteArchive = useArchiveMockStore((state) => state.deleteArchive);
   const [selectedCategory, setSelectedCategory] =
-    useState<ArchiveFilterCategoryKey>('all');
+    useState<ArchiveCategoryKey>('all');
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
     string | null
   >(null);

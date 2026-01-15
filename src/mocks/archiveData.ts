@@ -1,9 +1,9 @@
-import type { ArchiveFilterCategory } from '@/utils/archiveCategory';
+import type { ArchiveCategory } from '@/utils/archiveCategory';
 
 export type MockArchive = {
   id: string;
   title: string;
-  category: ArchiveFilterCategory;
+  category: ArchiveCategory;
   itemCount: number;
   images?: string[];
   createdAt: string;

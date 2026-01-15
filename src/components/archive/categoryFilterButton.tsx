@@ -24,11 +24,11 @@ import TipsSelectedIcon from '@/assets/icons/category/home/tips-selected.svg';
 import TipsUnselectedIcon from '@/assets/icons/category/home/tips-unselected.svg';
 import {
   ARCHIVE_CATEGORY_LABEL,
-  type ArchiveFilterCategoryKey,
+  type ArchiveCategoryKey,
 } from '@/utils/archiveCategory';
 
 const CATEGORY_ICON_MAP: Record<
-  ArchiveFilterCategoryKey,
+  ArchiveCategoryKey,
   {
     selected: string;
     unselected: string;
@@ -80,7 +80,7 @@ const CATEGORY_ICON_MAP: Record<
   },
 } as const;
 
-export type ArchiveCategoryKey = ArchiveFilterCategoryKey;
+export type { ArchiveCategoryKey } from '@/utils/archiveCategory';
 
 type CategoryFilterButtonProps = {
   category: ArchiveCategoryKey;
