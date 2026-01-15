@@ -141,7 +141,7 @@ const pendingLinkRequests = new Map<
   {
     resolve: (value: LinkResponse) => void;
     reject: (error: LinkError) => void;
-    timeoutId: NodeJS.Timeout;
+    timeoutId: number;
   }
 >();
 

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { BackDetailBar } from '@/components/common/appBar';
 import { EmptyNotice } from '@/components/common/feedBack';
 import { FloatingButton } from '@/components/common/button/floatingButton';
@@ -178,8 +178,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: null,
     status: true,
     inout: false,
-    createdAt: '2025-02-23T14:00:00',
-    modifiedAt: '2025-02-24T10:30:00',
+    createdAt: '2026-02-23T14:00:00',
+    modifiedAt: '2026-02-24T10:30:00',
   },
   {
     taskId: 115,
@@ -188,8 +188,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: 'service 중심',
     status: false,
     inout: true,
-    createdAt: '2025-02-24T15:40:00',
-    modifiedAt: '2025-02-24T15:40:00',
+    createdAt: '2026-02-24T15:40:00',
+    modifiedAt: '2026-02-24T15:40:00',
   },
   {
     taskId: 116,
@@ -198,8 +198,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: null,
     status: true,
     inout: false,
-    createdAt: '2025-02-25T11:10:00',
-    modifiedAt: '2025-02-26T09:55:00',
+    createdAt: '2026-02-25T11:10:00',
+    modifiedAt: '2026-02-26T09:55:00',
   },
   {
     taskId: 117,
@@ -208,8 +208,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: 'GitHub Actions',
     status: false,
     inout: true,
-    createdAt: '2025-02-26T16:30:00',
-    modifiedAt: '2025-02-26T16:30:00',
+    createdAt: '2026-02-26T16:30:00',
+    modifiedAt: '2026-02-26T16:30:00',
   },
   {
     taskId: 118,
@@ -218,8 +218,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: null,
     status: true,
     inout: false,
-    createdAt: '2025-02-27T10:00:00',
-    modifiedAt: '2025-02-28T13:20:00',
+    createdAt: '2026-02-27T10:00:00',
+    modifiedAt: '2026-02-28T13:20:00',
   },
   {
     taskId: 119,
@@ -228,8 +228,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: 'rollback 고려',
     status: false,
     inout: true,
-    createdAt: '2025-02-28T15:00:00',
-    modifiedAt: '2025-02-28T15:00:00',
+    createdAt: '2026-02-28T15:00:00',
+    modifiedAt: '2026-02-28T15:00:00',
   },
   {
     taskId: 120,
@@ -238,8 +238,8 @@ const MOCK_TASK_ITEM: Task[] = [
     memo: null,
     status: true,
     inout: false,
-    createdAt: '2025-03-01T09:30:00',
-    modifiedAt: '2025-03-02T11:45:00',
+    createdAt: '2024-03-01T09:30:00',
+    modifiedAt: '2024-03-02T11:45:00',
   },
 ];
 
@@ -252,6 +252,9 @@ const archiveData = {
 };
 
 const ArchiveDetailPage = () => {
+  // TODO API 호출로 id에 해당하는 모음 데이터 받아오기
+  const { id } = useParams<{ id: string }>();
+
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState<TabType>('all');
   const [sortOption, setSortOption] = useState<SortOption>('newest');
@@ -262,21 +265,31 @@ const ArchiveDetailPage = () => {
   // 나중에 API로 데이터 받을 예정이면
   const [taskList, setTaskList] = useState<Task[]>([]);
 
+  // 각 링크의 완료/미완료 상태 관리
+  const [linkStates, setLinkStates] = useState<Record<number, boolean>>({});
+  // 각 링크의 편집 모드 상태 관리
+  const [linkEditModes, setLinkEditModes] = useState<Record<number, boolean>>(
+    {}
+  );
+
   // TODO API 호출 값 받아오기
   useEffect(() => {
     // API 호출 시 그대로 사용
     setTaskList(MOCK_TASK_ITEM);
+    // taskList 변경 시 linkStates와 linkEditModes도 초기화
+    setLinkStates(
+      MOCK_TASK_ITEM.reduce(
+        (acc, task) => ({ ...acc, [task.taskId]: task.status }),
+        {}
+      )
+    );
+    setLinkEditModes(
+      MOCK_TASK_ITEM.reduce(
+        (acc, task) => ({ ...acc, [task.taskId]: false }),
+        {}
+      )
+    );
   }, []);
-
-  const [linkStates, setLinkStates] = useState<Record<number, boolean>>(
-    MOCK_TASK_ITEM.reduce(
-      (acc, link) => ({ ...acc, [link.taskId]: link.status }),
-      {}
-    )
-  );
-  const [linkEditModes, setLinkEditModes] = useState<Record<number, boolean>>(
-    MOCK_TASK_ITEM.reduce((acc, link) => ({ ...acc, [link.taskId]: false }), {})
-  );
 
   const handleLinkCheck = (id: number, checked: boolean) => {
     setLinkStates((prev) => ({ ...prev, [id]: checked }));
@@ -359,17 +372,17 @@ const ArchiveDetailPage = () => {
 
   // createdAt별로 링크를 필터링, 정렬, 그룹화
   const groupedLinks = useMemo(() => {
-    // 1. 필터링
+    // 1. 필터링 - linkStates를 기준으로 필터링하여 실시간 체크 상태 반영
     let filtered: Task[];
     switch (selectedTab) {
       case 'all':
         filtered = taskList;
         break;
       case 'incomplete':
-        filtered = taskList.filter((task) => !task.status);
+        filtered = taskList.filter((task) => !linkStates[task.taskId]);
         break;
       case 'complete':
-        filtered = taskList.filter((task) => task.status);
+        filtered = taskList.filter((task) => linkStates[task.taskId]);
         break;
       default:
         filtered = taskList;
@@ -378,7 +391,7 @@ const ArchiveDetailPage = () => {
     const grouped = new Map<string, Task[]>();
 
     filtered.forEach((link) => {
-      const key = link.createdAt;
+      const key = link.createdAt.split('T')[0];
       if (!grouped.has(key)) {
         grouped.set(key, []);
       }
@@ -392,7 +405,7 @@ const ArchiveDetailPage = () => {
     });
 
     return result;
-  }, [taskList, selectedTab, sortOption]);
+  }, [taskList, selectedTab, sortOption, linkStates]);
 
   const hasData = groupedLinks.length > 0;
 
@@ -491,7 +504,7 @@ const ArchiveDetailPage = () => {
                   const task = tasks.find((t) => t.taskId === taskId);
                   if (task && task.link) {
                     console.log('원본 클릭:', task.title);
-                    window.open(task.link, '_blank');
+                    window.open(task.link, '_blank', 'noopener,noreferrer');
                   }
                 }}
                 onShareClick={(taskId) => {

@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import HomePage from '@/pages/home/homePage';
 import ArchivePage from '@/pages/archive/archivePage';
 import SettingsPage from '@/pages/settings/settingsPage';
+import LoginPage from '@/pages/auth/loginPage';
 import Test from '@/pages/test';
 import Test2 from '@/pages/test2';
 import Test3 from '@/pages/test3';
@@ -15,11 +16,10 @@ const AppRouter = () => {
       <Route path='/' element={<HomePage />} />
       <Route path='/archives' element={<ArchivePage />} />
       <Route path='/settings' element={<SettingsPage />} />
-
-      {/* TODO 추후 id 생성*/}
-      <Route path='/archives/detail' element={<ArchiveDetailPage />} />
-      {/* TODO  task 추후 id 생성*/}
+      <Route path='/login' element={<LoginPage />} />
       <Route path='/task/detail' element={<TaskDetailPage />} />
+
+      <Route path='/archives/detail/:id' element={<ArchiveDetailPage />} />
 
       {/* 공통 컴포넌트 테스트 페이지 */}
       <Route path='/test' element={<Test />} />
