@@ -14,7 +14,7 @@ const WITHDRAWAL_REASONS = [
   { id: 'etc', label: '기타' },
 ] as const;
 
-const WithdrawalPage = () => {
+const WithdrawalReasonPage = () => {
   const navigate = useNavigate();
   const [selectedReasonId, setSelectedReasonId] = useState<string | null>(null);
   const [etcReason, setEtcReason] = useState('');
@@ -116,4 +116,4 @@ const WithdrawalPage = () => {
   );
 };
 
-export default WithdrawalPage;
+export default WithdrawalReasonPage;
