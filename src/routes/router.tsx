@@ -5,6 +5,7 @@ import ArchivePage from '@/pages/archive/archivePage';
 import ArchiveAddPage from '@/pages/archive/archiveAddPage';
 import ArchiveEditPage from '@/pages/archive/archiveEditPage';
 import SettingsPage from '@/pages/settings/settingsPage';
+import LoginPage from '@/pages/auth/loginPage';
 import Test from '@/pages/test';
 import Test2 from '@/pages/test2';
 
@@ -17,6 +18,7 @@ const AppRouter = () => {
       <Route path='/archives/edit' element={<ArchiveEditPage />} />
 
       <Route path='/settings' element={<SettingsPage />} />
+      <Route path='/login' element={<LoginPage />} />
 
       {/* 공통 컴포넌트 테스트 페이지 */}
       <Route path='/test' element={<Test />} />
