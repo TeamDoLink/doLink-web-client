@@ -38,3 +38,12 @@
 
   animation: dolink-spin 0.9s linear infinite;
 }
+
+
+/* iOS WebView/Safari 자동 줌 방지 */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea {
+    font-size: 16px !important;
+  }
+}
