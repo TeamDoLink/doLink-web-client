@@ -2,6 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Loading Spinner ===== */
+@keyframes dolink-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+
+  /* 그라데이션: 위쪽 진함 → 뒤로 갈수록 흐려짐 */
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 1) 0deg,
+    /* 위쪽: 가장 진함 */ rgba(255, 255, 255, 0.7) 45deg,
+    /* 점점 흐려짐 */ rgba(255, 255, 255, 0.5) 90deg,
+    rgba(255, 255, 255, 0.35) 180deg,
+    /* 뒤쪽: 배경색 */ rgba(255, 255, 255, 0.35) 360deg /* 배경색 유지 */
+  );
+
+  /* 링 모양 만들기 */
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 4px),
+    white calc(100% - 4px)
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 4px),
+    white calc(100% - 4px)
+  );
+
+  animation: dolink-spin 0.9s linear infinite;
+}
+
+
 /* iOS WebView/Safari 자동 줌 방지 */
 @supports (-webkit-touch-callout: none) {
   input,
