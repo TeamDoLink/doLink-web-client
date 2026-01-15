@@ -14,7 +14,7 @@ export const CtaButton = ({
   ...props
 }: CtaButtonProps) => {
   const stateClass = disabled
-    ? 'bg-transparent text-grey-400'
+    ? 'bg-[#F3F4F6] text-grey-400'
     : 'bg-point text-white active:bg-[#2435CB]';
 
   return (
