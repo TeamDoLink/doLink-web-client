@@ -1,6 +1,61 @@
 /**
- * React Native WebView의 postMessage 인터페이스
+ * Native Bridge Message Types
  */
+
+// ============================================
+// Link Message Types
+// ============================================
+
+/**
+ * Link payload - URL to open
+ */
+export interface LinkPayload {
+  url: string;
+}
+
+/**
+ * Link response from native - success case
+ */
+export interface LinkResponse {
+  type: 'link:response';
+  success: boolean;
+  url: string;
+  canOpen?: boolean;
+}
+
+/**
+ * Link error response from native
+ */
+export interface LinkError {
+  type: 'link:error';
+  error: string;
+  url?: string;
+}
+
+/**
+ * Can open URL check payload
+ */
+export interface LinkCanOpenPayload {
+  url: string;
+}
+
+// ============================================
+// Message Type Union
+// ============================================
+
+/**
+ * All possible messages from Web to Native
+ */
+export type WebToNativeMessage =
+  | { type: 'link:open'; payload: LinkPayload }
+  | { type: 'link:canOpen'; payload: LinkCanOpenPayload };
+
+/**
+ * All possible messages from Native to Web
+ */
+
+export type NativeToWebMessage = LinkResponse | LinkError;
+
 export interface ReactNativeWebView {
   postMessage: (message: string) => void;
   addEventListener?: (event: string, handler: (event: Event) => void) => void;
@@ -8,22 +63,4 @@ export interface ReactNativeWebView {
     event: string,
     handler: (event: Event) => void
   ) => void;
-}
-
-/**
- * WebView에서 App으로 전송하는 메시지
- */
-export interface WebViewMessage<T = unknown> {
-  type: DraftMessageType;
-  payload: DraftPayload<T>;
-}
-
-/**
- * App에서 WebView로 전송하는 응답
- */
-export interface AppResponse<T = unknown> {
-  type: DraftMessageType;
-  success: boolean;
-  data?: T;
-  error?: string;
 }
