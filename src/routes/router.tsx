@@ -9,12 +9,14 @@ import ArchiveDetailPage from '@/pages/archive/archiveDetailPage';
 import SettingsPage from '@/pages/settings/settingsPage';
 import WithdrawalReasonPage from '@/pages/settings/withdrawal/withdrawalReasonPage';
 import WithdrawalConfirmPage from '@/pages/settings/withdrawal/withdrawalConfirmPage';
+
 import LoginPage from '@/pages/auth/loginPage';
 import TaskDetailPage from '@/pages/task/detail';
 import TaskCreatePage from '@/pages/task/taskCreatePage';
 import Test from '@/pages/test';
 import Test2 from '@/pages/test2';
 import Test3 from '@/pages/test3';
+import SearchPage from '@/pages/searchPage';
 
 const AppRouter = () => {
   return (
@@ -41,6 +43,7 @@ const AppRouter = () => {
       <Route path={ROUTES.login} element={<LoginPage />} />
       <Route path={ROUTES.taskDetail} element={<TaskDetailPage />} />
       <Route path={ROUTES.taskCreate} element={<TaskCreatePage />} />
+      <Route path={ROUTES.search} element={<SearchPage />} />
 
       {/* 공통 컴포넌트 테스트 페이지 */}
       <Route path={ROUTES.test} element={<Test />} />
