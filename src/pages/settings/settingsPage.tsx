@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FeedBack, TabBar } from '@/components/common';
 import { FloatingButton } from '@/components/common/button';
 import { SettingMenuItem } from '@/components/common/setting/settingMenuItem';
@@ -47,27 +47,21 @@ const SettingsPage = () => {
   }, []);
 
   const versionLabel = `버전 ${APP_VERSION}`;
-  const versionRightText = useMemo(() => {
-    if (versionFetchState === 'loading') {
-      return '확인 중…';
-    }
+  let versionRightText = '확인 불가';
 
-    if (versionFetchState === 'error') {
-      return '확인 불가';
-    }
-
-    if (!latestVersion) {
-      return '확인 불가';
-    }
-
+  if (versionFetchState === 'loading') {
+    versionRightText = '확인 중…';
+  } else if (versionFetchState === 'error') {
+    versionRightText = '확인 불가';
+  } else if (latestVersion) {
     const latestCheck = isLatestVersion(APP_VERSION, latestVersion);
-
-    if (latestCheck === null) {
-      return '확인 불가';
-    }
-
-    return latestCheck ? '최신 버전입니다' : '최신 버전이 아닙니다';
-  }, [latestVersion, versionFetchState]);
+    versionRightText =
+      latestCheck === null
+        ? '확인 불가'
+        : latestCheck
+          ? '최신 버전입니다'
+          : '최신 버전이 아닙니다';
+  }
 
   const handleLogoutClick = () => {
     setIsLogoutConfirmOpen(true);
