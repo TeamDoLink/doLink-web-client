@@ -1,0 +1,335 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { DraftMessageType, WebViewMessage } from '@/types/draft';
+import { isDraftMessageType, isDraftSuccess } from '@/types/draft';
+import { detectPlatform, getWebView } from '@/utils/webview';
+
+/**
+ * Draft Bridge 에러 타입
+ */
+export class DraftBridgeError extends Error {
+  code:
+    | 'WEBVIEW_NOT_AVAILABLE'
+    | 'INVALID_MESSAGE'
+    | 'MESSAGE_FAILED'
+    | 'TIMEOUT';
+
+  constructor(
+    message: string,
+    code:
+      | 'WEBVIEW_NOT_AVAILABLE'
+      | 'INVALID_MESSAGE'
+      | 'MESSAGE_FAILED'
+      | 'TIMEOUT'
+  ) {
+    super(message);
+    this.name = 'DraftBridgeError';
+    this.code = code;
+  }
+}
+
+/**
+ * useDraftBridge Hook의 반환 타입
+ */
+interface UseDraftBridgeReturn<T> {
+  saveDraft: (key: string, data: T) => Promise<void>;
+  loadDraft: (key: string) => Promise<T | null>;
+  deleteDraft: (key: string) => Promise<void>;
+  isLoading: boolean;
+  error: DraftBridgeError | null;
+  clearError: () => void;
+}
+
+/**
+ * Promise resolver 타입
+ */
+interface PendingPromise<T = unknown> {
+  resolve: (value: T) => void;
+  reject: (error: Error) => void;
+  timeout: number;
+}
+
+/**
+ * useDraftBridge Hook
+ * React Native WebView와 Draft 통신을 관리합니다.
+ *
+ * @example
+ * const { saveDraft, loadDraft, deleteDraft, isLoading, error } =
+ *   useDraftBridge<TaskDraft>();
+ *
+ * // 임시저장
+ * await saveDraft('task-create-draft', formData);
+ *
+ * // 불러오기
+ * const data = await loadDraft('task-create-draft');
+ *
+ * // 삭제
+ * await deleteDraft('task-create-draft');
+ */
+export const useDraftBridge = <T = unknown>(): UseDraftBridgeReturn<T> => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<DraftBridgeError | null>(null);
+
+  // 대기 중인 Promise들을 메시지 타입별로 관리
+  const pendingPromisesRef = useRef<
+    Map<DraftMessageType, PendingPromise<unknown>>
+  >(new Map());
+
+  /**
+   * 메시지 리스너 등록/정리
+   */
+  useEffect(() => {
+    /**
+     * 메시지 핸들러 - Native로부터 수신
+     */
+    const handleMessage = (event: Event): void => {
+      if (!(event instanceof MessageEvent)) return;
+      const messageEvent = event as MessageEvent<unknown>;
+      try {
+        // 데이터 추출
+        const data = messageEvent.data;
+        if (!data) {
+          console.error('[useDraftBridge] Empty message received');
+          return;
+        }
+
+        // JSON 파싱
+        let response: unknown;
+        if (typeof data === 'string') {
+          try {
+            response = JSON.parse(data);
+          } catch (parseError) {
+            console.error(
+              '[useDraftBridge] Failed to parse message:',
+              parseError
+            );
+            return;
+          }
+        } else {
+          response = data;
+        }
+
+        // Draft 메시지 타입 확인
+        if (!isDraftMessageType(response)) {
+          return;
+        }
+
+        // 메시지 타입으로 해당 요청의 Promise resolver 가져오기
+        const messageType = response.type;
+        const pending = pendingPromisesRef.current.get(messageType);
+
+        // 메시지 유효성 검증
+        if (!isDraftSuccess(response)) {
+          console.error('[useDraftBridge] Invalid response format');
+
+          if (pending) {
+            clearTimeout(pending.timeout); // 1. 타임아웃 즉시 취소
+            pendingPromisesRef.current.delete(messageType); // 2. Map에서 제거
+            setIsLoading(pendingPromisesRef.current.size > 0); // 3. 로딩 상태 업데이트
+
+            const error = new DraftBridgeError(
+              'Invalid response format',
+              'INVALID_MESSAGE'
+            );
+            setError(error); // 4. 에러 상태 설정
+            pending.reject(error); // 5. Promise 즉시 reject
+          }
+
+          return;
+        }
+        if (!pending) {
+          console.error(
+            '[useDraftBridge] No pending promise for:',
+            messageType
+          );
+          return;
+        }
+
+        // Timeout 해제
+        clearTimeout(pending.timeout);
+        pendingPromisesRef.current.delete(messageType);
+
+        // 로딩 상태 업데이트
+        setIsLoading(pendingPromisesRef.current.size > 0);
+
+        // 응답 처리
+        if (response.success) {
+          setError(null);
+          pending.resolve(response.data ?? null);
+        } else {
+          const error = new DraftBridgeError(
+            response.error || 'Unknown error',
+            'MESSAGE_FAILED'
+          );
+          setError(error);
+          pending.reject(error);
+        }
+      } catch (err) {
+        console.error('[useDraftBridge] Error handling message:', err);
+      }
+    };
+
+    // 플랫폼별 이벤트 타겟 설정 (iOS: window, Android: document)
+    const platform = detectPlatform();
+    const receiver: EventTarget = platform === 'ios' ? window : document;
+
+    receiver.addEventListener('message', handleMessage);
+
+    // Cleanup 함수에서 사용할 ref 복사
+    const pendingPromises = pendingPromisesRef.current;
+
+    return () => {
+      receiver.removeEventListener('message', handleMessage);
+
+      // 컴포넌트 언마운트 시 모든 대기 중인 Promise 정리
+      pendingPromises.forEach((pending) => {
+        clearTimeout(pending.timeout);
+        pending.reject(
+          new DraftBridgeError('Component unmounted', 'MESSAGE_FAILED')
+        );
+      });
+      pendingPromises.clear();
+    };
+  }, []);
+
+  /**
+   * WebView에 메시지 전송 (Promise 기반)
+   */
+  const sendMessage = useCallback(
+    <R = unknown>(
+      type: DraftMessageType,
+      key: string,
+      data?: unknown
+    ): Promise<R | null> => {
+      return new Promise<R | null>((resolve, reject) => {
+        let timeout: number | null = null;
+        try {
+          setIsLoading(true);
+          setError(null);
+
+          const webView = getWebView();
+          if (!webView) {
+            const err = new DraftBridgeError(
+              'React Native WebView is not available',
+              'WEBVIEW_NOT_AVAILABLE'
+            );
+            setError(err);
+            setIsLoading(false);
+            reject(err);
+            return;
+          }
+
+          // TODO: 설계 개선 필요
+          // 현재 문제: 메시지 타입만을 키로 사용하여 같은 타입의 요청을 동시에 보낼 수 없음
+          // 예: saveDraft('key1')과 saveDraft('key2')를 동시에 호출 불가
+          // 해결 방안:
+          // 1. Native 응답에 key 포함 → 복합 키 사용 (type:key)
+          // 2. requestId 패턴 도입 → 각 요청에 고유 ID 부여
+          // 동일한 타입의 요청이 이미 대기 중이면 거부
+          if (pendingPromisesRef.current.has(type)) {
+            const err = new DraftBridgeError(
+              `A ${type} request is already in progress`,
+              'MESSAGE_FAILED'
+            );
+            setError(err);
+            setIsLoading(false);
+            reject(err);
+            return;
+          }
+
+          // 메시지 전송 (timeout 등록 전에 먼저 전송)
+          const message: WebViewMessage = {
+            type,
+            payload: {
+              key,
+              data,
+            },
+          };
+
+          webView.postMessage(JSON.stringify(message));
+
+          // postMessage 성공 후 타임아웃 설정 (10초)
+          timeout = setTimeout(() => {
+            pendingPromisesRef.current.delete(type);
+            setIsLoading(pendingPromisesRef.current.size > 0);
+            const err = new DraftBridgeError('Request timeout', 'TIMEOUT');
+            setError(err);
+            reject(err);
+          }, 10000);
+
+          // Promise resolver 저장 (메시지 타입을 키로 사용)
+          pendingPromisesRef.current.set(type, {
+            resolve: resolve as (value: unknown) => void,
+            reject,
+            timeout,
+          });
+        } catch (err) {
+          // timeout 취소 + Map 엔트리 제거
+          if (timeout !== null) {
+            clearTimeout(timeout);
+          }
+          pendingPromisesRef.current.delete(type);
+          setIsLoading(pendingPromisesRef.current.size > 0);
+
+          const draftError =
+            err instanceof DraftBridgeError
+              ? err
+              : new DraftBridgeError(
+                  err instanceof Error ? err.message : 'Unknown error',
+                  'MESSAGE_FAILED'
+                );
+          setError(draftError);
+          setIsLoading(false);
+          reject(draftError);
+        }
+      });
+    },
+    []
+  );
+
+  /**
+   * 임시저장하기
+   */
+  const saveDraft = useCallback(
+    async (key: string, data: T): Promise<void> => {
+      await sendMessage('SAVE_DRAFT', key, data);
+    },
+    [sendMessage]
+  );
+
+  /**
+   * 임시저장 불러오기
+   */
+  const loadDraft = useCallback(
+    async (key: string): Promise<T | null> => {
+      const result = await sendMessage<T>('LOAD_DRAFT', key);
+      return result;
+    },
+    [sendMessage]
+  );
+
+  /**
+   * 임시저장 삭제하기
+   */
+  const deleteDraft = useCallback(
+    async (key: string): Promise<void> => {
+      await sendMessage('DELETE_DRAFT', key);
+    },
+    [sendMessage]
+  );
+
+  /**
+   * 에러 초기화
+   */
+  const clearError = (): void => {
+    setError(null);
+  };
+
+  return {
+    saveDraft,
+    loadDraft,
+    deleteDraft,
+    isLoading,
+    error,
+    clearError,
+  };
+};

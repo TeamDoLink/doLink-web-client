@@ -45,6 +45,12 @@ export default {
         'caption-md': ['12px', { lineHeight: '18px', fontWeight: '600' }],
         'caption-sm': ['12px', { lineHeight: '18px', fontWeight: '500' }],
       },
+      zIndex: {
+        header: 20,
+        dropdown: 30,
+        'modal-overlay': 40,
+        'modal-content': 50,
+      },
     },
   },
   plugins: [],

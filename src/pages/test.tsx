@@ -995,7 +995,14 @@ function CommonTestComponent() {
             <p className='mb-3 font-semibold text-grey-900'>
               기본 상태 (전체 선택됨)
             </p>
-            <Filter.SortDropdown value={sortValue} onChange={setSortValue} />
+            <Filter.SortDropdown
+              value={sortValue}
+              onChange={setSortValue}
+              options={[
+                { value: 'all', label: '전체' },
+                { value: 'latest', label: '최신 순' },
+              ]}
+            />
           </div>
 
           <div className='border-t border-grey-200 pt-6'>

@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { TodoBottomSheet } from '@/components/common/bottomSheet/todoBottomSheet';
+import { ArchiveAddBottomSheet } from '@/components/common/bottomSheet/archiveAddBottomSheet';
 import { CtaSecondButton } from '@/components/common/button/ctaSecondButton';
 import { FlagLabel } from '@/components/common/label/flagLabel';
 import { LinkCapsuleButton } from '@/components/common/button/linkCapsuleButton';
 import { ShareCapsuleButton } from '@/components/common/button/shareCapsuleButton';
 import { TabButton } from '@/components/common/button/tabButton';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
+import { LoadingSpinner } from '@/components/common/loading/loadingSpinner';
+import { GreyVerticalLine } from '@/components/common/line/greyVerticalLine';
 import Test_yj1 from './test_yj1';
 
 const TabButtonShowcase = () => {
@@ -61,6 +64,40 @@ const TodoBottomSheetShowcase = () => {
   );
 };
 
+const ArchiveAddBottomSheetShowcase = () => {
+  const [open, setOpen] = useState(true);
+  const handleClose = () => setOpen(false);
+
+  return (
+    <div className='flex w-full max-w-md flex-col gap-4 rounded-3xl bg-grey-100 p-6'>
+      {open ? (
+        <ArchiveAddBottomSheet
+          title='모음 추가'
+          onClickBack={handleClose}
+          onClickSave={() => undefined}
+          onClickSearch={() => undefined}
+          onClickOption={() => undefined}
+          onClose={handleClose}
+        >
+          <div className='flex flex-col gap-2 rounded-2xl bg-grey-50 p-4 text-body-sm text-grey-600'>
+            <p>모음 추가 바텀시트 레이아웃입니다.</p>
+            <p>children 영역에 콘텐츠를 넣으면 높이가 확장됩니다.</p>
+          </div>
+        </ArchiveAddBottomSheet>
+      ) : (
+        <div className='flex flex-col items-start gap-2'>
+          <p className='text-body-sm text-grey-600'>
+            드래그로 닫은 후 다시 열어보세요.
+          </p>
+          <CtaSecondButton onClick={() => setOpen(true)}>
+            모음 추가 시트 열기
+          </CtaSecondButton>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const CapsuleButtonShowcase = () => (
   <div className='flex flex-col gap-4 rounded-3xl bg-grey-100 p-6'>
     <div className='flex gap-2'>
@@ -76,12 +113,32 @@ const CapsuleButtonShowcase = () => (
 
 const sections = [
   {
+    title: 'Loading Spinner Row',
+    description:
+      '어두운 배경 위에서 회전하는 단일 링 스피너입니다. 필요에 따라 스타일만 변경하면 다른 배경에서도 바로 사용할 수 있습니다.',
+    component: (
+      <div className='flex flex-col items-center gap-3 rounded-3xl bg-grey-900 p-6'>
+        <LoadingSpinner />
+      </div>
+    ),
+  },
+  {
     title: 'Option Menu',
     description:
       '아이콘과 텍스트를 포함한 두 가지 액션 메뉴입니다. 항목을 클릭하면 해당 항목만 하이라이트됩니다.',
     component: (
       <div className='flex flex-wrap gap-3 rounded-3xl bg-grey-100 p-6'>
         <OptionMenu />
+      </div>
+    ),
+  },
+  {
+    title: 'Grey Vertical Line',
+    description:
+      '높이 48px, 두께 2px의 세로 구분선입니다. 좌우 여백을 className으로 조정할 수 있습니다.',
+    component: (
+      <div className='flex h-16 items-center justify-center rounded-3xl bg-grey-100 p-6'>
+        <GreyVerticalLine />
       </div>
     ),
   },
@@ -124,6 +181,12 @@ const sections = [
     description:
       '상단 핸들바와 “모음 추가” 액션을 포함한 할 일 담기 바텀시트 래퍼입니다.',
     component: <TodoBottomSheetShowcase />,
+  },
+  {
+    title: 'Archive Add Bottom Sheet',
+    description:
+      '모음 추가 시나리오 전용 바텀시트. 뒤로가기와 임시저장/검색/옵션 버튼을 옵션으로 제어할 수 있습니다.',
+    component: <ArchiveAddBottomSheetShowcase />,
   },
 ];
 
