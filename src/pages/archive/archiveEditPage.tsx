@@ -63,11 +63,11 @@ const ArchiveEditPage = () => {
 
   const handleSubmit = (payload: {
     name: string;
-    category: ArchiveCategoryKey;
+    category: ArchiveCategory;
   }) => {
     archiveMockApi.update(targetArchive.id, {
       title: payload.name,
-      category: payload.category as ArchiveCategory,
+      category: payload.category,
     });
     setSelectedArchiveId(null);
     const fallbackPath = origin ?? ROUTES.archives;
