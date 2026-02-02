@@ -11,9 +11,9 @@ import heroIllustration from '@/assets/icons/home/home1.svg';
 import { FloatingButton } from '@/components/common/button';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
+import { archiveMockApi } from '@/api/archive.mock';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import { formatRelativeDateLabel } from '@/utils/date';
-import { MOCK_ARCHIVES } from '@/mocks/archiveData';
 import { MOCK_TODOS } from '@/mocks/todoData';
 
 const HomeBeforeLogin = () => {
@@ -23,7 +23,19 @@ const HomeBeforeLogin = () => {
     MOCK_TODOS.slice(0, 1).map((todo) => ({ ...todo }))
   );
   const [archiveItems, setArchiveItems] = useState(() =>
-    MOCK_ARCHIVES.slice(0, 3).map((archive) => ({ ...archive }))
+    archiveMockApi
+      .getAll()
+      .slice(0, 3)
+      .map((archive) => ({
+        id: archive.id,
+        title: archive.title,
+        category: archive.category,
+        itemCount: archive.itemCount,
+        createdAt: archive.createdAt,
+        previewImages: Array.isArray(archive.images)
+          ? archive.images.slice(0, 4)
+          : [],
+      }))
   );
   const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
   const {
@@ -148,13 +160,13 @@ const HomeBeforeLogin = () => {
               <h2 className='text-heading-sm text-black'>모음</h2>
               <div className='space-y-3'>
                 {archiveItems.map(
-                  ({ id, title, category, itemCount, images }) => (
+                  ({ id, title, category, itemCount, previewImages }) => (
                     <List.ArchiveCard
                       key={id}
                       title={title}
                       category={ARCHIVE_CATEGORY_LABEL[category]}
                       itemCount={itemCount}
-                      images={images}
+                      images={previewImages}
                       width='w-full'
                       onDeleteClick={() => handleRequestDeleteArchive(id)}
                     />

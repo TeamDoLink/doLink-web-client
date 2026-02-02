@@ -5,8 +5,12 @@ import {
 } from '@/utils/archiveCategory';
 import type { ArchiveItem } from '@/types';
 
+type ArchiveSectionItem = ArchiveItem & {
+  previewImages?: string[];
+};
+
 type ArchiveSectionProps = {
-  items: ArchiveItem[];
+  items: ArchiveSectionItem[];
   onRequestDelete?: (id: string) => void;
   onRequestEdit?: (id: string) => void;
   className?: string;
@@ -33,7 +37,7 @@ export const ArchiveSection = ({
     <section className={`mt-7 space-y-4 pb-20 ${className}`}>
       <h2 className='text-heading-sm text-black'>모음</h2>
       <div className='space-y-3'>
-        {items.map(({ id, title, category, itemCount, images }) => {
+        {items.map(({ id, title, category, itemCount, previewImages }) => {
           const label =
             ARCHIVE_CATEGORY_LABEL[category as ArchiveCategoryKey] ?? category;
 
@@ -43,7 +47,7 @@ export const ArchiveSection = ({
               title={title}
               category={label}
               itemCount={itemCount}
-              images={images}
+              images={previewImages}
               width='w-full'
               onEditClick={() => handleEditClick(id)}
               onDeleteClick={() => handleDeleteClick(id)}

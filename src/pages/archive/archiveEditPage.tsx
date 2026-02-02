@@ -7,9 +7,12 @@ import {
 } from '@/components/archive';
 import { ROUTES } from '@/constants/routes';
 import {
-  useArchiveMockStore,
-  type MockArchive,
-} from '@/stores/useArchiveMockStore';
+  archiveMockApi,
+  useMockArchives,
+  type Archive,
+} from '@/api/archive.mock';
+import type { ArchiveCategory } from '@/utils/archiveCategory';
+import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 
 type ArchiveEditLocationState = {
   origin?: string;
@@ -23,17 +26,24 @@ type ArchiveEditLocationState = {
 const ArchiveEditPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const archives = useArchiveMockStore((state) => state.archives);
-  const updateArchive = useArchiveMockStore((state) => state.updateArchive);
+  const archives = useMockArchives();
+  const selectedArchiveId = useArchiveUIStore(
+    (state) => state.selectedArchiveId
+  );
+  const setSelectedArchiveId = useArchiveUIStore(
+    (state) => state.setSelectedArchiveId
+  );
   const { archive, origin } =
     (location.state as ArchiveEditLocationState | undefined) ?? {};
 
-  const targetArchive = useMemo<MockArchive | undefined>(() => {
-    if (!archive) {
+  const targetArchive = useMemo<Archive | undefined>(() => {
+    const targetId = archive?.id ?? selectedArchiveId;
+    if (!targetId) {
       return undefined;
     }
-    return archives.find((item) => item.id === archive.id);
-  }, [archive, archives]);
+
+    return archives.find((item) => item.id === targetId);
+  }, [archive, archives, selectedArchiveId]);
 
   const hasArchive = Boolean(targetArchive);
 
@@ -43,6 +53,10 @@ const ArchiveEditPage = () => {
     }
   }, [hasArchive, navigate]);
 
+  useEffect(() => {
+    return () => setSelectedArchiveId(null);
+  }, [setSelectedArchiveId]);
+
   if (!targetArchive) {
     return null;
   }
@@ -51,10 +65,11 @@ const ArchiveEditPage = () => {
     name: string;
     category: ArchiveCategoryKey;
   }) => {
-    updateArchive(targetArchive.id, {
+    archiveMockApi.update(targetArchive.id, {
       title: payload.name,
-      category: payload.category,
+      category: payload.category as ArchiveCategory,
     });
+    setSelectedArchiveId(null);
     const fallbackPath = origin ?? ROUTES.archives;
     navigate(fallbackPath, { replace: true });
   };

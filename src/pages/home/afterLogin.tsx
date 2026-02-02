@@ -8,9 +8,14 @@ import { TodoSection } from '@/components/home/todoSection';
 import { ArchiveSection } from '@/components/home/archiveSection';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
-import { useArchiveMockStore } from '@/stores/useArchiveMockStore';
+import {
+  archiveMockApi,
+  selectLatestArchivePreviews,
+  useMockArchives,
+} from '@/api/archive.mock';
 import { MOCK_TODOS } from '@/mocks/todoData';
 import { ROUTES } from '@/constants/routes';
+import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 
 // 시간 계산 함수
 const getGreetingPeriod = (hour: number) => {
@@ -31,8 +36,10 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   const [todoItems, setTodoItems] = useState(() =>
     MOCK_TODOS.map((todo) => ({ ...todo }))
   );
-  const archiveItems = useArchiveMockStore((state) => state.archives);
-  const deleteArchive = useArchiveMockStore((state) => state.deleteArchive);
+  const archiveItems = useMockArchives();
+  const setSelectedArchiveId = useArchiveUIStore(
+    (state) => state.setSelectedArchiveId
+  );
   const {
     isOpen: isModalOpen,
     type: modalType,
@@ -52,15 +59,10 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     return `좋은 ${period}이에요 😊`;
   }, []);
 
-  const latestArchives = useMemo(() => {
-    return archiveItems
-      .slice()
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-      .slice(0, 8);
-  }, [archiveItems]);
+  const latestArchives = useMemo(
+    () => selectLatestArchivePreviews(archiveItems),
+    [archiveItems]
+  );
 
   const handleToggleTodo = (id: string, nextChecked: boolean) => {
     setTodoItems((prevTodos) =>
@@ -82,7 +84,8 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
 
   const handleConfirmDeleteArchive = () => {
     if (!pendingDeleteArchiveId) return;
-    deleteArchive(pendingDeleteArchiveId);
+    archiveMockApi.delete(pendingDeleteArchiveId);
+    setSelectedArchiveId(null);
     setPendingDeleteArchiveId(null);
   };
 
@@ -107,6 +110,8 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     if (!targetArchive) {
       return;
     }
+
+    setSelectedArchiveId(id);
 
     navigate(ROUTES.archiveEdit, {
       state: {

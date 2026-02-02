@@ -82,56 +82,61 @@ const SAMPLE_ARCHIVES = [
       '2025 연말 도쿄 여행ㅓㅁ이ㅏㅓ마ㅣㄹㅇㄴ리ㅏㅁㄴ어ㅏㅣ러미ㅏㄴ어리ㅏㅁㄴ어ㅣㅏㄹㄴ머이ㅏ러ㅣ만어라ㅣ먼이ㅏ럼니ㅏㅓ리ㅏㅁ너이ㅏ런미ㅏ어리ㅏ넝라ㅣㅓㄴ',
     category: '여행',
     itemCount: 4,
-    images: [TEST_URL_IMG, TEST_URL_IMG_3, TEST_URL_IMG, TEST_URL_IMG],
+    previewImages: [TEST_URL_IMG, TEST_URL_IMG_3, TEST_URL_IMG, TEST_URL_IMG],
   },
   {
     id: 2,
     title: '서울 맛집 탐방',
     category: '음식점',
     itemCount: 8,
-    images: [TEST_URL_IMG, TEST_URL_IMG_3],
+    previewImages: [TEST_URL_IMG, TEST_URL_IMG_3],
   },
   {
     id: 3,
     title: '도서 추천 리스트',
     category: '공부',
     itemCount: 12,
-    images: [],
+    previewImages: [],
   },
   {
     id: 4,
     title: '파리 여행 계획',
     category: '여행',
     itemCount: 6,
-    images: [TEST_URL_IMG_2],
+    previewImages: [TEST_URL_IMG_2],
   },
   {
     id: 5,
     title: 'React 학습 로드맵',
     category: '공부',
     itemCount: 15,
-    images: [TEST_URL_IMG_2, TEST_URL_IMG_3, TEST_URL_IMG_2],
+    previewImages: [TEST_URL_IMG_2, TEST_URL_IMG_3, TEST_URL_IMG_2],
   },
   {
     id: 6,
     title: '주말 등산 코스',
     category: '운동',
     itemCount: 5,
-    images: [],
+    previewImages: [],
   },
   {
     id: 7,
     title: '도쿄 디즈니랜드 가이드',
     category: '여행',
     itemCount: 10,
-    images: [TEST_URL_IMG_2, TEST_URL_IMG_3],
+    previewImages: [TEST_URL_IMG_2, TEST_URL_IMG_3],
   },
   {
     id: 8,
     title: '홈트레이닝 루틴',
     category: '운동',
     itemCount: 7,
-    images: [TEST_URL_IMG_2, TEST_URL_IMG_2, TEST_URL_IMG_2, TEST_URL_IMG_2],
+    previewImages: [
+      TEST_URL_IMG_2,
+      TEST_URL_IMG_2,
+      TEST_URL_IMG_2,
+      TEST_URL_IMG_2,
+    ],
   },
 ];
 
@@ -413,7 +418,7 @@ const Test_yj1 = () => {
                         title={archive.title}
                         category={archive.category}
                         itemCount={archive.itemCount}
-                        images={archive.images}
+                        images={archive.previewImages}
                         searchQuery={searchQuery}
                         onClick={() => {
                           console.log('Clicked:', archive.title);

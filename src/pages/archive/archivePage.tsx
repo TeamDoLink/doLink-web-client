@@ -9,8 +9,12 @@ import {
 } from '@/components/archive';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { ROUTES } from '@/constants/routes';
-import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
-import { useArchiveMockStore } from '@/stores/useArchiveMockStore';
+import { archiveMockApi, useMockArchives } from '@/api/archive.mock';
+import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
+import {
+  ARCHIVE_CATEGORY_LABEL,
+  type ArchiveCategory,
+} from '@/utils/archiveCategory';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveCategoryKey[] = [
   'all',
@@ -34,8 +38,10 @@ const ARCHIVE_CATEGORIES = ARCHIVE_CATEGORY_KEYS.map((key) => ({
 const ArchivePage = () => {
   const { handleTabChange } = useBottomTabNavigation();
   const navigate = useNavigate();
-  const archives = useArchiveMockStore((state) => state.archives);
-  const deleteArchive = useArchiveMockStore((state) => state.deleteArchive);
+  const archives = useMockArchives();
+  const setSelectedArchiveId = useArchiveUIStore(
+    (state) => state.setSelectedArchiveId
+  );
   const [selectedCategory, setSelectedCategory] =
     useState<ArchiveCategoryKey>('all');
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
@@ -55,7 +61,8 @@ const ArchivePage = () => {
 
   const handleConfirmDelete = () => {
     if (!pendingDeleteArchiveId) return;
-    deleteArchive(pendingDeleteArchiveId);
+    archiveMockApi.delete(pendingDeleteArchiveId);
+    setSelectedArchiveId(null);
     setPendingDeleteArchiveId(null);
   };
 
@@ -64,6 +71,20 @@ const ArchivePage = () => {
   };
   const handleClickAdd = () => {
     navigate(ROUTES.archiveAdd);
+  };
+
+  const handleEdit = (id: string, title: string, category: ArchiveCategory) => {
+    setSelectedArchiveId(id);
+    navigate(ROUTES.archiveEdit, {
+      state: {
+        archive: {
+          id,
+          title,
+          category,
+        },
+        origin: ROUTES.archives,
+      },
+    });
   };
 
   return (
@@ -96,29 +117,26 @@ const ArchivePage = () => {
           />
         </section>
         <section className='space-y-3 bg-grey-50 px-5 pb-24 pt-6'>
-          {filteredArchives.map((archive) => (
-            <List.ArchiveCard
-              key={archive.id}
-              title={archive.title}
-              category={ARCHIVE_CATEGORY_LABEL[archive.category]}
-              itemCount={archive.itemCount}
-              images={archive.images}
-              width='w-full'
-              onEditClick={() =>
-                navigate(ROUTES.archiveEdit, {
-                  state: {
-                    archive: {
-                      id: archive.id,
-                      title: archive.title,
-                      category: archive.category,
-                    },
-                    origin: ROUTES.archives,
-                  },
-                })
-              }
-              onDeleteClick={() => handleRequestDelete(archive.id)}
-            />
-          ))}
+          {filteredArchives.map((archive) => {
+            const previewImages = Array.isArray(archive.images)
+              ? archive.images.slice(0, 4)
+              : [];
+
+            return (
+              <List.ArchiveCard
+                key={archive.id}
+                title={archive.title}
+                category={ARCHIVE_CATEGORY_LABEL[archive.category]}
+                itemCount={archive.itemCount}
+                images={previewImages}
+                width='w-full'
+                onEditClick={() =>
+                  handleEdit(archive.id, archive.title, archive.category)
+                }
+                onDeleteClick={() => handleRequestDelete(archive.id)}
+              />
+            );
+          })}
         </section>
       </main>
       <footer className='sticky bottom-0 bg-white shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
