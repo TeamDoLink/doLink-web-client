@@ -42,8 +42,10 @@ const ArchivePage = () => {
   const setSelectedArchiveId = useArchiveUIStore(
     (state) => state.setSelectedArchiveId
   );
-  const [selectedCategory, setSelectedCategory] =
-    useState<ArchiveCategoryKey>('all');
+  const selectedCategory = useArchiveUIStore((state) => state.selectedCategory);
+  const setSelectedCategory = useArchiveUIStore(
+    (state) => state.setSelectedCategory
+  );
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
     string | null
   >(null);
