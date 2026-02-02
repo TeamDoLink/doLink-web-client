@@ -27,7 +27,9 @@ let archives: Archive[] = createInitialArchives();
 const listeners = new Set<() => void>();
 
 const emit = () => {
-  listeners.forEach((listener) => listener());
+  listeners.forEach((listener) => {
+    listener();
+  });
 };
 
 const getSnapshot = (): Archive[] => archives;
