@@ -3,5 +3,15 @@ export const openExternalLink = (url: string) => {
     return;
   }
 
-  window.open(url, '_blank', 'noopener,noreferrer');
+  try {
+    const parsed = new URL(url);
+
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return;
+    }
+
+    window.open(parsed.toString(), '_blank', 'noopener,noreferrer');
+  } catch (error) {
+    console.error('Invalid URL:', url);
+  }
 };
