@@ -14,8 +14,8 @@ import {
   useMockArchives,
 } from '@/api/archive.mock';
 import { MOCK_TODOS } from '@/mocks/todoData';
-import { ROUTES } from '@/constants/routes';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
+import { ROUTES } from '@/constants/routes';
 
 // 시간 계산 함수
 const getGreetingPeriod = (hour: number) => {
