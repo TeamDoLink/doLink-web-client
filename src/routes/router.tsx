@@ -10,6 +10,8 @@ import Test from '@/pages/test';
 import Test2 from '@/pages/test2';
 import Test3 from '@/pages/test3';
 import ArchiveDetailPage from '@/pages/archive/archiveDetailPage';
+import TaskDetailPage from '@/pages/task/detail';
+import TaskCreatePage from '@/pages/task/taskCreatePage';
 
 const AppRouter = () => {
   return (
@@ -23,7 +25,8 @@ const AppRouter = () => {
         element={<WithdrawalConfirmPage />}
       />
       <Route path='/login' element={<LoginPage />} />
-
+      <Route path='/task/detail' element={<TaskDetailPage />} />
+      <Route path='/task/create' element={<TaskCreatePage />} />
       <Route path='/archives/detail/:id' element={<ArchiveDetailPage />} />
 
       {/* 공통 컴포넌트 테스트 페이지 */}

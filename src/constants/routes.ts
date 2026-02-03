@@ -6,6 +6,7 @@ export const ROUTES = {
   settingsWithdrawalConfirm: '/settings/withdrawal/confirm',
   test: '/test',
   test2: '/test2',
+  taskCreate: '/task/create',
 } as const;
 
 export const TAB_ROUTE_MAP = {

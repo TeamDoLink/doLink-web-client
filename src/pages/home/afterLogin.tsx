@@ -9,6 +9,12 @@ import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
 import { useTodoPreferenceStore } from '@/stores/useTodoPreferenceStore';
 import type { ArchiveItem, TodoItem } from '@/types';
+import { ROUTES } from '@/constants/routes';
+import { useNavigate } from 'react-router-dom';
+import { useDraftBridge } from '@/hooks/useDraftBridge';
+import type { TaskDraft } from '@/types/draft';
+
+const DRAFT_KEY = 'task-create-draft';
 
 const TODO_ITEMS: TodoItem[] = [
   {
@@ -141,6 +147,7 @@ type HomeAfterLoginProps = {
 };
 
 const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
+  const navigate = useNavigate();
   const { handleTabChange } = useBottomTabNavigation();
   const { suppressCompleteModal, setSuppressCompleteModal } =
     useTodoPreferenceStore();
@@ -153,6 +160,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     openConfirm,
     close: closeModal,
   } = useModalStore();
+  const { loadDraft } = useDraftBridge<TaskDraft>();
   const [todoItems, setTodoItems] = useState<TodoItem[]>(() =>
     TODO_ITEMS.map((todo) => ({ ...todo }))
   );
@@ -225,6 +233,40 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     closeModal();
   };
 
+  const checkHasDraft = async () => {
+    try {
+      return (await loadDraft(DRAFT_KEY)) !== null;
+    } catch (err) {
+      console.error('임시저장 확인 실패:', err);
+      return false;
+    }
+  };
+
+  /**
+   * FloatingButton 클릭 핸들러
+   */
+  const handleFloatingButtonClick = async () => {
+    const hasDraft = await checkHasDraft();
+
+    if (hasDraft) {
+      openConfirm({
+        title: '작성 중인 할 일이 있어요. 이어서 작성할까요?',
+        positiveLabel: '이어서 쓰기',
+        negativeLabel: '새로 쓰기',
+        onPositive: () => {
+          // 임시저장 복구
+          navigate(ROUTES.taskCreate, { state: { restoreDraft: true } });
+        },
+        onNegative: () => {
+          navigate(ROUTES.taskCreate, { state: { restoreDraft: false } });
+        },
+      });
+    } else {
+      // 임시저장 없으면 바로 이동
+      navigate(ROUTES.taskCreate);
+    }
+  };
+
   return (
     <div className='relative flex min-h-screen flex-col'>
       <Background.GradientBackground>
@@ -250,6 +292,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
             <FloatingButton
               aria-label='새 할 일 추가'
               className='pointer-events-auto'
+              onClick={handleFloatingButtonClick}
             />
           </div>
           <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
