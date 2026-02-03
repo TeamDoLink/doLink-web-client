@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import closeIcon from '@/assets/icons/common/close-36.svg';
 import { Button } from '@/components/common';
 import { ArchiveInput } from './archiveInput';
-import { ArchiveSelect, type ArchiveCategoryKey } from './archiveSelect';
+import { ArchiveSelect, type ArchiveCategory } from './archiveSelect';
 
 type ArchiveBottomSheetMode = 'create' | 'edit';
 
@@ -24,8 +24,8 @@ const MODE_PRESET: Record<
 interface ArchiveBottomSheetProps {
   mode?: ArchiveBottomSheetMode;
   initialName?: string;
-  initialCategory?: ArchiveCategoryKey | null;
-  onSubmit?: (payload: { name: string; category: ArchiveCategoryKey }) => void;
+  initialCategory?: ArchiveCategory | null;
+  onSubmit?: (payload: { name: string; category: ArchiveCategory }) => void;
 }
 
 const MAX_NAME_LENGTH = 20;
@@ -41,7 +41,7 @@ export const ArchiveBottomSheet = ({
 
   const [name, setName] = useState(initialName);
   const [selectedCategory, setSelectedCategory] =
-    useState<ArchiveCategoryKey | null>(initialCategory);
+    useState<ArchiveCategory | null>(initialCategory);
 
   const trimmedName = name.trim();
   const isSubmittable = trimmedName.length > 0 && selectedCategory !== null;
