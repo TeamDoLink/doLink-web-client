@@ -9,9 +9,7 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(
       (packageJson as { version: string }).version
     ),
-
-export default defineConfig({
-  plugins: [react()],
+  },
   server: {
     // 전체 IP에서 접속 가능하도록 설정
     host: '0.0.0.0',
