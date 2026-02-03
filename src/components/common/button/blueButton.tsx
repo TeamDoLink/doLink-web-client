@@ -65,7 +65,7 @@ export const BlueButton = ({
     <button
       type='button'
       disabled={isDisabled}
-      className={`inline-flex w-fit items-center justify-center rounded-[6px] px-2 py-[7px] text-body-sm transition ${
+      className={`inline-flex h-14 w-full items-center justify-center rounded-xl text-heading-md transition ${
         styles.bg
       } ${styles.text} ${activeClass} ${className}`}
       {...props}

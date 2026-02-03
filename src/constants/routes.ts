@@ -2,6 +2,8 @@ export const ROUTES = {
   home: '/',
   archives: '/archives',
   settings: '/settings',
+  settingsWithdrawal: '/settings/withdrawal',
+  settingsWithdrawalConfirm: '/settings/withdrawal/confirm',
   test: '/test',
   test2: '/test2',
   taskCreate: '/task/create',

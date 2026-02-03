@@ -22,7 +22,7 @@ export default function ModalLayout({
 
   return (
     <div
-      className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'
+      className='fixed inset-0 z-50 flex items-center justify-center bg-black/60'
       onClick={handleBackgroundClick}
     >
       <div onClick={(e) => e.stopPropagation()}>{children}</div>

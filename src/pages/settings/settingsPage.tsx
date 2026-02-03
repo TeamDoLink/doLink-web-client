@@ -10,10 +10,12 @@ import { APP_VERSION } from '@/constants/appVersion';
 import { fetchAppVersionInfo } from '@/api/appVersion';
 import { isLatestVersion } from '@/utils/versionCompare';
 import { openExternalLink } from '@/utils/openExternalLink';
+import { Router, useNavigate } from 'react-router-dom';
 
 const SettingsPage = () => {
   const { handleTabChange } = useBottomTabNavigation();
   const signOut = useAuthStore((state) => state.signOut);
+  const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [versionFetchState, setVersionFetchState] = useState<
@@ -132,7 +134,12 @@ const SettingsPage = () => {
           </button>
           {/* 추후 컴포넌트로 분리 예정 */}
           <div className='h-4 w-px bg-grey-200' />
-          <button type='button'>회원탈퇴</button>
+          <button
+            type='button'
+            onClick={() => navigate('/settings/withdrawal')}
+          >
+            회원탈퇴
+          </button>
         </div>
       </main>
       <footer className='sticky bottom-0 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>

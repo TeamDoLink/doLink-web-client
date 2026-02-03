@@ -15,7 +15,7 @@ export type ConfirmConfig = {
   title: string;
   subtitle?: string;
   positiveLabel: string;
-  negativeLabel: string;
+  negativeLabel?: string;
   onPositive?: () => void;
   onNegative?: () => void;
 };

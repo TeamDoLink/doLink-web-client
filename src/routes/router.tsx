@@ -3,6 +3,8 @@ import { Route, Routes } from 'react-router-dom';
 import HomePage from '@/pages/home/homePage';
 import ArchivePage from '@/pages/archive/archivePage';
 import SettingsPage from '@/pages/settings/settingsPage';
+import WithdrawalReasonPage from '@/pages/settings/withdrawal/withdrawalReasonPage';
+import WithdrawalConfirmPage from '@/pages/settings/withdrawal/withdrawalConfirmPage';
 import LoginPage from '@/pages/auth/loginPage';
 import Test from '@/pages/test';
 import Test2 from '@/pages/test2';
@@ -17,6 +19,11 @@ const AppRouter = () => {
       <Route path='/' element={<HomePage />} />
       <Route path='/archives' element={<ArchivePage />} />
       <Route path='/settings' element={<SettingsPage />} />
+      <Route path='/settings/withdrawal' element={<WithdrawalReasonPage />} />
+      <Route
+        path='/settings/withdrawal/confirm'
+        element={<WithdrawalConfirmPage />}
+      />
       <Route path='/login' element={<LoginPage />} />
       <Route path='/task/detail' element={<TaskDetailPage />} />
       <Route path='/task/create' element={<TaskCreatePage />} />
