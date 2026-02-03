@@ -1,11 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import {
   ArchiveBottomSheet,
-  type ArchiveSelectCategoryKey as ArchiveCategoryKey,
+  type ArchiveSelectCategory,
 } from '@/components/archive';
 import { ROUTES } from '@/constants/routes';
 import { archiveMockApi } from '@/api/archive.mock';
-import type { ArchiveCategory } from '@/utils/archiveCategory';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 
 const ArchiveAddPage = () => {
@@ -16,11 +15,11 @@ const ArchiveAddPage = () => {
 
   const handleSubmit = (payload: {
     name: string;
-    category: ArchiveCategoryKey;
+    category: ArchiveSelectCategory;
   }) => {
     archiveMockApi.add({
       title: payload.name,
-      category: payload.category as ArchiveCategory,
+      category: payload.category,
       itemCount: 0,
       images: [],
     });

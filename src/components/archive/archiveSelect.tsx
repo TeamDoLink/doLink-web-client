@@ -22,18 +22,18 @@ import etcSelected from '@/assets/icons/category/editor/etc-selected.svg';
 import etcUnselected from '@/assets/icons/category/editor/etc-unselected.svg';
 import {
   ARCHIVE_CATEGORY_LABEL,
-  type ArchiveCategoryKey,
+  type ArchiveCategory,
 } from '@/utils/archiveCategory';
 
-export type { ArchiveCategoryKey } from '@/utils/archiveCategory';
+export type { ArchiveCategory } from '@/utils/archiveCategory';
 
 interface ArchiveSelectProps {
-  selected?: ArchiveCategoryKey | null;
-  onSelect?: (category: ArchiveCategoryKey) => void;
+  selected?: ArchiveCategory | null;
+  onSelect?: (category: ArchiveCategory) => void;
 }
 
 const CATEGORY_ITEMS: Array<{
-  key: ArchiveCategoryKey;
+  key: ArchiveCategory;
   selectedIcon: string;
   unselectedIcon: string;
 }> = [
@@ -95,7 +95,7 @@ const CATEGORY_ITEMS: Array<{
  */
 export const ArchiveSelect = ({ selected, onSelect }: ArchiveSelectProps) => {
   const handleClick =
-    (key: ArchiveCategoryKey): MouseEventHandler<HTMLButtonElement> =>
+    (key: ArchiveCategory): MouseEventHandler<HTMLButtonElement> =>
     (event) => {
       event.preventDefault();
       onSelect?.(key);

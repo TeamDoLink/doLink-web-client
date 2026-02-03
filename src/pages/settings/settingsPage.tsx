@@ -10,7 +10,7 @@ import { APP_VERSION } from '@/constants/appVersion';
 import { fetchAppVersionInfo } from '@/api/appVersion';
 import { isLatestVersion } from '@/utils/versionCompare';
 import { openExternalLink } from '@/utils/openExternalLink';
-import { Router, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const SettingsPage = () => {
   const { handleTabChange } = useBottomTabNavigation();

@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import {
   ArchiveBottomSheet,
-  type ArchiveSelectCategoryKey as ArchiveCategoryKey,
+  type ArchiveSelectCategory,
 } from '@/components/archive';
 import { ROUTES } from '@/constants/routes';
 import {
@@ -11,7 +11,6 @@ import {
   useMockArchives,
   type Archive,
 } from '@/api/archive.mock';
-import type { ArchiveCategory } from '@/utils/archiveCategory';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 
 type ArchiveEditLocationState = {
@@ -19,7 +18,7 @@ type ArchiveEditLocationState = {
   archive?: {
     id: string;
     title: string;
-    category: ArchiveCategoryKey;
+    category: ArchiveSelectCategory;
   };
 };
 
@@ -63,7 +62,7 @@ const ArchiveEditPage = () => {
 
   const handleSubmit = (payload: {
     name: string;
-    category: ArchiveCategory;
+    category: ArchiveSelectCategory;
   }) => {
     archiveMockApi.update(targetArchive.id, {
       title: payload.name,
