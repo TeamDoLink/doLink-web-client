@@ -2,9 +2,9 @@ export type ConfirmDialogProps = {
   title: string;
   subtitle?: string;
   positiveLabel: string;
-  negativeLabel: string;
+  negativeLabel?: string;
   onPositive: () => void;
-  onNegative: () => void;
+  onNegative?: () => void;
 };
 
 export default function ConfirmDialog({
@@ -37,13 +37,14 @@ export default function ConfirmDialog({
         </button>
 
         {/* Secondary Text Button */}
-        <button
-          type='button'
-          onClick={onNegative}
-          className='w-full text-center text-body-md text-grey-800'
-        >
-          {negativeLabel}
-        </button>
+        {negativeLabel && onNegative && (
+          <button
+            onClick={onNegative}
+            className='w-full text-center text-body-md text-grey-800'
+          >
+            {negativeLabel}
+          </button>
+        )}
       </div>
     </div>
   );

@@ -4,6 +4,8 @@ export const ROUTES = {
   archiveAdd: '/archives/add',
   archiveEdit: '/archives/edit',
   settings: '/settings',
+  settingsWithdrawal: '/settings/withdrawal',
+  settingsWithdrawalConfirm: '/settings/withdrawal/confirm',
   test: '/test',
   test2: '/test2',
   taskCreate: '/task/create',
