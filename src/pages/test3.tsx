@@ -1,10 +1,7 @@
 import { useEffect } from 'react';
-import { CtaSecondButton } from '@/components/common/button/ctaSecondButton';
-import { FlagLabel } from '@/components/common/label/flagLabel';
 import { LinkCapsuleButton } from '@/components/common/button/linkCapsuleButton';
 import { ShareCapsuleButton } from '@/components/common/button/shareCapsuleButton';
-import { OptionMenu } from '@/components/common/menu/optionMenu';
-import Test_yj1 from './test_yj1';
+
 import {
   openLink,
   addTypedMessageListener,
