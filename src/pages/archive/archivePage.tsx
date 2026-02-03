@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TabBar, List, FeedBack } from '@/components/common';
+import { FloatingButton } from '@/components/common/button';
 import { SearchAppBar } from '@/components/common/appBar/searchAppBar';
 import {
   CategoryFilterButton,
@@ -142,7 +143,16 @@ const ArchivePage = () => {
         </section>
       </main>
       <footer className='sticky bottom-0 bg-white shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
-        <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
+        <div className='relative w-full'>
+          <div className='pointer-events-none absolute -top-[76px] right-6 z-10 flex h-[52px] w-[52px] items-center justify-center'>
+            <FloatingButton
+              aria-label='새 할 일 추가'
+              className='pointer-events-auto'
+              onClick={() => navigate(ROUTES.taskCreate)}
+            />
+          </div>
+          <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
+        </div>
       </footer>
 
       <FeedBack.ModalLayout
