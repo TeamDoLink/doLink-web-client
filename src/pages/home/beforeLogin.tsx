@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Background,
   Button,
@@ -14,14 +14,13 @@ import { useModalStore } from '@/stores/useModalStore';
 import { archiveMockApi } from '@/api/archive.mock';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import { formatRelativeDateLabel } from '@/utils/date';
-import { MOCK_TODOS } from '@/mocks/todoData';
+import { todoMockApi, useMockTodos } from '@/api/todo.mock';
 
 const HomeBeforeLogin = () => {
   const { handleTabChange } = useBottomTabNavigation();
   const [showToast, setShowToast] = useState(true);
-  const [todoItems, setTodoItems] = useState(() =>
-    MOCK_TODOS.slice(0, 1).map((todo) => ({ ...todo }))
-  );
+  const todoItems = useMockTodos();
+  const previewTodoItems = useMemo(() => todoItems.slice(0, 1), [todoItems]);
   const [archiveItems, setArchiveItems] = useState(() =>
     archiveMockApi
       .getAll()
@@ -61,11 +60,11 @@ const HomeBeforeLogin = () => {
   };
 
   const handleTodoCheckbox = (id: string, nextChecked: boolean) => {
-    setTodoItems((prev) =>
-      prev.map((todo) =>
-        todo.id === id ? { ...todo, checked: nextChecked } : todo
-      )
-    );
+    const updatedTodo = todoMockApi.update(id, { checked: nextChecked });
+
+    if (!updatedTodo) {
+      return;
+    }
 
     if (nextChecked && !suppressCompleteModal) {
       openAlert({
@@ -142,7 +141,7 @@ const HomeBeforeLogin = () => {
             <section className='mt-5 space-y-4'>
               <h2 className='text-heading-sm text-black'>할 일</h2>
               <div className='space-y-4 rounded-2xl bg-white py-5 shadow-[0_4px_12px_rgba(0,0,0,0.03)]'>
-                {todoItems.map(
+                {previewTodoItems.map(
                   ({ id, title, platform, checked, createdAt }) => (
                     <List.TodoItem
                       key={id}

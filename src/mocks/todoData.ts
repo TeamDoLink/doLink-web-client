@@ -1,6 +1,8 @@
 import type { TodoItem } from '@/types';
 
-export const MOCK_TODOS: TodoItem[] = [
+export type MockTodo = TodoItem;
+
+export const MOCK_TODOS: MockTodo[] = [
   {
     id: 'welcome-guide',
     title: '두링크(DoLink) 안내서 📚',
