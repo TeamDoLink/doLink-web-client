@@ -516,9 +516,6 @@ const Test_yj1 = () => {
                       checked={linkStates[link.id]}
                       isEditMode={linkEditModes[link.id]}
                       onChange={(checked) => handleLinkCheck(link.id, checked)}
-                      onEditModeChange={(isEditMode) =>
-                        handleEditModeChange(link.id, isEditMode)
-                      }
                       onOriginalClick={() => {
                         console.log('원본 클릭:', link.title);
                         alert(`${link.title}의 원본 보기`);
