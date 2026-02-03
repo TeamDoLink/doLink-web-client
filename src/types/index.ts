@@ -1,9 +1,9 @@
 export type TodoItem = {
   id: string;
   title: string;
-  date: string;
   platform: string;
   checked: boolean;
+  createdAt: string;
 };
 
 export type ArchiveItem = {
@@ -11,6 +11,5 @@ export type ArchiveItem = {
   title: string;
   category: string;
   itemCount: number;
-  images?: string[];
   createdAt: string;
 };

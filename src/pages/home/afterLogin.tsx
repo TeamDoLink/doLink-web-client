@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Background, FeedBack, TabBar } from '@/components/common';
 import { FloatingButton } from '@/components/common/button';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
@@ -7,132 +8,14 @@ import { TodoSection } from '@/components/home/todoSection';
 import { ArchiveSection } from '@/components/home/archiveSection';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
-import { useTodoPreferenceStore } from '@/stores/useTodoPreferenceStore';
-import type { ArchiveItem, TodoItem } from '@/types';
+import {
+  archiveMockApi,
+  selectLatestArchivePreviews,
+  useMockArchives,
+} from '@/api/archive.mock';
+import { MOCK_TODOS } from '@/mocks/todoData';
+import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import { ROUTES } from '@/constants/routes';
-import { useNavigate } from 'react-router-dom';
-import { useDraftBridge } from '@/hooks/useDraftBridge';
-import type { TaskDraft } from '@/types/draft';
-
-const DRAFT_KEY = 'task-create-draft';
-
-const TODO_ITEMS: TodoItem[] = [
-  {
-    id: 'welcome-guide',
-    title: '두링크(DoLink) 안내서 📚',
-    date: '오늘',
-    platform: '노션 (Notion)',
-    checked: false,
-  },
-  {
-    id: 'welcome-guide-2',
-    title: '두링크(DoLink) 안내서 📚',
-    date: '오늘',
-    platform: '노션 (Notion)',
-    checked: false,
-  },
-  {
-    id: 'welcome-guide-3',
-    title: '두링크(DoLink) 안내서 📚',
-    date: '오늘',
-    platform: '노션 (Notion)',
-    checked: false,
-  },
-  {
-    id: 'welcome-guide-4',
-    title: '두링크(DoLink) 안내서 📚',
-    date: '오늘',
-    platform: '노션 (Notion)',
-    checked: false,
-  },
-  {
-    id: 'welcome-guide-5',
-    title: '두링크(DoLink) 안내서 📚',
-    date: '오늘',
-    platform: '노션 (Notion)',
-    checked: false,
-  },
-];
-
-const ARCHIVE_ITEMS: ArchiveItem[] = [
-  {
-    id: 'tutorial-4',
-    title: '두링크(DoLink) 튜토리얼 (01/07)',
-    category: '기타',
-    itemCount: 3,
-    createdAt: '2025-01-07T16:45:00',
-  },
-  {
-    id: 'tutorial-5',
-    title: '두링크(DoLink) 튜토리얼 (12/31)',
-    category: '기타',
-    itemCount: 1,
-    createdAt: '2024-12-31T17:30:28',
-  },
-  {
-    id: 'tutorial-2',
-    title: '두링크(DoLink) 튜토리얼 (01/09)',
-    category: '기타',
-    itemCount: 2,
-    createdAt: '2025-01-09T14:20:15',
-  },
-  {
-    id: 'tutorial-3',
-    title: '두링크(DoLink) 튜토리얼 (01/05)',
-    category: '기타',
-    itemCount: 4,
-    createdAt: '2025-01-05T13:25:10',
-  },
-  {
-    id: 'tutorial',
-    title: '두링크(DoLink) 튜토리얼 (01/10)',
-    category: '기타',
-    itemCount: 1,
-    createdAt: '2025-01-10T12:30:21',
-  },
-  {
-    id: 'tutorial-5',
-    title: '두링크(DoLink) 튜토리얼 (01/03)',
-    category: '기타',
-    itemCount: 1,
-    createdAt: '2025-01-03T15:40:33',
-  },
-  {
-    id: 'tutorial-4',
-    title: '두링크(DoLink) 튜토리얼 (01/01)',
-    category: '기타',
-    itemCount: 3,
-    createdAt: '2025-01-01T12:10:55',
-  },
-  {
-    id: 'tutorial-3',
-    title: '두링크(DoLink) 튜토리얼 (01/08)',
-    category: '기타',
-    itemCount: 4,
-    createdAt: '2025-01-08T09:15:30',
-  },
-  {
-    id: 'tutorial-5',
-    title: '두링크(DoLink) 튜토리얼 (01/06)',
-    category: '기타',
-    itemCount: 1,
-    createdAt: '2025-01-06T11:30:22',
-  },
-  {
-    id: 'tutorial-3',
-    title: '두링크(DoLink) 튜토리얼 (01/02)',
-    category: '기타',
-    itemCount: 4,
-    createdAt: '2025-01-02T08:20:17',
-  },
-  {
-    id: 'tutorial-4',
-    title: '두링크(DoLink) 튜토리얼 (01/04)',
-    category: '기타',
-    itemCount: 3,
-    createdAt: '2025-01-04T10:15:45',
-  },
-];
 
 // 시간 계산 함수
 const getGreetingPeriod = (hour: number) => {
@@ -149,8 +32,14 @@ type HomeAfterLoginProps = {
 const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   const navigate = useNavigate();
   const { handleTabChange } = useBottomTabNavigation();
-  const { suppressCompleteModal, setSuppressCompleteModal } =
-    useTodoPreferenceStore();
+  const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
+  const [todoItems, setTodoItems] = useState(() =>
+    MOCK_TODOS.map((todo) => ({ ...todo }))
+  );
+  const archiveItems = useMockArchives();
+  const setSelectedArchiveId = useArchiveUIStore(
+    (state) => state.setSelectedArchiveId
+  );
   const {
     isOpen: isModalOpen,
     type: modalType,
@@ -160,13 +49,6 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     openConfirm,
     close: closeModal,
   } = useModalStore();
-  const { loadDraft } = useDraftBridge<TaskDraft>();
-  const [todoItems, setTodoItems] = useState<TodoItem[]>(() =>
-    TODO_ITEMS.map((todo) => ({ ...todo }))
-  );
-  const [archiveItems, setArchiveItems] = useState<ArchiveItem[]>(() =>
-    ARCHIVE_ITEMS.map((archive) => ({ ...archive }))
-  );
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
     string | null
   >(null);
@@ -177,16 +59,14 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     return `좋은 ${period}이에요 😊`;
   }, []);
 
-  const latestArchiveItems = useMemo(() => {
-    return [...archiveItems].sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-  }, [archiveItems]);
+  const latestArchives = useMemo(
+    () => selectLatestArchivePreviews(archiveItems),
+    [archiveItems]
+  );
 
   const handleToggleTodo = (id: string, nextChecked: boolean) => {
-    setTodoItems((prev) =>
-      prev.map((todo) =>
+    setTodoItems((prevTodos) =>
+      prevTodos.map((todo) =>
         todo.id === id ? { ...todo, checked: nextChecked } : todo
       )
     );
@@ -204,9 +84,8 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
 
   const handleConfirmDeleteArchive = () => {
     if (!pendingDeleteArchiveId) return;
-    setArchiveItems((prev) =>
-      prev.filter((archive) => archive.id !== pendingDeleteArchiveId)
-    );
+    archiveMockApi.delete(pendingDeleteArchiveId);
+    setSelectedArchiveId(null);
     setPendingDeleteArchiveId(null);
   };
 
@@ -226,45 +105,31 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     });
   };
 
+  const handleRequestEditArchive = (id: string) => {
+    const targetArchive = archiveItems.find((archive) => archive.id === id);
+    if (!targetArchive) {
+      return;
+    }
+
+    setSelectedArchiveId(id);
+
+    navigate(ROUTES.archiveEdit, {
+      state: {
+        archive: {
+          id: targetArchive.id,
+          title: targetArchive.title,
+          category: targetArchive.category,
+        },
+        origin: ROUTES.home,
+      },
+    });
+  };
+
   const handleModalClose = () => {
     if (modalType === 'confirm') {
       confirmConfig?.onNegative?.();
     }
     closeModal();
-  };
-
-  const checkHasDraft = async () => {
-    try {
-      return (await loadDraft(DRAFT_KEY)) !== null;
-    } catch (err) {
-      console.error('임시저장 확인 실패:', err);
-      return false;
-    }
-  };
-
-  /**
-   * FloatingButton 클릭 핸들러
-   */
-  const handleFloatingButtonClick = async () => {
-    const hasDraft = await checkHasDraft();
-
-    if (hasDraft) {
-      openConfirm({
-        title: '작성 중인 할 일이 있어요. 이어서 작성할까요?',
-        positiveLabel: '이어서 쓰기',
-        negativeLabel: '새로 쓰기',
-        onPositive: () => {
-          // 임시저장 복구
-          navigate(ROUTES.taskCreate, { state: { restoreDraft: true } });
-        },
-        onNegative: () => {
-          navigate(ROUTES.taskCreate, { state: { restoreDraft: false } });
-        },
-      });
-    } else {
-      // 임시저장 없으면 바로 이동
-      navigate(ROUTES.taskCreate);
-    }
   };
 
   return (
@@ -279,8 +144,9 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
             <GreetingSection memberName={memberName} greeting={greeting} />
             <TodoSection items={todoItems} onToggle={handleToggleTodo} />
             <ArchiveSection
-              items={latestArchiveItems}
+              items={latestArchives}
               onRequestDelete={handleRequestDeleteArchive}
+              onRequestEdit={handleRequestEditArchive}
             />
           </div>
         </main>
@@ -292,7 +158,6 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
             <FloatingButton
               aria-label='새 할 일 추가'
               className='pointer-events-auto'
-              onClick={handleFloatingButtonClick}
             />
           </div>
           <TabBar.BottomTabBar value='home' onChange={handleTabChange} />

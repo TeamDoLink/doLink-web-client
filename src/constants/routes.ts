@@ -1,6 +1,8 @@
 export const ROUTES = {
   home: '/',
   archives: '/archives',
+  archiveAdd: '/archives/add',
+  archiveEdit: '/archives/edit',
   settings: '/settings',
   settingsWithdrawal: '/settings/withdrawal',
   settingsWithdrawalConfirm: '/settings/withdrawal/confirm',

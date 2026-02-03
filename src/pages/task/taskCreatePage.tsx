@@ -281,17 +281,16 @@ function TaskCreatePage() {
   /**
    * 에러 메시지 표시
    */
-  const showErrorMessage = (): string | undefined => {
+  const getErrorMessage = (): string | undefined => {
     if (!error) return undefined;
 
-    const message =
-      error.code === 'WEBVIEW_NOT_AVAILABLE'
-        ? 'React Native WebView 환경이 아닙니다.'
-        : error.code === 'MESSAGE_FAILED'
-          ? `클립보드 읽기 실패: ${error.message}`
-          : `오류: ${error.message}`;
-
-    return message;
+    if (error.code === 'WEBVIEW_NOT_AVAILABLE') {
+      return 'React Native WebView 환경이 아닙니다.';
+    }
+    if (error.code === 'MESSAGE_FAILED') {
+      return `클립보드 읽기 실패: ${error.message}`;
+    }
+    return `오류: ${error.message}`;
   };
 
   return (
@@ -371,7 +370,7 @@ function TaskCreatePage() {
             name='link'
             state={getLinkState()}
             placeholder='링크를 입력해주세요.'
-            errorMessage={error ? showErrorMessage() : undefined}
+            errorMessage={getErrorMessage()}
             buttonLabel={hasClipboardLink ? '붙여넣기' : undefined}
             value={linkValue}
             onChange={handleLinkChange}

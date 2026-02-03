@@ -2,6 +2,8 @@ import { Route, Routes } from 'react-router-dom';
 
 import HomePage from '@/pages/home/homePage';
 import ArchivePage from '@/pages/archive/archivePage';
+import ArchiveAddPage from '@/pages/archive/archiveAddPage';
+import ArchiveEditPage from '@/pages/archive/archiveEditPage';
 import SettingsPage from '@/pages/settings/settingsPage';
 import WithdrawalReasonPage from '@/pages/settings/withdrawal/withdrawalReasonPage';
 import WithdrawalConfirmPage from '@/pages/settings/withdrawal/withdrawalConfirmPage';
@@ -18,6 +20,9 @@ const AppRouter = () => {
     <Routes>
       <Route path='/' element={<HomePage />} />
       <Route path='/archives' element={<ArchivePage />} />
+      <Route path='/archives/add' element={<ArchiveAddPage />} />
+      <Route path='/archives/edit' element={<ArchiveEditPage />} />
+
       <Route path='/settings' element={<SettingsPage />} />
       <Route path='/settings/withdrawal' element={<WithdrawalReasonPage />} />
       <Route
