@@ -64,6 +64,15 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     [archiveItems]
   );
 
+  const latestTodos = useMemo(() => {
+    return [...todoItems]
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      .slice(0, 3);
+  }, [todoItems]);
+
   const handleToggleTodo = (id: string, nextChecked: boolean) => {
     setTodoItems((prevTodos) =>
       prevTodos.map((todo) =>
@@ -146,7 +155,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
         <main className='relative grow'>
           <div className='mx-auto flex flex-col px-5 py-2'>
             <GreetingSection memberName={memberName} greeting={greeting} />
-            <TodoSection items={todoItems} onToggle={handleToggleTodo} />
+            <TodoSection items={latestTodos} onToggle={handleToggleTodo} />
             <ArchiveSection
               items={latestArchives}
               onRequestDelete={handleRequestDeleteArchive}
