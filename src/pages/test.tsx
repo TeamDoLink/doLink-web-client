@@ -7,7 +7,7 @@ import { BlueButton } from '@/components/common/button/blueButton';
 import { GreyButton } from '@/components/common/button/greyButton';
 import { IconButton } from '@/components/common/button/iconButton';
 import { BackDetailBar } from '@/components/common/appBar/backDetailAppBar';
-import { SettingAppBar } from '@/components/common/appBar/settingAppBar';
+import { SettingMenuItem } from '@/components/common/setting/settingMenuItem';
 import { GreyLine } from '@/components/common/line/greyLine';
 import { GradientBackground } from '@/components/common/background/gradientBackground';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
@@ -264,12 +264,12 @@ const sections = [
     ),
   },
   {
-    title: 'Setting App Bar',
+    title: 'Setting Menu Item',
     description:
-      '세팅 화면 전용 상단바입니다. 좌측 큰 텍스트와 우측 보조 텍스트/화살표를 조합해 렌더링합니다.',
+      '설정 화면 전용 메뉴 아이템입니다. 좌측 큰 텍스트와 우측 보조 텍스트/화살표를 조합해 렌더링합니다.',
     component: (
       <div className='w-full max-w-md space-y-3 rounded-3xl bg-grey-100 p-6'>
-        <SettingAppBar leftText='텍스트' rightText='텍스트' />
+        <SettingMenuItem leftText='텍스트' rightText='텍스트' />
       </div>
     ),
   },
