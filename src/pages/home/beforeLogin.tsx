@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Background,
   Button,
@@ -15,8 +16,10 @@ import { archiveMockApi } from '@/api/archive.mock';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import { formatRelativeDateLabel } from '@/utils/date';
 import { MOCK_TODOS } from '@/mocks/todoData';
+import { ROUTES } from '@/constants/routes';
 
 const HomeBeforeLogin = () => {
+  const navigate = useNavigate();
   const { handleTabChange } = useBottomTabNavigation();
   const [showToast, setShowToast] = useState(true);
   const [todoItems, setTodoItems] = useState(() =>
@@ -109,6 +112,10 @@ const HomeBeforeLogin = () => {
     closeModal();
   };
 
+  const handleCreateTodo = () => {
+    navigate(ROUTES.taskCreate);
+  };
+
   return (
     <div className='relative flex min-h-screen flex-col'>
       <Background.GradientBackground className='flex min-h-0 flex-1 flex-col'>
@@ -193,6 +200,7 @@ const HomeBeforeLogin = () => {
               <FloatingButton
                 aria-label='새 할 일 추가'
                 className='pointer-events-auto'
+                onClick={handleCreateTodo}
               />
             </div>
             <TabBar.BottomTabBar value='home' onChange={handleTabChange} />

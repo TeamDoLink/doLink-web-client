@@ -132,6 +132,10 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     closeModal();
   };
 
+  const handleCreateTodo = () => {
+    navigate(ROUTES.taskCreate);
+  };
+
   return (
     <div className='relative flex min-h-screen flex-col'>
       <Background.GradientBackground>
@@ -158,6 +162,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
             <FloatingButton
               aria-label='새 할 일 추가'
               className='pointer-events-auto'
+              onClick={handleCreateTodo}
             />
           </div>
           <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
