@@ -13,7 +13,7 @@ import {
   selectLatestArchivePreviews,
   useMockArchives,
 } from '@/api/archive.mock';
-import { MOCK_TODOS } from '@/mocks/todoData';
+import { todoMockApi, useMockTodos } from '@/api/todo.mock';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import { ROUTES } from '@/constants/routes';
 
@@ -33,9 +33,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   const navigate = useNavigate();
   const { handleTabChange } = useBottomTabNavigation();
   const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
-  const [todoItems, setTodoItems] = useState(() =>
-    MOCK_TODOS.map((todo) => ({ ...todo }))
-  );
+  const todoItems = useMockTodos();
   const archiveItems = useMockArchives();
   const setSelectedArchiveId = useArchiveUIStore(
     (state) => state.setSelectedArchiveId
@@ -65,11 +63,10 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   );
 
   const handleToggleTodo = (id: string, nextChecked: boolean) => {
-    setTodoItems((prevTodos) =>
-      prevTodos.map((todo) =>
-        todo.id === id ? { ...todo, checked: nextChecked } : todo
-      )
-    );
+    const updatedTodo = todoMockApi.update(id, { checked: nextChecked });
+    if (!updatedTodo) {
+      return;
+    }
 
     if (nextChecked && !suppressCompleteModal) {
       openAlert({

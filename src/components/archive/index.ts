@@ -2,7 +2,7 @@ export { ArchiveBottomSheet } from './archiveBottomSheet';
 export { ArchiveInput } from './archiveInput';
 export {
   ArchiveSelect,
-  type ArchiveCategoryKey as ArchiveSelectCategoryKey,
+  type ArchiveCategory as ArchiveSelectCategory,
 } from './archiveSelect';
 export {
   CategoryFilterButton,
