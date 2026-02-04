@@ -159,6 +159,7 @@ const ArchiveBeforeLogin = () => {
                 itemCount={archive.itemCount}
                 images={previewImages}
                 width='w-full'
+                disableActionMenu
                 onMoreClick={handleArchiveMoreClick}
                 onEditClick={handleArchiveActionClick}
                 onDeleteClick={handleArchiveActionClick}
