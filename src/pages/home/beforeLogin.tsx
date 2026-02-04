@@ -11,7 +11,6 @@ import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import heroIllustration from '@/assets/icons/home/home1.svg';
 import { FloatingButton } from '@/components/common/button';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
-import { useModalStore } from '@/stores/useModalStore';
 import { formatRelativeDateLabel } from '@/utils/date';
 import { ROUTES } from '@/constants/routes';
 
@@ -45,7 +44,7 @@ const HomeBeforeLogin = () => {
       createdAt: '2026-01-03T09:00:00',
     },
   ]);
-  const [archiveItems, setArchiveItems] = useState<BeforeLoginArchiveItem[]>([
+  const [archiveItems] = useState<BeforeLoginArchiveItem[]>([
     {
       id: 'welcome-archive',
       title: '두링크(DoLink) 튜토리얼',
@@ -54,18 +53,6 @@ const HomeBeforeLogin = () => {
       previewImages: [],
     },
   ]);
-  const {
-    isOpen: isModalOpen,
-    type: modalType,
-    alertConfig,
-    confirmConfig,
-    openConfirm,
-    close: closeModal,
-  } = useModalStore();
-  const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
-    string | null
-  >(null);
-
   useEffect(() => {
     if (!showToast) {
       return;
@@ -88,39 +75,8 @@ const HomeBeforeLogin = () => {
     triggerLoginToast();
   };
 
-  const handleConfirmDeleteArchive = () => {
-    if (!pendingDeleteArchiveId) return;
-    setArchiveItems((prev) =>
-      prev.filter((archive) => archive.id !== pendingDeleteArchiveId)
-    );
-    setPendingDeleteArchiveId(null);
-  };
-
-  const handleCancelDeleteArchive = () => {
-    setPendingDeleteArchiveId(null);
-  };
-
-  const handleRequestDeleteArchive = (id: string) => {
-    setPendingDeleteArchiveId(id);
-    openConfirm({
-      title: '모음을 삭제할까요?',
-      subtitle: '모음 내 할 일도 함께 삭제돼요.',
-      positiveLabel: '삭제하기',
-      negativeLabel: '취소',
-      onPositive: handleConfirmDeleteArchive,
-      onNegative: handleCancelDeleteArchive,
-    });
-  };
-
-  const handleModalClose = () => {
-    if (modalType === 'confirm') {
-      confirmConfig?.onNegative?.();
-    }
-    closeModal();
-  };
-
   const handleCreateTodo = () => {
-    navigate(ROUTES.taskCreate);
+    triggerLoginToast();
   };
 
   return (
@@ -182,7 +138,10 @@ const HomeBeforeLogin = () => {
                       itemCount={itemCount}
                       images={previewImages}
                       width='w-full'
-                      onDeleteClick={() => handleRequestDeleteArchive(id)}
+                      disableActionMenu
+                      onMoreClick={triggerLoginToast}
+                      onEditClick={triggerLoginToast}
+                      onDeleteClick={triggerLoginToast}
                     />
                   )
                 )}
@@ -213,45 +172,6 @@ const HomeBeforeLogin = () => {
             <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
           </div>
         </footer>
-
-        <FeedBack.ModalLayout open={isModalOpen} onClose={handleModalClose}>
-          {modalType === 'alert' && alertConfig && (
-            <FeedBack.AlertDialog
-              title={alertConfig.title}
-              subtitle={alertConfig.subtitle}
-              primaryLabel={alertConfig.primaryLabel}
-              secondaryLabel={alertConfig.secondaryLabel}
-              onPrimary={() => {
-                alertConfig.onPrimary?.();
-                closeModal();
-              }}
-              onSecondary={
-                alertConfig.secondaryLabel
-                  ? () => {
-                      alertConfig.onSecondary?.();
-                      closeModal();
-                    }
-                  : undefined
-              }
-            />
-          )}
-          {modalType === 'confirm' && confirmConfig && (
-            <FeedBack.ConfirmDialog
-              title={confirmConfig.title}
-              subtitle={confirmConfig.subtitle}
-              positiveLabel={confirmConfig.positiveLabel}
-              negativeLabel={confirmConfig.negativeLabel}
-              onPositive={() => {
-                confirmConfig.onPositive?.();
-                closeModal();
-              }}
-              onNegative={() => {
-                confirmConfig.onNegative?.();
-                closeModal();
-              }}
-            />
-          )}
-        </FeedBack.ModalLayout>
       </Background.GradientBackground>
     </div>
   );
