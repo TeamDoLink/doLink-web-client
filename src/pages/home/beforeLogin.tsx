@@ -11,48 +11,21 @@ import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import heroIllustration from '@/assets/icons/home/home1.svg';
 import { FloatingButton } from '@/components/common/button';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
-import { formatRelativeDateLabel } from '@/utils/date';
+import {
+  BEFORE_LOGIN_ARCHIVE,
+  BEFORE_LOGIN_TODO,
+} from '@/constants/beforeLoginData';
 import { ROUTES } from '@/constants/routes';
-
-type BeforeLoginTodoItem = {
-  id: string;
-  title: string;
-  platform: string;
-  checked: boolean;
-  createdAt: string;
-};
-
-type BeforeLoginArchiveItem = {
-  id: string;
-  title: string;
-  categoryLabel: string;
-  itemCount: number;
-  previewImages: string[];
-};
+import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
+import { formatRelativeDateLabel } from '@/utils/date';
 
 const HomeBeforeLogin = () => {
   const navigate = useNavigate();
   const { handleTabChange } = useBottomTabNavigation();
   const [showToast, setShowToast] = useState(false);
   const [toastToken, setToastToken] = useState(0);
-  const [todoItems] = useState<BeforeLoginTodoItem[]>([
-    {
-      id: 'welcome-guide',
-      title: '두링크(DoLink) 안내서 📚',
-      platform: '노션 (Notion)',
-      checked: false,
-      createdAt: '2026-01-03T09:00:00',
-    },
-  ]);
-  const [archiveItems] = useState<BeforeLoginArchiveItem[]>([
-    {
-      id: 'welcome-archive',
-      title: '두링크(DoLink) 튜토리얼',
-      categoryLabel: '기타',
-      itemCount: 1,
-      previewImages: [],
-    },
-  ]);
+  const todoItems = BEFORE_LOGIN_TODO();
+  const archiveItems = BEFORE_LOGIN_ARCHIVE();
   useEffect(() => {
     if (!showToast) {
       return;
@@ -130,13 +103,13 @@ const HomeBeforeLogin = () => {
               <h2 className='text-heading-sm text-black'>모음</h2>
               <div className='space-y-3'>
                 {archiveItems.map(
-                  ({ id, title, categoryLabel, itemCount, previewImages }) => (
+                  ({ id, title, category, itemCount, images }) => (
                     <List.ArchiveCard
                       key={id}
                       title={title}
-                      category={categoryLabel}
+                      category={ARCHIVE_CATEGORY_LABEL[category]}
                       itemCount={itemCount}
-                      images={previewImages}
+                      images={images.slice(0, 4)}
                       width='w-full'
                       disableActionMenu
                       onMoreClick={triggerLoginToast}
