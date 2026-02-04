@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TabBar, List, FeedBack } from '@/components/common';
 import { FloatingButton } from '@/components/common/button';
@@ -10,12 +10,9 @@ import {
 } from '@/components/archive';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { ROUTES } from '@/constants/routes';
+import { BEFORE_LOGIN_ARCHIVE } from '@/constants/beforeLoginData';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
-import {
-  ARCHIVE_CATEGORY_LABEL,
-  type ArchiveCategory,
-} from '@/utils/archiveCategory';
-import { formatRelativeDateLabel } from '@/utils/date';
+import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveCategoryKey[] = [
   'all',
@@ -35,15 +32,6 @@ const ARCHIVE_CATEGORIES = ARCHIVE_CATEGORY_KEYS.map((key) => ({
   key,
   label: ARCHIVE_CATEGORY_LABEL[key],
 }));
-
-type BeforeLoginArchive = {
-  id: string;
-  title: string;
-  category: ArchiveCategory;
-  itemCount: number;
-  createdAt: string;
-  images: string[];
-};
 
 const ArchiveBeforeLogin = () => {
   const { handleTabChange } = useBottomTabNavigation();
@@ -68,27 +56,12 @@ const ArchiveBeforeLogin = () => {
     return () => clearTimeout(timer);
   }, [showToast, toastToken]);
 
-  const archives = useMemo<BeforeLoginArchive[]>(() => {
-    const todayISO = new Date().toISOString();
-    return [
-      {
-        id: 'archive-tutorial',
-        title: '두링크 튜토리얼',
-        category: 'etc',
-        itemCount: 1,
-        createdAt: todayISO,
-        images: [],
-      },
-    ];
-  }, []);
+  const archives = BEFORE_LOGIN_ARCHIVE();
 
-  const filteredArchives = useMemo(() => {
-    if (selectedCategory === 'all') {
-      return archives;
-    }
-
-    return archives.filter((archive) => archive.category === selectedCategory);
-  }, [archives, selectedCategory]);
+  const filteredArchives =
+    selectedCategory === 'all'
+      ? archives
+      : archives.filter((archive) => archive.category === selectedCategory);
 
   const triggerLoginToast = () => {
     setShowToast(true);
@@ -149,7 +122,7 @@ const ArchiveBeforeLogin = () => {
             const previewImages = Array.isArray(archive.images)
               ? archive.images.slice(0, 4)
               : [];
-            const categoryLabel = `${ARCHIVE_CATEGORY_LABEL[archive.category]} · ${formatRelativeDateLabel(archive.createdAt)}`;
+            const categoryLabel = ARCHIVE_CATEGORY_LABEL[archive.category];
 
             return (
               <List.ArchiveCard
