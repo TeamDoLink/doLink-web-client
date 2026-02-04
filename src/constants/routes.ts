@@ -3,12 +3,16 @@ export const ROUTES = {
   archives: '/archives',
   archiveAdd: '/archives/add',
   archiveEdit: '/archives/edit',
+  archiveDetail: '/archives/detail',
   settings: '/settings',
   settingsWithdrawal: '/settings/withdrawal',
   settingsWithdrawalConfirm: '/settings/withdrawal/confirm',
+  taskDetail: '/task/detail',
   test: '/test',
   test2: '/test2',
+  test3: '/test3',
   taskCreate: '/task/create',
+  login: '/login',
 } as const;
 
 export const TAB_ROUTE_MAP = {

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { FeedBack, TabBar } from '@/components/common';
 import { FloatingButton } from '@/components/common/button';
 import { SettingMenuItem } from '@/components/common/setting/settingMenuItem';
@@ -7,10 +9,10 @@ import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { APP_VERSION } from '@/constants/appVersion';
+import { ROUTES } from '@/constants/routes';
 import { fetchAppVersionInfo } from '@/api/appVersion';
 import { isLatestVersion } from '@/utils/versionCompare';
 import { openExternalLink } from '@/utils/openExternalLink';
-import { useNavigate } from 'react-router-dom';
 
 const SettingsPage = () => {
   const { handleTabChange } = useBottomTabNavigation();
@@ -136,7 +138,7 @@ const SettingsPage = () => {
           <div className='h-4 w-px bg-grey-200' />
           <button
             type='button'
-            onClick={() => navigate('/settings/withdrawal')}
+            onClick={() => navigate(ROUTES.settingsWithdrawal)}
           >
             회원탈퇴
           </button>

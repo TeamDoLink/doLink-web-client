@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Background,
   Button,
@@ -11,38 +12,53 @@ import heroIllustration from '@/assets/icons/home/home1.svg';
 import { FloatingButton } from '@/components/common/button';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
-import { archiveMockApi } from '@/api/archive.mock';
-import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import { formatRelativeDateLabel } from '@/utils/date';
-import { todoMockApi, useMockTodos } from '@/api/todo.mock';
+import { ROUTES } from '@/constants/routes';
+
+type BeforeLoginTodoItem = {
+  id: string;
+  title: string;
+  platform: string;
+  checked: boolean;
+  createdAt: string;
+};
+
+type BeforeLoginArchiveItem = {
+  id: string;
+  title: string;
+  categoryLabel: string;
+  itemCount: number;
+  previewImages: string[];
+};
 
 const HomeBeforeLogin = () => {
+  const navigate = useNavigate();
   const { handleTabChange } = useBottomTabNavigation();
-  const [showToast, setShowToast] = useState(true);
-  const todoItems = useMockTodos();
-  const previewTodoItems = useMemo(() => todoItems.slice(0, 1), [todoItems]);
-  const [archiveItems, setArchiveItems] = useState(() =>
-    archiveMockApi
-      .getAll()
-      .slice(0, 3)
-      .map((archive) => ({
-        id: archive.id,
-        title: archive.title,
-        category: archive.category,
-        itemCount: archive.itemCount,
-        createdAt: archive.createdAt,
-        previewImages: Array.isArray(archive.images)
-          ? archive.images.slice(0, 4)
-          : [],
-      }))
-  );
-  const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastToken, setToastToken] = useState(0);
+  const [todoItems] = useState<BeforeLoginTodoItem[]>([
+    {
+      id: 'welcome-guide',
+      title: '두링크(DoLink) 안내서 📚',
+      platform: '노션 (Notion)',
+      checked: false,
+      createdAt: '2026-01-03T09:00:00',
+    },
+  ]);
+  const [archiveItems, setArchiveItems] = useState<BeforeLoginArchiveItem[]>([
+    {
+      id: 'welcome-archive',
+      title: '두링크(DoLink) 튜토리얼',
+      categoryLabel: '기타',
+      itemCount: 1,
+      previewImages: [],
+    },
+  ]);
   const {
     isOpen: isModalOpen,
     type: modalType,
     alertConfig,
     confirmConfig,
-    openAlert,
     openConfirm,
     close: closeModal,
   } = useModalStore();
@@ -51,30 +67,25 @@ const HomeBeforeLogin = () => {
   >(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowToast(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleLoginClick = () => {
-    setShowToast(false);
-  };
-
-  const handleTodoCheckbox = (id: string, nextChecked: boolean) => {
-    const updatedTodo = todoMockApi.update(id, { checked: nextChecked });
-
-    if (!updatedTodo) {
+    if (!showToast) {
       return;
     }
 
-    if (nextChecked && !suppressCompleteModal) {
-      openAlert({
-        title: '할 일을 완료했어요',
-        subtitle: '완료한 일들은 해당 모음에서 확인할 수 있어요.',
-        primaryLabel: '확인',
-        secondaryLabel: '다시 보지 않기',
-        onSecondary: () => setSuppressCompleteModal(true),
-      });
-    }
+    const timer = setTimeout(() => setShowToast(false), 3000);
+    return () => clearTimeout(timer);
+  }, [showToast, toastToken]);
+
+  const handleLoginClick = () => {
+    navigate(ROUTES.login);
+  };
+
+  const triggerLoginToast = () => {
+    setShowToast(true);
+    setToastToken((prev) => prev + 1);
+  };
+
+  const handleTodoCheckbox = () => {
+    triggerLoginToast();
   };
 
   const handleConfirmDeleteArchive = () => {
@@ -106,6 +117,10 @@ const HomeBeforeLogin = () => {
       confirmConfig?.onNegative?.();
     }
     closeModal();
+  };
+
+  const handleCreateTodo = () => {
+    navigate(ROUTES.taskCreate);
   };
 
   return (
@@ -141,14 +156,14 @@ const HomeBeforeLogin = () => {
             <section className='mt-5 space-y-4'>
               <h2 className='text-heading-sm text-black'>할 일</h2>
               <div className='space-y-4 rounded-2xl bg-white py-5 shadow-[0_4px_12px_rgba(0,0,0,0.03)]'>
-                {previewTodoItems.map(
+                {todoItems.map(
                   ({ id, title, platform, checked, createdAt }) => (
                     <List.TodoItem
                       key={id}
                       title={title}
                       subtitle={`${formatRelativeDateLabel(createdAt)} · ${platform}`}
                       checked={checked}
-                      onChange={(next) => handleTodoCheckbox(id, next)}
+                      onChange={handleTodoCheckbox}
                     />
                   )
                 )}
@@ -159,11 +174,11 @@ const HomeBeforeLogin = () => {
               <h2 className='text-heading-sm text-black'>모음</h2>
               <div className='space-y-3'>
                 {archiveItems.map(
-                  ({ id, title, category, itemCount, previewImages }) => (
+                  ({ id, title, categoryLabel, itemCount, previewImages }) => (
                     <List.ArchiveCard
                       key={id}
                       title={title}
-                      category={ARCHIVE_CATEGORY_LABEL[category]}
+                      category={categoryLabel}
                       itemCount={itemCount}
                       images={previewImages}
                       width='w-full'
@@ -192,6 +207,7 @@ const HomeBeforeLogin = () => {
               <FloatingButton
                 aria-label='새 할 일 추가'
                 className='pointer-events-auto'
+                onClick={handleCreateTodo}
               />
             </div>
             <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
