@@ -27,6 +27,7 @@ const AppRouter = () => {
         path={`${ROUTES.archiveDetail}/:id`}
         element={<ArchiveDetailPage />}
       />
+      <Route path={ROUTES.archiveTutorial} element={<ArchiveDetailPage />} />
 
       <Route path={ROUTES.settings} element={<SettingsPage />} />
       <Route

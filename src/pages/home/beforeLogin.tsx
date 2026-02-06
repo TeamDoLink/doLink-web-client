@@ -52,6 +52,10 @@ const HomeBeforeLogin = () => {
     triggerLoginToast();
   };
 
+  const handleOpenTutorialArchive = () => {
+    navigate(ROUTES.archiveTutorial);
+  };
+
   return (
     <div className='relative flex min-h-screen flex-col'>
       <Background.GradientBackground className='flex min-h-0 flex-1 flex-col'>
@@ -112,6 +116,7 @@ const HomeBeforeLogin = () => {
                       images={images.slice(0, 4)}
                       width='w-full'
                       disableActionMenu
+                      onClick={handleOpenTutorialArchive}
                       onMoreClick={triggerLoginToast}
                       onEditClick={triggerLoginToast}
                       onDeleteClick={triggerLoginToast}

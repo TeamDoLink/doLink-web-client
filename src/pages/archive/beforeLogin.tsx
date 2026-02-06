@@ -88,6 +88,10 @@ const ArchiveBeforeLogin = () => {
     triggerLoginToast();
   };
 
+  const handleOpenTutorialArchive = () => {
+    navigate(ROUTES.archiveTutorial);
+  };
+
   return (
     <div className='flex min-h-screen flex-col bg-grey-50'>
       <SearchAppBar
@@ -133,6 +137,7 @@ const ArchiveBeforeLogin = () => {
                 images={previewImages}
                 width='w-full'
                 disableActionMenu
+                onClick={handleOpenTutorialArchive}
                 onMoreClick={handleArchiveMoreClick}
                 onEditClick={handleArchiveActionClick}
                 onDeleteClick={handleArchiveActionClick}
