@@ -13,13 +13,113 @@ import { GradientBackground } from '@/components/common/background/gradientBackg
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import { SearchAppBar } from '@/components/common/appBar/searchAppBar';
 import { BlackLine } from '@/components/common/line/blackLine';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FeedBack, List, InputField, Filter } from '../components/common';
 import ModalLayout from '@/components/common/feedBack/modalLayout';
 import {
   CategoryEditorIconImage,
   CategoryHomeIconImage,
 } from '@/constants/images';
+import { SwipeableDeleteCard } from '@/components/archive/swipeableDeleteCard';
+
+const ChipButtonDemo = () => {
+  const [selected, setSelected] = useState(false);
+
+  return (
+    <ChipButton
+      selected={selected}
+      onClick={() => setSelected((prev) => !prev)}
+    >
+      2025 연말 도쿄여행
+    </ChipButton>
+  );
+};
+
+const SwipeableDeleteCardDemo = () => {
+  const sampleTasks = useMemo(
+    () => [
+      {
+        taskId: 101,
+        title: '오늘 읽을 기사',
+        link: 'https://example.com/article',
+        memo: '새 기능 참고',
+        status: false,
+        inout: false,
+        createdAt: '2025-02-01T10:00:00Z',
+        modifiedAt: '2025-02-01T10:00:00Z',
+      },
+      {
+        taskId: 102,
+        title: '저장한 아카이브',
+        link: 'https://example.com/archive',
+        memo: null,
+        status: false,
+        inout: false,
+        createdAt: '2025-02-01T10:00:00Z',
+        modifiedAt: '2025-02-02T08:30:00Z',
+      },
+    ],
+    []
+  );
+
+  const [linkStates, setLinkStates] = useState<Record<number, boolean>>(() =>
+    sampleTasks.reduce<Record<number, boolean>>((acc, task) => {
+      acc[task.taskId] = false;
+      return acc;
+    }, {})
+  );
+  const [linkEditModes, setLinkEditModes] = useState<Record<number, boolean>>(
+    () =>
+      sampleTasks.reduce<Record<number, boolean>>((acc, task) => {
+        acc[task.taskId] = false;
+        return acc;
+      }, {})
+  );
+  const [capsuleDisabled, setCapsuleDisabled] = useState(false);
+
+  const handleCheck = (linkId: number, checked: boolean) => {
+    setLinkStates((prev) => ({ ...prev, [linkId]: checked }));
+  };
+
+  const handleEditModeChange = (isEditMode: boolean) => {
+    setLinkEditModes((prev) => {
+      const next = { ...prev };
+      sampleTasks.forEach((task) => {
+        next[task.taskId] = isEditMode;
+      });
+      return next;
+    });
+  };
+
+  const toggleCapsuleDisabled = () => {
+    setCapsuleDisabled((prev) => !prev);
+  };
+
+  return (
+    <div className='flex flex-col gap-4'>
+      <button
+        type='button'
+        className='w-fit rounded-md border border-grey-300 px-3 py-2 text-sm text-grey-700'
+        onClick={toggleCapsuleDisabled}
+      >
+        캡슐 버튼 {capsuleDisabled ? '활성화' : '비활성화'} 전환
+      </button>
+      <SwipeableDeleteCard
+        tasks={sampleTasks}
+        createdAt={new Date('2025-02-01T10:00:00Z')}
+        linkStates={linkStates}
+        linkEditModes={linkEditModes}
+        onCheck={handleCheck}
+        onEditModeChange={handleEditModeChange}
+        onOriginalClick={(linkId) => alert(`원본 보기: ${linkId}`)}
+        onShareClick={(linkId) => alert(`공유: ${linkId}`)}
+        onEditClick={(linkId) => alert(`편집: ${linkId}`)}
+        onDeleteClick={(linkId) => alert(`삭제: ${linkId}`)}
+        capsuleDisabled={capsuleDisabled}
+      />
+    </div>
+  );
+};
 
 const sections = [
   {
@@ -34,12 +134,18 @@ const sections = [
     ),
   },
   {
+    title: 'Swipeable Delete Card',
+    description:
+      '같은 날짜에 묶인 링크 리스트를 스와이프해 삭제하는 컴포넌트입니다. edit 모드 전환과 캡슐 버튼 비활성 상태를 토글해볼 수 있습니다.',
+    component: <SwipeableDeleteCardDemo />,
+  },
+  {
     title: 'Chip Button',
     description:
-      'radius 6px, px-3 py-2 패딩을 가진 토글형 칩입니다. 컴포넌트 내부에서 상태를 관리하며 선택 시 point 컬러 테두리/텍스트가 활성화됩니다.',
+      'radius 6px, px-3 py-2 패딩을 가진 토글형 칩입니다. 외부에서 selected 상태를 내려 제어하며, 선택 시 point 컬러 테두리/텍스트가 활성화됩니다.',
     component: (
       <div className='gap- flex flex-wrap'>
-        <ChipButton>2025 연말 도쿄여행</ChipButton>
+        <ChipButtonDemo />
       </div>
     ),
   },

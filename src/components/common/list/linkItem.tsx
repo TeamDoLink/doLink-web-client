@@ -21,6 +21,7 @@ export type LinkItemProps = {
   onEditClick?: () => void;
   onDeleteClick?: () => void;
   width?: string;
+  actionDisabled?: boolean;
 };
 
 /**
@@ -45,11 +46,12 @@ export default function LinkItem({
   onEditClick,
   onDeleteClick,
   width = 'w-full',
+  actionDisabled = false,
 }: LinkItemProps) {
   const itemRef = useRef<HTMLDivElement>(null);
 
   const handleCheckboxClick = () => {
-    if (!isEditMode) {
+    if (!isEditMode && !actionDisabled) {
       onChange?.(!checked);
     }
   };
@@ -92,8 +94,14 @@ export default function LinkItem({
 
           {/* Buttons */}
           <div className='flex items-start gap-1'>
-            <LinkCapsuleButton onClick={onOriginalClick} />
-            <ShareCapsuleButton onClick={onShareClick} />
+            <LinkCapsuleButton
+              onClick={onOriginalClick}
+              disabled={actionDisabled}
+            />
+            <ShareCapsuleButton
+              onClick={onShareClick}
+              disabled={actionDisabled}
+            />
           </div>
         </div>
       </div>
@@ -124,7 +132,7 @@ export default function LinkItem({
           className='flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden'
           type='button'
         >
-          <CheckBox checked={checked} />
+          <CheckBox checked={checked} disabled={actionDisabled} />
         </button>
       )}
     </div>
