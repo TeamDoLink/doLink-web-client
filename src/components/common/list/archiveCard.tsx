@@ -15,6 +15,7 @@ export type ArchiveCardProps = {
   onEditClick?: () => void;
   onDeleteClick?: () => void;
   disableActionMenu?: boolean;
+  onClick?: () => void;
 };
 
 // TODO category type 지정 - mapping 함수 만들어서 자동 매칭해 관리 예정
@@ -31,6 +32,7 @@ export default function ArchiveCard({
   onEditClick,
   onDeleteClick,
   disableActionMenu = false,
+  onClick,
 }: ArchiveCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -87,6 +89,13 @@ export default function ArchiveCard({
     onMoreClick?.();
   };
 
+  const handleCardClick = () => {
+    if (!onClick) {
+      return;
+    }
+    onClick();
+  };
+
   // 항상 4개의 슬롯을 생성 (이미지가 있으면 표시, 없으면 배경만)
   const slots = Array.from({ length: 4 }, (_, index) => images[index]);
   const displayType = isOpen ? 'edit' : type;
@@ -95,6 +104,7 @@ export default function ArchiveCard({
     <div
       ref={cardRef}
       className={`flex ${width} items-start gap-3 rounded-xl bg-white p-3 pl-3 pr-4 shadow-sm`}
+      onClick={onClick ? handleCardClick : undefined}
     >
       <div className='flex min-h-0 min-w-0 flex-1 items-center gap-4'>
         <div className='grid size-[60px] shrink-0 grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden rounded-[9.6px]'>
@@ -126,7 +136,10 @@ export default function ArchiveCard({
 
       {displayType === 'default' ? (
         <button
-          onClick={handleMoreClick}
+          onClick={(event) => {
+            event.stopPropagation();
+            handleMoreClick();
+          }}
           className='flex h-6 w-6 flex-shrink-0 items-center justify-center pt-[7px]'
         >
           <img alt='more' className='h-6 w-6' src={imgMoreIcon} />
@@ -134,13 +147,19 @@ export default function ArchiveCard({
       ) : (
         <div className='flex flex-shrink-0 items-center gap-2.5 pt-[7px]'>
           <button
-            onClick={onEditClick}
+            onClick={(event) => {
+              event.stopPropagation();
+              onEditClick?.();
+            }}
             className='flex h-6 w-6 flex-shrink-0 items-center justify-center'
           >
             <img alt='edit' className='h-5 w-5' src={imgEditIcon} />
           </button>
           <button
-            onClick={onDeleteClick}
+            onClick={(event) => {
+              event.stopPropagation();
+              onDeleteClick?.();
+            }}
             className='flex h-6 w-6 flex-shrink-0 items-center justify-center'
           >
             <img alt='delete' className='h-5 w-5' src={imgDeleteIcon} />
