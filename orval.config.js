@@ -10,6 +10,7 @@ module.exports = {
       schemas: 'src/api/generated/models',
       client: 'react-query',
       mock: false, // 일단은 false로 두고 필요할 때 켜세요
+      prettier: true,
       override: {
         mutator: {
           path: './src/api/axios-instance.ts', // 내 커스텀 Axios 연결
