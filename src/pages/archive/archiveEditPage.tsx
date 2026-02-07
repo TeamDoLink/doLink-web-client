@@ -6,12 +6,11 @@ import {
   type ArchiveSelectCategory,
 } from '@/components/archive';
 import { ROUTES } from '@/constants/routes';
-import {
-  archiveMockApi,
-  useMockArchives,
-  type Archive,
-} from '@/api/archive.mock';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
+import {
+  useArchiveDataStore,
+  type ArchiveRecord,
+} from '@/stores/useArchiveDataStore';
 
 type ArchiveEditLocationState = {
   origin?: string;
@@ -25,7 +24,10 @@ type ArchiveEditLocationState = {
 const ArchiveEditPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const archives = useMockArchives();
+  // 로그인 유무 확인 후 모음 상세 API 호출
+  const archives = useArchiveDataStore((state) => state.archives);
+  // 로그인 후 모음 수정 API 호출
+  const updateArchive = useArchiveDataStore((state) => state.updateArchive);
   const selectedArchiveId = useArchiveUIStore(
     (state) => state.selectedArchiveId
   );
@@ -35,7 +37,7 @@ const ArchiveEditPage = () => {
   const { archive, origin } =
     (location.state as ArchiveEditLocationState | undefined) ?? {};
 
-  const targetArchive = useMemo<Archive | undefined>(() => {
+  const targetArchive = useMemo<ArchiveRecord | undefined>(() => {
     const targetId = archive?.id ?? selectedArchiveId;
     if (!targetId) {
       return undefined;
@@ -64,7 +66,7 @@ const ArchiveEditPage = () => {
     name: string;
     category: ArchiveSelectCategory;
   }) => {
-    archiveMockApi.update(targetArchive.id, {
+    updateArchive(targetArchive.id, {
       title: payload.name,
       category: payload.category,
     });

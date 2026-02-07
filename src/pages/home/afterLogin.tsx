@@ -8,14 +8,11 @@ import { TodoSection } from '@/components/home/todoSection';
 import { ArchiveSection } from '@/components/home/archiveSection';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
-import {
-  archiveMockApi,
-  selectLatestArchivePreviews,
-  useMockArchives,
-} from '@/api/archive.mock';
-import { todoMockApi, useMockTodos } from '@/api/todo.mock';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import { ROUTES } from '@/constants/routes';
+import { useArchiveDataStore } from '@/stores/useArchiveDataStore';
+import { useTodoDataStore } from '@/stores/useTodoDataStore';
+import { selectLatestArchivePreviews } from '@/utils/archivePreview';
 
 // 시간 계산 함수
 const getGreetingPeriod = (hour: number) => {
@@ -33,8 +30,14 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   const navigate = useNavigate();
   const { handleTabChange } = useBottomTabNavigation();
   const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
-  const todoItems = useMockTodos();
-  const archiveItems = useMockArchives();
+  // 로그인 유무 확인 후 할 일 목록 API 호출
+  const todoItems = useTodoDataStore((state) => state.todos);
+  // 로그인 후 할 일 완료/취소 API 호출
+  const updateTodo = useTodoDataStore((state) => state.updateTodo);
+  // 로그인 유무 확인 후 모음 목록 API 호출
+  const archiveItems = useArchiveDataStore((state) => state.archives);
+  // 로그인 후 모음 삭제 API 호출
+  const deleteArchive = useArchiveDataStore((state) => state.deleteArchive);
   const setSelectedArchiveId = useArchiveUIStore(
     (state) => state.setSelectedArchiveId
   );
@@ -72,7 +75,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
   }, [todoItems]);
 
   const handleToggleTodo = (id: string, nextChecked: boolean) => {
-    const updatedTodo = todoMockApi.update(id, { checked: nextChecked });
+    const updatedTodo = updateTodo(id, { checked: nextChecked });
     if (!updatedTodo) {
       return;
     }
@@ -90,7 +93,7 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
 
   const handleConfirmDeleteArchive = () => {
     if (!pendingDeleteArchiveId) return;
-    archiveMockApi.delete(pendingDeleteArchiveId);
+    deleteArchive(pendingDeleteArchiveId);
     setSelectedArchiveId(null);
     setPendingDeleteArchiveId(null);
   };

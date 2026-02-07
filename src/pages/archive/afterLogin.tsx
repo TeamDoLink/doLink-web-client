@@ -10,7 +10,7 @@ import {
 } from '@/components/archive';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { ROUTES } from '@/constants/routes';
-import { archiveMockApi, useMockArchives } from '@/api/archive.mock';
+import { useArchiveDataStore } from '@/stores/useArchiveDataStore';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import {
   ARCHIVE_CATEGORY_LABEL,
@@ -39,7 +39,9 @@ const ARCHIVE_CATEGORIES = ARCHIVE_CATEGORY_KEYS.map((key) => ({
 const ArchiveAfterLogin = () => {
   const { handleTabChange } = useBottomTabNavigation();
   const navigate = useNavigate();
-  const archives = useMockArchives();
+  // 로그인 유무 확인 후 모음 목록 API 호출
+  const archives = useArchiveDataStore((state) => state.archives);
+  const deleteArchive = useArchiveDataStore((state) => state.deleteArchive);
   const setSelectedArchiveId = useArchiveUIStore(
     (state) => state.setSelectedArchiveId
   );
@@ -64,7 +66,7 @@ const ArchiveAfterLogin = () => {
 
   const handleConfirmDelete = () => {
     if (!pendingDeleteArchiveId) return;
-    archiveMockApi.delete(pendingDeleteArchiveId);
+    deleteArchive(pendingDeleteArchiveId);
     setSelectedArchiveId(null);
     setPendingDeleteArchiveId(null);
   };
