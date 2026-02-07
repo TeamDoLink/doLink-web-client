@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     // 전체 IP에서 접속 가능하도록 설정
     host: '0.0.0.0',
-    port: 5173,
+    port: 3000, // 개발 서버 포트
   },
   resolve: {
     alias: {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { FeedBack, TabBar } from '@/components/common';
 import { FloatingButton } from '@/components/common/button';
@@ -8,6 +9,7 @@ import { GreyLine } from '@/components/common/line/greyLine';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { logout } from '@/api/generated/endpoints/user/user';
 import { APP_VERSION } from '@/constants/appVersion';
 import { ROUTES } from '@/constants/routes';
 import { fetchAppVersionInfo } from '@/api/appVersion';
@@ -16,8 +18,9 @@ import { openExternalLink } from '@/utils/openExternalLink';
 
 const SettingsPage = () => {
   const { handleTabChange } = useBottomTabNavigation();
-  const signOut = useAuthStore((state) => state.signOut);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [versionFetchState, setVersionFetchState] = useState<
@@ -75,9 +78,17 @@ const SettingsPage = () => {
     setIsLogoutConfirmOpen(false);
   };
 
-  const handleConfirmLogout = () => {
-    signOut();
-    setIsLogoutConfirmOpen(false);
+  const handleConfirmLogout = async () => {
+    try {
+      await logout();
+    } catch {
+      // 서버 로그아웃 실패해도 클라이언트 상태는 정리
+    } finally {
+      clearAuth();
+      queryClient.clear();
+      setIsLogoutConfirmOpen(false);
+      navigate(ROUTES.home, { replace: true });
+    }
   };
 
   return (
