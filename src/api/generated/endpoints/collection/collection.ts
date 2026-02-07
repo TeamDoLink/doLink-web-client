@@ -129,6 +129,190 @@ export const useCreateCollect = <TError = unknown, TContext = unknown>(
   return useMutation(getCreateCollectMutationOptions(options), queryClient);
 };
 /**
+ * collectId에 해당하는 모음 상세 정보를 조회한다. 최근 tasks는 기본 3개를 반환한다.
+ * @summary 모음 상세 조회
+ */
+export type getCollectDetailResponse200 = {
+  data: Blob;
+  status: 200;
+};
+
+export type getCollectDetailResponseSuccess = getCollectDetailResponse200 & {
+  headers: Headers;
+};
+export type getCollectDetailResponse = getCollectDetailResponseSuccess;
+
+export const getGetCollectDetailUrl = (collectId: number) => {
+  return `/api/v1/collect/${collectId}`;
+};
+
+export const getCollectDetail = async (
+  collectId: number,
+  options?: RequestInit
+): Promise<getCollectDetailResponse> => {
+  return customInstance<getCollectDetailResponse>(
+    getGetCollectDetailUrl(collectId),
+    {
+      ...options,
+      method: 'GET',
+    }
+  );
+};
+
+export const getGetCollectDetailQueryKey = (collectId: number) => {
+  return [`/api/v1/collect/${collectId}`] as const;
+};
+
+export const getGetCollectDetailQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCollectDetail>>,
+  TError = unknown,
+>(
+  collectId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCollectDetail>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  }
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetCollectDetailQueryKey(collectId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCollectDetail>>
+  > = ({ signal }) =>
+    getCollectDetail(collectId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!collectId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCollectDetail>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetCollectDetailQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCollectDetail>>
+>;
+export type GetCollectDetailQueryError = unknown;
+
+export function useGetCollectDetail<
+  TData = Awaited<ReturnType<typeof getCollectDetail>>,
+  TError = unknown,
+>(
+  collectId: number,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCollectDetail>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCollectDetail>>,
+          TError,
+          Awaited<ReturnType<typeof getCollectDetail>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCollectDetail<
+  TData = Awaited<ReturnType<typeof getCollectDetail>>,
+  TError = unknown,
+>(
+  collectId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCollectDetail>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCollectDetail>>,
+          TError,
+          Awaited<ReturnType<typeof getCollectDetail>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCollectDetail<
+  TData = Awaited<ReturnType<typeof getCollectDetail>>,
+  TError = unknown,
+>(
+  collectId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCollectDetail>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary 모음 상세 조회
+ */
+
+export function useGetCollectDetail<
+  TData = Awaited<ReturnType<typeof getCollectDetail>>,
+  TError = unknown,
+>(
+  collectId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCollectDetail>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetCollectDetailQueryOptions(collectId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
  * collectId에 해당하는 모음을 삭제한다.
  * @summary 모음 삭제
  */
