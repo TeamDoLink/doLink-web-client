@@ -24,7 +24,7 @@ import type {
 import type {
   CollectionCreateRequest,
   CollectionUpdateRequest,
-  ListAllParams,
+  ListAll1Params,
   ListByCategoryParams,
 } from '../../models';
 
@@ -659,17 +659,17 @@ export function useListByCategory<
 /**
  * @summary 모음 전체 조회 (무한 스크롤)
  */
-export type listAllResponse200 = {
+export type listAll1Response200 = {
   data: Blob;
   status: 200;
 };
 
-export type listAllResponseSuccess = listAllResponse200 & {
+export type listAll1ResponseSuccess = listAll1Response200 & {
   headers: Headers;
 };
-export type listAllResponse = listAllResponseSuccess;
+export type listAll1Response = listAll1ResponseSuccess;
 
-export const getListAllUrl = (params?: ListAllParams) => {
+export const getListAll1Url = (params?: ListAll1Params) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -685,66 +685,66 @@ export const getListAllUrl = (params?: ListAllParams) => {
     : `/api/v1/collect/all`;
 };
 
-export const listAll = async (
-  params?: ListAllParams,
+export const listAll1 = async (
+  params?: ListAll1Params,
   options?: RequestInit
-): Promise<listAllResponse> => {
-  return customInstance<listAllResponse>(getListAllUrl(params), {
+): Promise<listAll1Response> => {
+  return customInstance<listAll1Response>(getListAll1Url(params), {
     ...options,
     method: 'GET',
   });
 };
 
-export const getListAllQueryKey = (params?: ListAllParams) => {
+export const getListAll1QueryKey = (params?: ListAll1Params) => {
   return [`/api/v1/collect/all`, ...(params ? [params] : [])] as const;
 };
 
-export const getListAllQueryOptions = <
-  TData = Awaited<ReturnType<typeof listAll>>,
+export const getListAll1QueryOptions = <
+  TData = Awaited<ReturnType<typeof listAll1>>,
   TError = unknown,
 >(
-  params?: ListAllParams,
+  params?: ListAll1Params,
   options?: {
     query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof listAll>>, TError, TData>
+      UseQueryOptions<Awaited<ReturnType<typeof listAll1>>, TError, TData>
     >;
     request?: SecondParameter<typeof customInstance>;
   }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getListAllQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getListAll1QueryKey(params);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof listAll>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listAll1>>> = ({
     signal,
-  }) => listAll(params, { signal, ...requestOptions });
+  }) => listAll1(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof listAll>>,
+    Awaited<ReturnType<typeof listAll1>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type ListAllQueryResult = NonNullable<
-  Awaited<ReturnType<typeof listAll>>
+export type ListAll1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof listAll1>>
 >;
-export type ListAllQueryError = unknown;
+export type ListAll1QueryError = unknown;
 
-export function useListAll<
-  TData = Awaited<ReturnType<typeof listAll>>,
+export function useListAll1<
+  TData = Awaited<ReturnType<typeof listAll1>>,
   TError = unknown,
 >(
-  params: undefined | ListAllParams,
+  params: undefined | ListAll1Params,
   options: {
     query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof listAll>>, TError, TData>
+      UseQueryOptions<Awaited<ReturnType<typeof listAll1>>, TError, TData>
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listAll>>,
+          Awaited<ReturnType<typeof listAll1>>,
           TError,
-          Awaited<ReturnType<typeof listAll>>
+          Awaited<ReturnType<typeof listAll1>>
         >,
         'initialData'
       >;
@@ -754,20 +754,20 @@ export function useListAll<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useListAll<
-  TData = Awaited<ReturnType<typeof listAll>>,
+export function useListAll1<
+  TData = Awaited<ReturnType<typeof listAll1>>,
   TError = unknown,
 >(
-  params?: ListAllParams,
+  params?: ListAll1Params,
   options?: {
     query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof listAll>>, TError, TData>
+      UseQueryOptions<Awaited<ReturnType<typeof listAll1>>, TError, TData>
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listAll>>,
+          Awaited<ReturnType<typeof listAll1>>,
           TError,
-          Awaited<ReturnType<typeof listAll>>
+          Awaited<ReturnType<typeof listAll1>>
         >,
         'initialData'
       >;
@@ -777,14 +777,14 @@ export function useListAll<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useListAll<
-  TData = Awaited<ReturnType<typeof listAll>>,
+export function useListAll1<
+  TData = Awaited<ReturnType<typeof listAll1>>,
   TError = unknown,
 >(
-  params?: ListAllParams,
+  params?: ListAll1Params,
   options?: {
     query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof listAll>>, TError, TData>
+      UseQueryOptions<Awaited<ReturnType<typeof listAll1>>, TError, TData>
     >;
     request?: SecondParameter<typeof customInstance>;
   },
@@ -796,14 +796,14 @@ export function useListAll<
  * @summary 모음 전체 조회 (무한 스크롤)
  */
 
-export function useListAll<
-  TData = Awaited<ReturnType<typeof listAll>>,
+export function useListAll1<
+  TData = Awaited<ReturnType<typeof listAll1>>,
   TError = unknown,
 >(
-  params?: ListAllParams,
+  params?: ListAll1Params,
   options?: {
     query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof listAll>>, TError, TData>
+      UseQueryOptions<Awaited<ReturnType<typeof listAll1>>, TError, TData>
     >;
     request?: SecondParameter<typeof customInstance>;
   },
@@ -811,7 +811,7 @@ export function useListAll<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getListAllQueryOptions(params, options);
+  const queryOptions = getListAll1QueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

@@ -6,14 +6,13 @@
  * OpenAPI spec version: v1.0.0
  */
 
-export interface TaskResponse {
-  taskId?: number;
-  collectionId?: number;
+export interface LinkCreateResult {
   title?: string;
-  link?: string;
-  memo?: string;
+  description?: string;
+  siteName?: string;
+  canonicalUrl?: string;
+  originalKey?: string;
+  originalUrl?: string;
+  thumbnailKey?: string;
   thumbnailUrl?: string;
-  status?: boolean;
-  inout?: boolean;
-  createdAt?: string;
 }

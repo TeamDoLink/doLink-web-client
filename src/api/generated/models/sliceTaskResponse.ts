@@ -5,15 +5,15 @@
  * This is DoLink! 저장하고, 묶고, 바로 꺼내는 링크 관리
  * OpenAPI spec version: v1.0.0
  */
-import type { CollectionResponse } from './collectionResponse';
 import type { PageableObject } from './pageableObject';
 import type { SortObject } from './sortObject';
+import type { TaskResponse } from './taskResponse';
 
-export interface SliceCollectionResponse {
+export interface SliceTaskResponse {
   first?: boolean;
   last?: boolean;
   size?: number;
-  content?: CollectionResponse[];
+  content?: TaskResponse[];
   number?: number;
   sort?: SortObject;
   pageable?: PageableObject;

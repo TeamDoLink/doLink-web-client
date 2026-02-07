@@ -6,14 +6,9 @@
  * OpenAPI spec version: v1.0.0
  */
 
-export interface TaskResponse {
-  taskId?: number;
+export interface TaskUpdateRequest {
   collectionId?: number;
   title?: string;
   link?: string;
   memo?: string;
-  thumbnailUrl?: string;
-  status?: boolean;
-  inout?: boolean;
-  createdAt?: string;
 }
