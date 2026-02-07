@@ -39,7 +39,7 @@ const cloneArchive = (archive: ArchiveRecord): ArchiveRecord => ({
 const createInitialArchives = (): ArchiveRecord[] =>
   MOCK_ARCHIVES.map((archive) => cloneArchive(archive));
 
-export const useArchiveDataStore = create<ArchiveDataState>((set, get) => ({
+export const useArchiveDataStore = create<ArchiveDataState>((set) => ({
   archives: createInitialArchives(),
   addArchive: (payload) => {
     const newArchive: ArchiveRecord = {
