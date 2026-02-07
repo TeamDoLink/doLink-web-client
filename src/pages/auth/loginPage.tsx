@@ -14,8 +14,15 @@ const LoginPage = () => {
     navigate(-1);
   };
 
-  const KAKAO_AUTH_URL = 'http://localhost:8080/oauth2/authorization/kakao';
-  window.location.href = KAKAO_AUTH_URL;
+  const handleKakaoLogin = () => {
+    // Vite 프록시 사용 시 주석 처리
+    // TODO http://localhost:8080 ->  환경변수 처리
+    const KAKAO_AUTH_URL = 'http://localhost:8080/oauth2/authorization/kakao';
+
+    // const KAKAO_AUTH_URL = '/oauth2/authorization/kakao'; // Vite 프록시가 /oauth2 경로를 백엔드로 전달
+    window.location.href = KAKAO_AUTH_URL;
+  };
+
   return (
     <div className='flex min-h-screen flex-col bg-white'>
       <BackDetailBar title='' rightIcons={[]} onClickBack={handleBack} />
