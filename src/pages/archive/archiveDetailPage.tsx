@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { BackDetailBar } from '@/components/common/appBar';
 import { EmptyNotice } from '@/components/common/feedBack';
 import { FloatingButton } from '@/components/common/button/floatingButton';
@@ -12,6 +12,8 @@ import {
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { ROUTES } from '@/constants/routes';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
+import { useListByCollection } from '@/api/generated/endpoints/task/task';
+import type { ApiResponseListTaskResponse } from '@/api/generated/models';
 
 // 카테고리 아이콘 임포트
 // TODO 임시 - 카테고리에 맞게 수정 예정
@@ -37,211 +39,6 @@ const TAB_OPTIONS = [
   { value: 'all', label: '전체' },
   { value: 'incomplete', label: '미완료' },
   { value: 'complete', label: '완료' },
-];
-
-// Task 타입은 SwipeableDeleteCard에서 import
-
-const MOCK_TASK_ITEM: Task[] = [
-  {
-    taskId: 101,
-    title: 'API 명세 작성',
-    link: null,
-    memo: '우선순위 높음',
-    status: false,
-    inout: true,
-    createdAt: '2025-01-10T13:10:00',
-    modifiedAt: '2025-01-10T13:10:00',
-  },
-  {
-    taskId: 102,
-    title: 'ERD 설계',
-    link: 'https://example.com/erd',
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2025-12-10T13:10:00',
-    modifiedAt: '2025-12-12T18:40:10',
-  },
-  {
-    taskId: 103,
-    title: '회원가입 API 구현',
-    link: 'https://example.com/signup',
-    memo: 'validation 필요',
-    status: false,
-    inout: true,
-    createdAt: '2025-02-10T13:10:00',
-    modifiedAt: '2025-02-12T10:30:00',
-  },
-  {
-    taskId: 104,
-    title: '로그인 기능 개발',
-    link: null,
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2025-02-13T14:20:00',
-    modifiedAt: '2025-02-14T11:05:30',
-  },
-  {
-    taskId: 105,
-    title: 'JWT 인증 적용',
-    link: 'https://example.com/jwt',
-    memo: 'refresh token 포함',
-    status: false,
-    inout: true,
-    createdAt: '2025-02-13T14:20:00',
-    modifiedAt: '2025-02-14T16:00:00',
-  },
-  {
-    taskId: 106,
-    title: '게시글 CRUD API',
-    link: null,
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2025-02-13T14:20:00',
-    modifiedAt: '2025-02-16T13:45:00',
-  },
-  {
-    taskId: 107,
-    title: '댓글 기능 구현',
-    link: 'https://example.com/comment',
-    memo: '대댓글 포함',
-    status: false,
-    inout: true,
-    createdAt: '2025-02-16T11:00:00',
-    modifiedAt: '2025-02-16T11:00:00',
-  },
-  {
-    taskId: 108,
-    title: '좋아요 기능 추가',
-    link: null,
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2025-02-17T15:30:00',
-    modifiedAt: '2025-02-18T10:20:00',
-  },
-  {
-    taskId: 109,
-    title: '검색 API 구현',
-    link: 'https://example.com/search',
-    memo: 'index 고려',
-    status: false,
-    inout: true,
-    createdAt: '2025-02-18T17:00:00',
-    modifiedAt: '2025-02-18T17:00:00',
-  },
-  {
-    taskId: 110,
-    title: '페이징 처리',
-    link: null,
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2025-02-19T09:40:00',
-    modifiedAt: '2025-02-19T14:10:00',
-  },
-  {
-    taskId: 111,
-    title: '예외 처리 공통화',
-    link: 'https://example.com/error',
-    memo: 'global handler',
-    status: false,
-    inout: true,
-    createdAt: '2025-12-20T10:00:00',
-    modifiedAt: '2025-12-20T10:00:00',
-  },
-  {
-    taskId: 112,
-    title: '로그 설정',
-    link: null,
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2025-12-20T10:00:00',
-    modifiedAt: '2025-12-20T10:00:00',
-  },
-  {
-    taskId: 113,
-    title: '환경변수 분리',
-    link: null,
-    memo: '.env 사용',
-    status: false,
-    inout: true,
-    createdAt: '2025-12-20T10:00:00',
-    modifiedAt: '2025-12-20T10:00:00',
-  },
-  {
-    taskId: 114,
-    title: 'Swagger 문서화',
-    link: 'https://example.com/swagger',
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2026-02-23T14:00:00',
-    modifiedAt: '2026-02-24T10:30:00',
-  },
-  {
-    taskId: 115,
-    title: '단위 테스트 작성',
-    link: null,
-    memo: 'service 중심',
-    status: false,
-    inout: true,
-    createdAt: '2026-02-24T15:40:00',
-    modifiedAt: '2026-02-24T15:40:00',
-  },
-  {
-    taskId: 116,
-    title: '통합 테스트',
-    link: 'https://example.com/test',
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2026-02-25T11:10:00',
-    modifiedAt: '2026-02-26T09:55:00',
-  },
-  {
-    taskId: 117,
-    title: 'CI 파이프라인 구성',
-    link: null,
-    memo: 'GitHub Actions',
-    status: false,
-    inout: true,
-    createdAt: '2026-02-26T16:30:00',
-    modifiedAt: '2026-02-26T16:30:00',
-  },
-  {
-    taskId: 118,
-    title: 'CD 설정',
-    link: 'https://example.com/cd',
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2026-02-27T10:00:00',
-    modifiedAt: '2026-02-28T13:20:00',
-  },
-  {
-    taskId: 119,
-    title: '배포 스크립트 작성',
-    link: null,
-    memo: 'rollback 고려',
-    status: false,
-    inout: true,
-    createdAt: '2026-02-28T15:00:00',
-    modifiedAt: '2026-02-28T15:00:00',
-  },
-  {
-    taskId: 120,
-    title: '운영 서버 모니터링',
-    link: 'https://example.com/monitoring',
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2024-03-01T09:30:00',
-    modifiedAt: '2024-03-02T11:45:00',
-  },
 ];
 
 const BEFORE_LOGIN_TASKS: Task[] = [
@@ -272,7 +69,15 @@ const BEFORE_LOGIN_ARCHIVE_META = {
 const ArchiveDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { id } = useParams<{ id: string }>();
   const isBeforeLoginArchive = location.pathname === ROUTES.archiveTutorial;
+
+  const collectionId = id ? Number(id) : 0;
+
+  const { data: taskData } = useListByCollection(collectionId, {
+    query: { enabled: !isBeforeLoginArchive && !!collectionId },
+  });
+
   const archiveMeta = isBeforeLoginArchive
     ? BEFORE_LOGIN_ARCHIVE_META
     : AUTH_ARCHIVE_META;
@@ -299,11 +104,25 @@ const ArchiveDetailPage = () => {
     }, 0);
   }, [linkStates, taskList]);
 
-  // TODO API 호출 값 받아오기
   useEffect(() => {
-    const sourceTasks = isBeforeLoginArchive
-      ? BEFORE_LOGIN_TASKS
-      : MOCK_TASK_ITEM;
+    let sourceTasks: Task[];
+
+    if (isBeforeLoginArchive) {
+      sourceTasks = BEFORE_LOGIN_TASKS;
+    } else {
+      const apiResponse = taskData as unknown as ApiResponseListTaskResponse;
+      const apiTasks = apiResponse?.result ?? [];
+      sourceTasks = apiTasks.map((t) => ({
+        taskId: t.taskId ?? 0,
+        title: t.title ?? '',
+        link: t.link ?? null,
+        memo: t.memo ?? null,
+        status: t.status ?? false,
+        inout: t.inout ?? false,
+        createdAt: new Date().toISOString(),
+        modifiedAt: new Date().toISOString(),
+      }));
+    }
 
     setTaskList(sourceTasks);
     setLinkStates(
@@ -315,7 +134,7 @@ const ArchiveDetailPage = () => {
     setLinkEditModes(
       sourceTasks.reduce((acc, task) => ({ ...acc, [task.taskId]: false }), {})
     );
-  }, [isBeforeLoginArchive]);
+  }, [isBeforeLoginArchive, taskData]);
 
   const handleLinkCheck = (id: number, checked: boolean) => {
     setLinkStates((prev) => ({ ...prev, [id]: checked }));
