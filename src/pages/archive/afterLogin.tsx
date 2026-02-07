@@ -67,12 +67,14 @@ const ArchiveAfterLogin = () => {
   const isAll = selectedCategory === 'all';
 
   // 전체 모음 조회
+  // TODO: 무한 스크롤 적용
   const { data: allData } = useListAll(
     { page: 0, size: 10 },
     { query: { enabled: isAll } }
   );
 
   // 카테고리별 모음 조회
+  // TODO: 무한 스크롤 적용
   const { data: categoryData } = useListByCategory(
     {
       category: ARCHIVE_CATEGORY_LABEL[
@@ -177,6 +179,9 @@ const ArchiveAfterLogin = () => {
                 category={archive.category}
                 images={previewImages}
                 width='w-full'
+                onClick={() =>
+                  navigate(`${ROUTES.archiveDetail}/${archive.collectionId}`)
+                }
                 onEditClick={() =>
                   handleEdit(
                     archive.collectionId!,
