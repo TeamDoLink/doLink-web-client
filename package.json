@@ -10,7 +10,8 @@
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "generate:api": "orval --config orval.config.js"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -23,6 +24,8 @@
     ]
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.20",
+    "axios": "^1.13.4",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-router-dom": "^7.9.5",
@@ -30,6 +33,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "orval": "^8.2.0",
     "@eslint/js": "^9.36.0",
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.16",
