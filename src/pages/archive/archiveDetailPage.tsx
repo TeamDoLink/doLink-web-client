@@ -74,7 +74,7 @@ const ArchiveDetailPage = () => {
 
   const collectionId = id ? Number(id) : 0;
 
-  const { data: taskData } = useListByCollection(collectionId, {
+  const { data: taskData } = useListByCollection(collectionId, undefined, {
     query: { enabled: !isBeforeLoginArchive && !!collectionId },
   });
 

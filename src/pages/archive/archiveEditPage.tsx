@@ -9,7 +9,7 @@ import {
 import { ROUTES } from '@/constants/routes';
 import {
   useUpdateCollect,
-  getListAllQueryKey,
+  getListAll1QueryKey as getListAllQueryKey,
   getListByCategoryQueryKey,
 } from '@/api/generated/endpoints/collection/collection';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';

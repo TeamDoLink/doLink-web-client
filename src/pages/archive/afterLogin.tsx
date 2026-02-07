@@ -16,10 +16,10 @@ import {
   type ArchiveCategory,
 } from '@/utils/archiveCategory';
 import {
-  useListAll,
+  useListAll1 as useListAll,
   useListByCategory,
   useDeleteCollect,
-  getListAllQueryKey,
+  getListAll1QueryKey as getListAllQueryKey,
   getListByCategoryQueryKey,
 } from '@/api/generated/endpoints/collection/collection';
 import type {
