@@ -4,6 +4,7 @@ export const ROUTES = {
   archiveAdd: '/archives/add',
   archiveEdit: '/archives/edit',
   archiveDetail: '/archives/detail',
+  archiveTutorial: '/archives/tutorial',
   settings: '/settings',
   settingsWithdrawal: '/settings/withdrawal',
   settingsWithdrawalConfirm: '/settings/withdrawal/confirm',

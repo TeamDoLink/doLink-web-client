@@ -1,28 +1,22 @@
+import checkCircleSelected from '@/assets/icons/common/check-circle-selected.svg';
+import checkCircleUnselected from '@/assets/icons/common/check-circle-unselected.svg';
+import checkCircleDisabled from '@/assets/icons/common/check-circle-disabled.svg';
+
 type CheckBoxProps = {
   checked?: boolean;
+  disabled?: boolean;
 };
 
-export function CheckBox({ checked = false }: CheckBoxProps) {
-  if (checked) {
-    return (
-      <div className='flex h-[1.5rem] w-[1.5rem] flex-shrink-0 items-center justify-center rounded-full bg-point'>
-        {/* Check Mark */}
-        <svg
-          className='h-[0.875rem] w-[0.875rem] text-white'
-          viewBox='0 0 24 24'
-          fill='none'
-          stroke='currentColor'
-          strokeWidth='3'
-          strokeLinecap='round'
-          strokeLinejoin='round'
-        >
-          <polyline points='20 6 9 17 4 12'></polyline>
-        </svg>
-      </div>
-    );
-  }
+export function CheckBox({ checked = false, disabled = false }: CheckBoxProps) {
+  const iconSrc = disabled
+    ? checkCircleDisabled
+    : checked
+      ? checkCircleSelected
+      : checkCircleUnselected;
 
   return (
-    <div className='h-[1.5rem] w-[1.5rem] flex-shrink-0 rounded-full border-2 border-grey-300 bg-white'></div>
+    <span className='flex h-6 w-6 flex-shrink-0 items-center justify-center'>
+      <img src={iconSrc} className='h-6 w-6' />
+    </span>
   );
 }

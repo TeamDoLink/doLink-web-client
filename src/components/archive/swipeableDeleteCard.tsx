@@ -68,6 +68,8 @@ interface SwipeableDeleteCardProps {
   onEditClick: (linkId: number) => void;
   /** '삭제' 버튼 클릭 시 호출되는 콜백 함수 */
   onDeleteClick: (linkId: number) => void;
+  /** 캡슐 버튼 및 체크박스 비활성화 여부 */
+  capsuleDisabled?: boolean;
 }
 
 /**
@@ -116,6 +118,7 @@ export const SwipeableDeleteCard = ({
   onShareClick,
   onEditClick,
   onDeleteClick,
+  capsuleDisabled = false,
 }: SwipeableDeleteCardProps) => {
   // Task를 LinkItem 형식으로 변환
   const links = tasks.map((task) => ({
@@ -160,6 +163,9 @@ export const SwipeableDeleteCard = ({
    * isEditMode를 true로 설정하여 수정 모드 활성화
    */
   const handleEditClick = () => {
+    if (capsuleDisabled) {
+      return;
+    }
     onEditModeChange(true);
   };
 
@@ -305,6 +311,7 @@ export const SwipeableDeleteCard = ({
               onEditClick={() => onEditClick(link.id)} // 편집 클릭 핸들러
               onDeleteClick={() => onDeleteClick(link.id)} // 삭제 클릭 핸들러
               width='w-full' // 전체 너비 사용
+              actionDisabled={capsuleDisabled}
             />
           ))}
         </div>

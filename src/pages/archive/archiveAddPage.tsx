@@ -4,20 +4,22 @@ import {
   type ArchiveSelectCategory,
 } from '@/components/archive';
 import { ROUTES } from '@/constants/routes';
-import { archiveMockApi } from '@/api/archive.mock';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
+import { useArchiveDataStore } from '@/stores/useArchiveDataStore';
 
 const ArchiveAddPage = () => {
   const navigate = useNavigate();
   const setSelectedArchiveId = useArchiveUIStore(
     (state) => state.setSelectedArchiveId
   );
+  // 로그인 후 모음 생성 API 호출
+  const addArchive = useArchiveDataStore((state) => state.addArchive);
 
   const handleSubmit = (payload: {
     name: string;
     category: ArchiveSelectCategory;
   }) => {
-    archiveMockApi.add({
+    addArchive({
       title: payload.name,
       category: payload.category,
       itemCount: 0,

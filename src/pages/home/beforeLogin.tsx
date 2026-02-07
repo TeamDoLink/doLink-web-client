@@ -11,61 +11,21 @@ import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import heroIllustration from '@/assets/icons/home/home1.svg';
 import { FloatingButton } from '@/components/common/button';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
-import { useModalStore } from '@/stores/useModalStore';
-import { formatRelativeDateLabel } from '@/utils/date';
+import {
+  BEFORE_LOGIN_ARCHIVE,
+  BEFORE_LOGIN_TODO,
+} from '@/constants/beforeLoginData';
 import { ROUTES } from '@/constants/routes';
-
-type BeforeLoginTodoItem = {
-  id: string;
-  title: string;
-  platform: string;
-  checked: boolean;
-  createdAt: string;
-};
-
-type BeforeLoginArchiveItem = {
-  id: string;
-  title: string;
-  categoryLabel: string;
-  itemCount: number;
-  previewImages: string[];
-};
+import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
+import { formatRelativeDateLabel } from '@/utils/date';
 
 const HomeBeforeLogin = () => {
   const navigate = useNavigate();
   const { handleTabChange } = useBottomTabNavigation();
   const [showToast, setShowToast] = useState(false);
   const [toastToken, setToastToken] = useState(0);
-  const [todoItems] = useState<BeforeLoginTodoItem[]>([
-    {
-      id: 'welcome-guide',
-      title: '두링크(DoLink) 안내서 📚',
-      platform: '노션 (Notion)',
-      checked: false,
-      createdAt: '2026-01-03T09:00:00',
-    },
-  ]);
-  const [archiveItems, setArchiveItems] = useState<BeforeLoginArchiveItem[]>([
-    {
-      id: 'welcome-archive',
-      title: '두링크(DoLink) 튜토리얼',
-      categoryLabel: '기타',
-      itemCount: 1,
-      previewImages: [],
-    },
-  ]);
-  const {
-    isOpen: isModalOpen,
-    type: modalType,
-    alertConfig,
-    confirmConfig,
-    openConfirm,
-    close: closeModal,
-  } = useModalStore();
-  const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
-    string | null
-  >(null);
-
+  const todoItems = BEFORE_LOGIN_TODO();
+  const archiveItems = BEFORE_LOGIN_ARCHIVE();
   useEffect(() => {
     if (!showToast) {
       return;
@@ -88,39 +48,12 @@ const HomeBeforeLogin = () => {
     triggerLoginToast();
   };
 
-  const handleConfirmDeleteArchive = () => {
-    if (!pendingDeleteArchiveId) return;
-    setArchiveItems((prev) =>
-      prev.filter((archive) => archive.id !== pendingDeleteArchiveId)
-    );
-    setPendingDeleteArchiveId(null);
-  };
-
-  const handleCancelDeleteArchive = () => {
-    setPendingDeleteArchiveId(null);
-  };
-
-  const handleRequestDeleteArchive = (id: string) => {
-    setPendingDeleteArchiveId(id);
-    openConfirm({
-      title: '모음을 삭제할까요?',
-      subtitle: '모음 내 할 일도 함께 삭제돼요.',
-      positiveLabel: '삭제하기',
-      negativeLabel: '취소',
-      onPositive: handleConfirmDeleteArchive,
-      onNegative: handleCancelDeleteArchive,
-    });
-  };
-
-  const handleModalClose = () => {
-    if (modalType === 'confirm') {
-      confirmConfig?.onNegative?.();
-    }
-    closeModal();
-  };
-
   const handleCreateTodo = () => {
-    navigate(ROUTES.taskCreate);
+    triggerLoginToast();
+  };
+
+  const handleOpenTutorialArchive = () => {
+    navigate(ROUTES.archiveTutorial);
   };
 
   return (
@@ -174,15 +107,19 @@ const HomeBeforeLogin = () => {
               <h2 className='text-heading-sm text-black'>모음</h2>
               <div className='space-y-3'>
                 {archiveItems.map(
-                  ({ id, title, categoryLabel, itemCount, previewImages }) => (
+                  ({ id, title, category, itemCount, images }) => (
                     <List.ArchiveCard
                       key={id}
                       title={title}
-                      category={categoryLabel}
+                      category={ARCHIVE_CATEGORY_LABEL[category]}
                       itemCount={itemCount}
-                      images={previewImages}
+                      images={images.slice(0, 4)}
                       width='w-full'
-                      onDeleteClick={() => handleRequestDeleteArchive(id)}
+                      disableActionMenu
+                      onClick={handleOpenTutorialArchive}
+                      onMoreClick={triggerLoginToast}
+                      onEditClick={triggerLoginToast}
+                      onDeleteClick={triggerLoginToast}
                     />
                   )
                 )}
@@ -213,45 +150,6 @@ const HomeBeforeLogin = () => {
             <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
           </div>
         </footer>
-
-        <FeedBack.ModalLayout open={isModalOpen} onClose={handleModalClose}>
-          {modalType === 'alert' && alertConfig && (
-            <FeedBack.AlertDialog
-              title={alertConfig.title}
-              subtitle={alertConfig.subtitle}
-              primaryLabel={alertConfig.primaryLabel}
-              secondaryLabel={alertConfig.secondaryLabel}
-              onPrimary={() => {
-                alertConfig.onPrimary?.();
-                closeModal();
-              }}
-              onSecondary={
-                alertConfig.secondaryLabel
-                  ? () => {
-                      alertConfig.onSecondary?.();
-                      closeModal();
-                    }
-                  : undefined
-              }
-            />
-          )}
-          {modalType === 'confirm' && confirmConfig && (
-            <FeedBack.ConfirmDialog
-              title={confirmConfig.title}
-              subtitle={confirmConfig.subtitle}
-              positiveLabel={confirmConfig.positiveLabel}
-              negativeLabel={confirmConfig.negativeLabel}
-              onPositive={() => {
-                confirmConfig.onPositive?.();
-                closeModal();
-              }}
-              onNegative={() => {
-                confirmConfig.onNegative?.();
-                closeModal();
-              }}
-            />
-          )}
-        </FeedBack.ModalLayout>
       </Background.GradientBackground>
     </div>
   );
