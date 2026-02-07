@@ -14,6 +14,8 @@ const LoginPage = () => {
     navigate(-1);
   };
 
+  const KAKAO_AUTH_URL = 'http://localhost:8080/oauth2/authorization/kakao';
+  window.location.href = KAKAO_AUTH_URL;
   return (
     <div className='flex min-h-screen flex-col bg-white'>
       <BackDetailBar title='' rightIcons={[]} onClickBack={handleBack} />
@@ -34,6 +36,7 @@ const LoginPage = () => {
               type='button'
               className={`flex ${SOCIAL_BUTTON_SIZE} items-center justify-center rounded-full bg-transparent`}
               aria-label='카카오로 로그인'
+              onClick={handleKakaoLogin}
             >
               <img src={kakaoIcon} alt='' className={SOCIAL_BUTTON_SIZE} />
             </button>
