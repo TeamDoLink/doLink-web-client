@@ -4,29 +4,33 @@ import {
   type ArchiveSelectCategory,
 } from '@/components/archive';
 import { ROUTES } from '@/constants/routes';
-import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
-import { useArchiveDataStore } from '@/stores/useArchiveDataStore';
+import { useCreateCollect } from '@/api/generated/endpoints/collection/collection';
+import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
+import type { CollectionCreateRequestCategory } from '@/api/generated/models';
 
 const ArchiveAddPage = () => {
   const navigate = useNavigate();
-  const setSelectedArchiveId = useArchiveUIStore(
-    (state) => state.setSelectedArchiveId
-  );
-  // 로그인 후 모음 생성 API 호출
-  const addArchive = useArchiveDataStore((state) => state.addArchive);
+  const { mutate: createCollection } = useCreateCollect();
 
   const handleSubmit = (payload: {
     name: string;
     category: ArchiveSelectCategory;
   }) => {
-    addArchive({
-      title: payload.name,
-      category: payload.category,
-      itemCount: 0,
-      images: [],
-    });
-    setSelectedArchiveId(null);
-    navigate(ROUTES.archives);
+    createCollection(
+      {
+        data: {
+          name: payload.name,
+          category: ARCHIVE_CATEGORY_LABEL[
+            payload.category
+          ] as CollectionCreateRequestCategory,
+        },
+      },
+      {
+        onSuccess: () => {
+          navigate(ROUTES.archives);
+        },
+      }
+    );
   };
 
   return <ArchiveBottomSheet onSubmit={handleSubmit} />;
