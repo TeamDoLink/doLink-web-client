@@ -84,10 +84,6 @@ const ArchiveBeforeLogin = () => {
     triggerLoginToast();
   };
 
-  const handleArchiveActionClick = () => {
-    triggerLoginToast();
-  };
-
   const handleOpenTutorialArchive = () => {
     navigate(ROUTES.archiveTutorial);
   };
@@ -139,8 +135,6 @@ const ArchiveBeforeLogin = () => {
                 disableActionMenu
                 onClick={handleOpenTutorialArchive}
                 onMoreClick={handleArchiveMoreClick}
-                onEditClick={handleArchiveActionClick}
-                onDeleteClick={handleArchiveActionClick}
               />
             );
           })}

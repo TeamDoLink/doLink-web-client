@@ -163,6 +163,9 @@ export const SwipeableDeleteCard = ({
    * isEditMode를 true로 설정하여 수정 모드 활성화
    */
   const handleEditClick = () => {
+    if (capsuleDisabled) {
+      return;
+    }
     onEditModeChange(true);
   };
 
