@@ -14,16 +14,20 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 3000,
     //TODO 배포 시 주석 처리 필요 테스트 위해 proxy 사용
-    // proxy: {
-    //   '/v1': {
-    //     target: 'http://localhost:8080',
-    //     changeOrigin: true,
-    //   },
-    //   '/oauth2': {
-    //     target: 'http://localhost:8080',
-    //     changeOrigin: true,
-    //   },
-    // },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/v1': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/oauth2': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
   },
   resolve: {
     alias: {

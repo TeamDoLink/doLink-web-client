@@ -7,7 +7,8 @@ import { useAuthStore } from '@/stores/useAuthStore';
 // ==============================
 export const AXIOS_INSTANCE = axios.create({
   // TODO 환경변수로 대체 필요
-  baseURL: 'http://localhost:8080',
+  // TODO proxy 사용시 주석
+  // baseURL: 'http://localhost:8080',
   withCredentials: true,
 });
 
@@ -52,6 +53,7 @@ AXIOS_INSTANCE.interceptors.response.use(
       _retry?: boolean;
     };
 
+    // 401이 아니거나 이미 재시도한 요청 → 그냥 에러 reject
     if (error.response?.status !== 401 || originalRequest._retry) {
       return Promise.reject(error);
     }
