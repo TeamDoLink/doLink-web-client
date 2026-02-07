@@ -7,9 +7,11 @@
  */
 
 export * from './apiResponseCollectionResponse';
+export * from './apiResponseLinkCreateResult';
 export * from './apiResponseListCollectionSimpleResponse';
 export * from './apiResponseListTaskResponse';
 export * from './apiResponseSliceCollectionResponse';
+export * from './apiResponseSliceTaskResponse';
 export * from './apiResponseString';
 export * from './apiResponseTaskResponse';
 export * from './apiResponseUserResponse';
@@ -20,12 +22,21 @@ export * from './collectionResponseCategory';
 export * from './collectionSimpleResponse';
 export * from './collectionUpdateRequest';
 export * from './collectionUpdateRequestCategory';
+export * from './linkCreateResult';
+export * from './linkPreviewRequest';
+export * from './listAll1Params';
 export * from './listAllParams';
 export * from './listByCategoryCategory';
 export * from './listByCategoryParams';
+export * from './listByCollectionParams';
+export * from './listRecentParams';
 export * from './pageableObject';
+export * from './searchCollectionsParams';
+export * from './searchTasksParams';
 export * from './sliceCollectionResponse';
+export * from './sliceTaskResponse';
 export * from './sortObject';
 export * from './taskCreateRequest';
 export * from './taskResponse';
+export * from './taskUpdateRequest';
 export * from './userResponse';
