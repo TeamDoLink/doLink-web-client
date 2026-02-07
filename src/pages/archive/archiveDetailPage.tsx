@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { BackDetailBar } from '@/components/common/appBar';
 import { EmptyNotice } from '@/components/common/feedBack';
 import { FloatingButton } from '@/components/common/button/floatingButton';
@@ -16,6 +16,7 @@ import { OptionMenu } from '@/components/common/menu/optionMenu';
 // 카테고리 아이콘 임포트
 // TODO 임시 - 카테고리에 맞게 수정 예정
 import restaurantIcon from '@/assets/icons/category/detail/restaurant.svg';
+import etcIcon from '@/assets/icons/category/detail/etc.svg';
 import todoIcon from '@/assets/icons/category/detail/todo.svg';
 
 type TabType = 'all' | 'incomplete' | 'complete';
@@ -243,16 +244,38 @@ const MOCK_TASK_ITEM: Task[] = [
   },
 ];
 
-// TODO 임시 데이터 (나중에 실제 데이터로 교체)
-const archiveData = {
+const BEFORE_LOGIN_TASKS: Task[] = [
+  {
+    taskId: 1,
+    title: '두링크(DoLink) 안내서 📚',
+    link: '노션 (Notion)',
+    memo: '',
+    status: false,
+    inout: false,
+    createdAt: '오늘',
+    modifiedAt: '오늘',
+  },
+];
+
+const AUTH_ARCHIVE_META = {
   title: '최대 19글자 오육칠팔구십일이삼사오육칠팔구십십일ㄴㅇㄹㄴㅇㄹ',
   category: '맛집',
   categoryIcon: restaurantIcon,
-  todoCount: MOCK_TASK_ITEM.filter((link) => !link.status).length,
+};
+
+const BEFORE_LOGIN_ARCHIVE_META = {
+  title: '두링크(DoLink) 튜토리얼',
+  category: '기타',
+  categoryIcon: etcIcon,
 };
 
 const ArchiveDetailPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isBeforeLoginArchive = location.pathname === ROUTES.archiveTutorial;
+  const archiveMeta = isBeforeLoginArchive
+    ? BEFORE_LOGIN_ARCHIVE_META
+    : AUTH_ARCHIVE_META;
   const [selectedTab, setSelectedTab] = useState<TabType>('all');
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [isTitleVisible, setIsTitleVisible] = useState(true);
@@ -269,24 +292,30 @@ const ArchiveDetailPage = () => {
     {}
   );
 
+  const todoCount = useMemo(() => {
+    return taskList.reduce((count, task) => {
+      const completed = linkStates[task.taskId] ?? task.status;
+      return completed ? count : count + 1;
+    }, 0);
+  }, [linkStates, taskList]);
+
   // TODO API 호출 값 받아오기
   useEffect(() => {
-    // API 호출 시 그대로 사용
-    setTaskList(MOCK_TASK_ITEM);
-    // taskList 변경 시 linkStates와 linkEditModes도 초기화
+    const sourceTasks = isBeforeLoginArchive
+      ? BEFORE_LOGIN_TASKS
+      : MOCK_TASK_ITEM;
+
+    setTaskList(sourceTasks);
     setLinkStates(
-      MOCK_TASK_ITEM.reduce(
+      sourceTasks.reduce(
         (acc, task) => ({ ...acc, [task.taskId]: task.status }),
         {}
       )
     );
     setLinkEditModes(
-      MOCK_TASK_ITEM.reduce(
-        (acc, task) => ({ ...acc, [task.taskId]: false }),
-        {}
-      )
+      sourceTasks.reduce((acc, task) => ({ ...acc, [task.taskId]: false }), {})
     );
-  }, []);
+  }, [isBeforeLoginArchive]);
 
   const handleLinkCheck = (id: number, checked: boolean) => {
     setLinkStates((prev) => ({ ...prev, [id]: checked }));
@@ -395,9 +424,16 @@ const ArchiveDetailPage = () => {
       grouped.get(key)!.push(link);
     });
 
+    const toTimestamp = (key: string) => {
+      if (key === '오늘') {
+        return new Date().getTime();
+      }
+      return new Date(key).getTime();
+    };
+
     const result = Array.from(grouped.entries()).sort(([aKey], [bKey]) => {
-      const aDate = new Date(aKey).getTime();
-      const bDate = new Date(bKey).getTime();
+      const aDate = toTimestamp(aKey);
+      const bDate = toTimestamp(bKey);
       return sortOption === 'newest' ? bDate - aDate : aDate - bDate;
     });
 
@@ -412,7 +448,7 @@ const ArchiveDetailPage = () => {
       {/* TODO  BackDetailBar 고정 수정*/}
       <div className='sticky left-0 right-0 top-0 z-10 w-full'>
         <BackDetailBar
-          title={isTitleVisible ? '모음 상세' : archiveData.title}
+          title={isTitleVisible ? '모음 상세' : archiveMeta.title}
           rightIcons={['search', 'option']}
           onClickBack={handleBack}
           onClickSearch={handleSearch}
@@ -438,7 +474,7 @@ const ArchiveDetailPage = () => {
         {/* 제목 */}
         <div className='px-5'>
           <h1 className='truncate text-heading-lg text-grey-900'>
-            {archiveData.title}
+            {archiveMeta.title}
           </h1>
         </div>
 
@@ -446,19 +482,17 @@ const ArchiveDetailPage = () => {
         <div className='flex items-center gap-2 px-5'>
           <div className='flex items-center gap-1'>
             <img
-              src={archiveData.categoryIcon}
+              src={archiveMeta.categoryIcon}
               alt=''
               className='size-4 shrink-0'
             />
             <span className='text-body-lg text-grey-700'>
-              {archiveData.category}
+              {archiveMeta.category}
             </span>
           </div>
           <div className='flex items-center gap-1'>
             <img src={todoIcon} alt='' className='size-4 shrink-0' />
-            <span className='text-body-lg text-grey-700'>
-              {archiveData.todoCount}개
-            </span>
+            <span className='text-body-lg text-grey-700'>{todoCount}개</span>
           </div>
         </div>
       </div>
@@ -488,7 +522,11 @@ const ArchiveDetailPage = () => {
               <SwipeableDeleteCard
                 key={`${dateKey}-${index}`}
                 tasks={tasks}
-                createdAt={new Date(tasks[0].createdAt)}
+                createdAt={
+                  tasks[0].createdAt === '오늘'
+                    ? new Date()
+                    : new Date(tasks[0].createdAt)
+                }
                 linkStates={linkStates}
                 linkEditModes={linkEditModes}
                 onCheck={handleLinkCheck}
@@ -527,6 +565,7 @@ const ArchiveDetailPage = () => {
                     }
                   }
                 }}
+                capsuleDisabled={isBeforeLoginArchive}
               />
             ))}
           </div>
