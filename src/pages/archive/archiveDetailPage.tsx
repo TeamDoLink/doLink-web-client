@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { BackDetailBar } from '@/components/common/appBar';
 import { EmptyNotice } from '@/components/common/feedBack';
 import { FloatingButton } from '@/components/common/button/floatingButton';
-import { TabBar } from '@/components/common';
+import { TabBar, FeedBack } from '@/components/common';
 import { StickyTabSection } from '@/components/archive/stickyTabSection';
 import {
   SwipeableDeleteCard,
@@ -12,14 +13,54 @@ import {
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { ROUTES } from '@/constants/routes';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
-import { useListByCollection } from '@/api/generated/endpoints/task/task';
-import type { ApiResponseListTaskResponse } from '@/api/generated/models';
+import {
+  useListByCollection,
+  getListByCollectionQueryKey,
+  useCompleteTask,
+  useDeleteTask,
+} from '@/api/generated/endpoints/task/task';
+import {
+  useDeleteCollect,
+  getListAll1QueryKey as getListAllQueryKey,
+  getListByCategoryQueryKey,
+} from '@/api/generated/endpoints/collection/collection';
+import type { ApiResponseSliceTaskResponse } from '@/api/generated/models';
+import {
+  ARCHIVE_CATEGORY_LABEL,
+  type ArchiveCategory,
+} from '@/utils/archiveCategory';
 
 // 카테고리 아이콘 임포트
-// TODO 임시 - 카테고리에 맞게 수정 예정
 import restaurantIcon from '@/assets/icons/category/detail/restaurant.svg';
+import hobbyIcon from '@/assets/icons/category/detail/hobby.svg';
+import travelIcon from '@/assets/icons/category/detail/travel.svg';
+import moneyIcon from '@/assets/icons/category/detail/money.svg';
+import shoppingIcon from '@/assets/icons/category/detail/shopping.svg';
+import exerciseIcon from '@/assets/icons/category/detail/exercise.svg';
+import careerIcon from '@/assets/icons/category/detail/career.svg';
+import studyIcon from '@/assets/icons/category/detail/study.svg';
+import tipsIcon from '@/assets/icons/category/detail/tips.svg';
 import etcIcon from '@/assets/icons/category/detail/etc.svg';
 import todoIcon from '@/assets/icons/category/detail/todo.svg';
+
+const CATEGORY_ICON_MAP: Record<string, string> = {
+  맛집: restaurantIcon,
+  취미: hobbyIcon,
+  여행: travelIcon,
+  재테크: moneyIcon,
+  쇼핑: shoppingIcon,
+  운동: exerciseIcon,
+  커리어: careerIcon,
+  자기개발: studyIcon,
+  꿀팁: tipsIcon,
+  기타: etcIcon,
+};
+
+const CATEGORY_LABEL_TO_KEY = Object.fromEntries(
+  Object.entries(ARCHIVE_CATEGORY_LABEL)
+    .filter(([key]) => key !== 'all')
+    .map(([key, label]) => [label, key])
+) as Record<string, ArchiveCategory>;
 
 type TabType = 'all' | 'incomplete' | 'complete';
 type SortOption = 'newest' | 'oldest';
@@ -54,12 +95,6 @@ const BEFORE_LOGIN_TASKS: Task[] = [
   },
 ];
 
-const AUTH_ARCHIVE_META = {
-  title: '최대 19글자 오육칠팔구십일이삼사오육칠팔구십십일ㄴㅇㄹㄴㅇㄹ',
-  category: '맛집',
-  categoryIcon: restaurantIcon,
-};
-
 const BEFORE_LOGIN_ARCHIVE_META = {
   title: '두링크(DoLink) 튜토리얼',
   category: '기타',
@@ -72,19 +107,37 @@ const ArchiveDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const isBeforeLoginArchive = location.pathname === ROUTES.archiveTutorial;
 
+  const queryClient = useQueryClient();
   const collectionId = id ? Number(id) : 0;
 
   const { data: taskData } = useListByCollection(collectionId, undefined, {
     query: { enabled: !isBeforeLoginArchive && !!collectionId },
   });
 
+  const { mutate: completeTask } = useCompleteTask();
+  const { mutate: deleteTask } = useDeleteTask();
+  const { mutate: deleteCollect } = useDeleteCollect();
+
+  const locationState = location.state as
+    | { title?: string; category?: string }
+    | undefined;
   const archiveMeta = isBeforeLoginArchive
     ? BEFORE_LOGIN_ARCHIVE_META
-    : AUTH_ARCHIVE_META;
+    : {
+        title: locationState?.title ?? '모음',
+        category: locationState?.category ?? '',
+        categoryIcon:
+          CATEGORY_ICON_MAP[locationState?.category ?? ''] ?? etcIcon,
+      };
+
   const [selectedTab, setSelectedTab] = useState<TabType>('all');
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [isTitleVisible, setIsTitleVisible] = useState(true);
   const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
+  const [pendingDeleteTaskId, setPendingDeleteTaskId] = useState<number | null>(
+    null
+  );
+  const [isCollectionDeleteOpen, setIsCollectionDeleteOpen] = useState(false);
   const titleSectionRef = useRef<HTMLDivElement>(null);
 
   // 나중에 API로 데이터 받을 예정이면
@@ -110,8 +163,9 @@ const ArchiveDetailPage = () => {
     if (isBeforeLoginArchive) {
       sourceTasks = BEFORE_LOGIN_TASKS;
     } else {
-      const apiResponse = taskData as unknown as ApiResponseListTaskResponse;
-      const apiTasks = apiResponse?.result ?? [];
+      const apiResponse = taskData as unknown as ApiResponseSliceTaskResponse;
+      const apiTasks = apiResponse?.result?.content ?? [];
+
       sourceTasks = apiTasks.map((t) => ({
         taskId: t.taskId ?? 0,
         title: t.title ?? '',
@@ -136,8 +190,21 @@ const ArchiveDetailPage = () => {
     );
   }, [isBeforeLoginArchive, taskData]);
 
-  const handleLinkCheck = (id: number, checked: boolean) => {
-    setLinkStates((prev) => ({ ...prev, [id]: checked }));
+  const handleLinkCheck = (taskId: number, checked: boolean) => {
+    setLinkStates((prev) => ({ ...prev, [taskId]: checked }));
+    completeTask(
+      { taskId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getListByCollectionQueryKey(collectionId),
+          });
+        },
+        onError: () => {
+          setLinkStates((prev) => ({ ...prev, [taskId]: !checked }));
+        },
+      }
+    );
   };
 
   const handleEditModeChange = (id: number, isEditMode: boolean) => {
@@ -162,19 +229,57 @@ const ArchiveDetailPage = () => {
   };
 
   const handleOptionSelect = (key: string) => {
-    if (key === 'edit') {
-      console.log('모음 수정');
-      // TODO: 모음 수정 로직 구현
-    } else if (key === 'delete') {
-      console.log('모음 삭제');
-      // TODO: 모음 삭제 로직 구현
-    }
     setIsOptionMenuOpen(false);
+    if (key === 'edit') {
+      const categoryKey = CATEGORY_LABEL_TO_KEY[archiveMeta.category] ?? 'etc';
+      navigate(ROUTES.archiveEdit, {
+        state: {
+          archive: {
+            id: String(collectionId),
+            title: archiveMeta.title,
+            category: categoryKey,
+          },
+          origin: `${ROUTES.archiveDetail}/${collectionId}`,
+        },
+      });
+    } else if (key === 'delete') {
+      setIsCollectionDeleteOpen(true);
+    }
+  };
+
+  const handleConfirmCollectionDelete = () => {
+    deleteCollect(
+      { collectId: collectionId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListAllQueryKey() });
+          queryClient.invalidateQueries({
+            queryKey: getListByCategoryQueryKey(),
+          });
+          setIsCollectionDeleteOpen(false);
+          navigate(ROUTES.archives, { replace: true });
+        },
+      }
+    );
+  };
+
+  const handleConfirmTaskDelete = () => {
+    if (pendingDeleteTaskId === null) return;
+    deleteTask(
+      { taskId: pendingDeleteTaskId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getListByCollectionQueryKey(collectionId),
+          });
+          setPendingDeleteTaskId(null);
+        },
+      }
+    );
   };
 
   const handleFloatingButtonClick = () => {
-    // 할일 추가로 이동 route
-    console.log('할일 추가로 이동 route');
+    navigate(ROUTES.taskCreate);
   };
 
   const handleSortChange = (newSort: SortOption) => {
@@ -376,13 +481,7 @@ const ArchiveDetailPage = () => {
                   }
                 }}
                 onDeleteClick={(taskId) => {
-                  const task = tasks.find((t) => t.taskId === taskId);
-                  if (task) {
-                    console.log('삭제 클릭:', task.title);
-                    if (confirm(`${task.title}을(를) 삭제하시겠습니까?`)) {
-                      alert('삭제됨');
-                    }
-                  }
+                  setPendingDeleteTaskId(taskId);
                 }}
                 capsuleDisabled={isBeforeLoginArchive}
               />
@@ -403,6 +502,35 @@ const ArchiveDetailPage = () => {
       <footer className='sticky bottom-0 bg-white shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
         <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
       </footer>
+
+      {/* 할 일 삭제 확인 모달 */}
+      <FeedBack.ModalLayout
+        open={pendingDeleteTaskId !== null}
+        onClose={() => setPendingDeleteTaskId(null)}
+      >
+        <FeedBack.ConfirmDialog
+          title='할 일을 삭제할까요?'
+          positiveLabel='삭제하기'
+          negativeLabel='취소'
+          onPositive={handleConfirmTaskDelete}
+          onNegative={() => setPendingDeleteTaskId(null)}
+        />
+      </FeedBack.ModalLayout>
+
+      {/* 모음 삭제 확인 모달 */}
+      <FeedBack.ModalLayout
+        open={isCollectionDeleteOpen}
+        onClose={() => setIsCollectionDeleteOpen(false)}
+      >
+        <FeedBack.ConfirmDialog
+          title='모음을 삭제할까요?'
+          subtitle='모음 내 할 일도 함께 삭제돼요.'
+          positiveLabel='삭제하기'
+          negativeLabel='취소'
+          onPositive={handleConfirmCollectionDelete}
+          onNegative={() => setIsCollectionDeleteOpen(false)}
+        />
+      </FeedBack.ModalLayout>
     </div>
   );
 };

@@ -180,7 +180,12 @@ const ArchiveAfterLogin = () => {
                 images={previewImages}
                 width='w-full'
                 onClick={() =>
-                  navigate(`${ROUTES.archiveDetail}/${archive.collectionId}`)
+                  navigate(`${ROUTES.archiveDetail}/${archive.collectionId}`, {
+                    state: {
+                      title: archive.name,
+                      category: archive.category,
+                    },
+                  })
                 }
                 onEditClick={() =>
                   handleEdit(
