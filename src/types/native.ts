@@ -48,7 +48,8 @@ export interface LinkCanOpenPayload {
  */
 export type WebToNativeMessage =
   | { type: 'link:open'; payload: LinkPayload }
-  | { type: 'link:canOpen'; payload: LinkCanOpenPayload };
+  | { type: 'link:canOpen'; payload: LinkCanOpenPayload }
+  | { type: 'auth:status'; payload: { isAuthenticated: boolean } };
 
 /**
  * All possible messages from Native to Web

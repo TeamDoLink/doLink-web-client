@@ -2,6 +2,9 @@ import { useSearchParams } from 'react-router-dom';
 import ExternalLink, {
   type ShareIntentData,
 } from '@/components/link/externalLink';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useEffect } from 'react';
+import { sendMessageToRN } from '@/utils/nativeBridge';
 
 /**
  * ExternalLinkPage
@@ -22,6 +25,17 @@ export default function ExternalLinkPage() {
           type: shareType,
         }
       : null;
+
+  const { isAuthenticated, isAuthInitialized } = useAuthStore();
+
+  useEffect(() => {
+    if (isAuthInitialized) {
+      sendMessageToRN({
+        type: 'auth:status',
+        payload: { isAuthenticated },
+      });
+    }
+  }, [isAuthenticated, isAuthInitialized]);
 
   /**
    * React Native로 메시지 전송
