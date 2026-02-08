@@ -102,9 +102,6 @@ const HomeAfterLogin = () => {
     openConfirm,
     close: closeModal,
   } = useModalStore();
-  const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
-    string | null
-  >(null);
 
   const greeting = useMemo(() => {
     const now = new Date();
@@ -165,7 +162,6 @@ const HomeAfterLogin = () => {
   };
 
   const handleRequestDeleteArchive = (id: string) => {
-    setPendingDeleteArchiveId(id);
     openConfirm({
       title: '모음을 삭제할까요?',
       subtitle: '모음 내 할 일도 함께 삭제돼요.',
@@ -186,32 +182,18 @@ const HomeAfterLogin = () => {
                 queryKey: getListRecentQueryKey(),
               });
               setSelectedArchiveId(null);
-              setPendingDeleteArchiveId(null);
               closeModal();
             },
           }
         );
       },
-      onNegative: () => setPendingDeleteArchiveId(null),
+      onNegative: closeModal,
     });
   };
 
   const handleRequestEditArchive = (id: string) => {
-    const target = archiveContent.find((a) => String(a.collectionId) === id);
-    if (!target) return;
-
     setSelectedArchiveId(id);
-    const categoryKey = CATEGORY_LABEL_TO_KEY[target.category ?? ''] ?? 'etc';
-    navigate(ROUTES.archiveEdit, {
-      state: {
-        archive: {
-          id,
-          title: target.name ?? '',
-          category: categoryKey,
-        },
-        origin: ROUTES.home,
-      },
-    });
+    navigate(`${ROUTES.archiveEdit}/${id}`);
   };
 
   const handleModalClose = () => {
