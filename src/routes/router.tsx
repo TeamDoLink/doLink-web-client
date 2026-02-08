@@ -22,7 +22,7 @@ const AppRouter = () => {
       <Route path={ROUTES.home} element={<HomePage />} />
       <Route path={ROUTES.archives} element={<ArchivePage />} />
       <Route path={ROUTES.archiveAdd} element={<ArchiveAddPage />} />
-      <Route path={ROUTES.archiveEdit} element={<ArchiveEditPage />} />
+      <Route path={`${ROUTES.archiveEdit}/:id`} element={<ArchiveEditPage />} />
       <Route
         path={`${ROUTES.archiveDetail}/:id`}
         element={<ArchiveDetailPage />}

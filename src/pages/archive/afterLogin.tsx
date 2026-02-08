@@ -11,10 +11,7 @@ import {
 } from '@/components/archive';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { ROUTES } from '@/constants/routes';
-import {
-  ARCHIVE_CATEGORY_LABEL,
-  type ArchiveCategory,
-} from '@/utils/archiveCategory';
+import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import {
   useListAll1 as useListAll,
   useListByCategory,
@@ -45,13 +42,6 @@ const ARCHIVE_CATEGORIES = ARCHIVE_CATEGORY_KEYS.map((key) => ({
   key,
   label: ARCHIVE_CATEGORY_LABEL[key],
 }));
-
-// 한글 카테고리 → 영문 키 역매핑
-const CATEGORY_LABEL_TO_KEY = Object.fromEntries(
-  Object.entries(ARCHIVE_CATEGORY_LABEL)
-    .filter(([key]) => key !== 'all')
-    .map(([key, label]) => [label, key])
-) as Record<string, ArchiveCategory>;
 
 const ArchiveAfterLogin = () => {
   const { handleTabChange } = useBottomTabNavigation();
@@ -122,17 +112,8 @@ const ArchiveAfterLogin = () => {
     navigate(ROUTES.archiveAdd);
   };
 
-  const handleEdit = (id: number, title: string, category: ArchiveCategory) => {
-    navigate(ROUTES.archiveEdit, {
-      state: {
-        archive: {
-          id: String(id),
-          title,
-          category,
-        },
-        origin: ROUTES.archives,
-      },
-    });
+  const handleEdit = (id: number) => {
+    navigate(`${ROUTES.archiveEdit}/${id}`);
   };
 
   return (
@@ -169,8 +150,6 @@ const ArchiveAfterLogin = () => {
             const previewImages = Array.isArray(archive.thumbnails)
               ? archive.thumbnails.slice(0, 4)
               : [];
-            const categoryKey =
-              CATEGORY_LABEL_TO_KEY[archive.category ?? ''] ?? 'etc';
 
             return (
               <List.ArchiveCard
@@ -180,20 +159,9 @@ const ArchiveAfterLogin = () => {
                 images={previewImages}
                 width='w-full'
                 onClick={() =>
-                  navigate(`${ROUTES.archiveDetail}/${archive.collectionId}`, {
-                    state: {
-                      title: archive.name,
-                      category: archive.category,
-                    },
-                  })
+                  navigate(`${ROUTES.archiveDetail}/${archive.collectionId}`)
                 }
-                onEditClick={() =>
-                  handleEdit(
-                    archive.collectionId!,
-                    archive.name ?? '',
-                    categoryKey
-                  )
-                }
+                onEditClick={() => handleEdit(archive.collectionId!)}
                 onDeleteClick={() => handleRequestDelete(archive.collectionId!)}
               />
             );

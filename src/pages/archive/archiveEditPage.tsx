@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
 import {
@@ -9,37 +9,52 @@ import {
 import { ROUTES } from '@/constants/routes';
 import {
   useUpdateCollect,
+  useGetCollectDetail,
   getListAll1QueryKey as getListAllQueryKey,
   getListByCategoryQueryKey,
+  getGetCollectDetailQueryKey,
 } from '@/api/generated/endpoints/collection/collection';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
-import type { CollectionUpdateRequestCategory } from '@/api/generated/models';
+import type {
+  CollectionUpdateRequestCategory,
+  ApiResponseCollectionDetailResponse,
+} from '@/api/generated/models';
 
-type ArchiveEditLocationState = {
-  origin?: string;
-  archive?: {
-    id: string;
-    title: string;
-    category: ArchiveSelectCategory;
-  };
-};
+// 한글 카테고리 → 영문 키 역매핑
+const CATEGORY_LABEL_TO_KEY = Object.fromEntries(
+  Object.entries(ARCHIVE_CATEGORY_LABEL)
+    .filter(([key]) => key !== 'all')
+    .map(([key, label]) => [label, key])
+) as Record<string, ArchiveSelectCategory>;
 
 const ArchiveEditPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { mutate: updateCollect } = useUpdateCollect();
 
-  const { archive, origin } =
-    (location.state as ArchiveEditLocationState | undefined) ?? {};
+  const collectionId = id ? Number(id) : 0;
+
+  // API에서 모음 정보 가져오기
+  const { data: collectionData, isLoading } = useGetCollectDetail(
+    collectionId,
+    {
+      query: { enabled: !!collectionId },
+    }
+  );
+
+  const apiCollectionData =
+    collectionData as unknown as ApiResponseCollectionDetailResponse;
+  const apiTitle = apiCollectionData?.result?.name;
+  const apiCategory = apiCollectionData?.result?.category;
 
   useEffect(() => {
-    if (!archive) {
+    if (!collectionId) {
       navigate(ROUTES.archives, { replace: true });
     }
-  }, [archive, navigate]);
+  }, [collectionId, navigate]);
 
-  if (!archive) {
+  if (!collectionId || isLoading) {
     return null;
   }
 
@@ -49,7 +64,7 @@ const ArchiveEditPage = () => {
   }) => {
     updateCollect(
       {
-        collectId: Number(archive.id),
+        collectId: collectionId,
         data: {
           name: payload.name,
           category: ARCHIVE_CATEGORY_LABEL[
@@ -63,18 +78,24 @@ const ArchiveEditPage = () => {
           queryClient.invalidateQueries({
             queryKey: getListByCategoryQueryKey(),
           });
-          const fallbackPath = origin ?? ROUTES.archives;
-          navigate(fallbackPath, { replace: true });
+          queryClient.invalidateQueries({
+            queryKey: getGetCollectDetailQueryKey(collectionId),
+          });
+          navigate(`${ROUTES.archiveDetail}/${collectionId}`, {
+            replace: true,
+          });
         },
       }
     );
   };
 
+  const categoryKey = CATEGORY_LABEL_TO_KEY[apiCategory ?? ''] ?? 'etc';
+
   return (
     <ArchiveBottomSheet
       mode='edit'
-      initialName={archive.title}
-      initialCategory={archive.category}
+      initialName={apiTitle ?? ''}
+      initialCategory={categoryKey}
       onSubmit={handleSubmit}
     />
   );

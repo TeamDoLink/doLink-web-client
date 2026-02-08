@@ -21,14 +21,15 @@ import {
 } from '@/api/generated/endpoints/task/task';
 import {
   useDeleteCollect,
+  useGetCollectDetail,
   getListAll1QueryKey as getListAllQueryKey,
   getListByCategoryQueryKey,
+  getGetCollectDetailQueryKey,
 } from '@/api/generated/endpoints/collection/collection';
-import type { ApiResponseSliceTaskResponse } from '@/api/generated/models';
-import {
-  ARCHIVE_CATEGORY_LABEL,
-  type ArchiveCategory,
-} from '@/utils/archiveCategory';
+import type {
+  ApiResponseSliceTaskResponse,
+  ApiResponseCollectionDetailResponse,
+} from '@/api/generated/models';
 
 // 카테고리 아이콘 임포트
 import restaurantIcon from '@/assets/icons/category/detail/restaurant.svg';
@@ -55,12 +56,6 @@ const CATEGORY_ICON_MAP: Record<string, string> = {
   꿀팁: tipsIcon,
   기타: etcIcon,
 };
-
-const CATEGORY_LABEL_TO_KEY = Object.fromEntries(
-  Object.entries(ARCHIVE_CATEGORY_LABEL)
-    .filter(([key]) => key !== 'all')
-    .map(([key, label]) => [label, key])
-) as Record<string, ArchiveCategory>;
 
 type TabType = 'all' | 'incomplete' | 'complete';
 type SortOption = 'newest' | 'oldest';
@@ -114,20 +109,26 @@ const ArchiveDetailPage = () => {
     query: { enabled: !isBeforeLoginArchive && !!collectionId },
   });
 
+  const { data: collectionData } = useGetCollectDetail(collectionId, {
+    query: { enabled: !isBeforeLoginArchive && !!collectionId },
+  });
+
   const { mutate: completeTask } = useCompleteTask();
   const { mutate: deleteTask } = useDeleteTask();
   const { mutate: deleteCollect } = useDeleteCollect();
 
-  const locationState = location.state as
-    | { title?: string; category?: string }
-    | undefined;
+  // API 데이터만 사용
+  const apiCollectionData =
+    collectionData as unknown as ApiResponseCollectionDetailResponse;
+  const apiTitle = apiCollectionData?.result?.name;
+  const apiCategory = apiCollectionData?.result?.category;
+
   const archiveMeta = isBeforeLoginArchive
     ? BEFORE_LOGIN_ARCHIVE_META
     : {
-        title: locationState?.title ?? '모음',
-        category: locationState?.category ?? '',
-        categoryIcon:
-          CATEGORY_ICON_MAP[locationState?.category ?? ''] ?? etcIcon,
+        title: apiTitle ?? '모음',
+        category: apiCategory ?? '',
+        categoryIcon: CATEGORY_ICON_MAP[apiCategory ?? ''] ?? etcIcon,
       };
 
   const [selectedTab, setSelectedTab] = useState<TabType>('all');
@@ -231,17 +232,7 @@ const ArchiveDetailPage = () => {
   const handleOptionSelect = (key: string) => {
     setIsOptionMenuOpen(false);
     if (key === 'edit') {
-      const categoryKey = CATEGORY_LABEL_TO_KEY[archiveMeta.category] ?? 'etc';
-      navigate(ROUTES.archiveEdit, {
-        state: {
-          archive: {
-            id: String(collectionId),
-            title: archiveMeta.title,
-            category: categoryKey,
-          },
-          origin: `${ROUTES.archiveDetail}/${collectionId}`,
-        },
-      });
+      navigate(`${ROUTES.archiveEdit}/${collectionId}`);
     } else if (key === 'delete') {
       setIsCollectionDeleteOpen(true);
     }
@@ -255,6 +246,9 @@ const ArchiveDetailPage = () => {
           queryClient.invalidateQueries({ queryKey: getListAllQueryKey() });
           queryClient.invalidateQueries({
             queryKey: getListByCategoryQueryKey(),
+          });
+          queryClient.invalidateQueries({
+            queryKey: getGetCollectDetailQueryKey(collectionId),
           });
           setIsCollectionDeleteOpen(false);
           navigate(ROUTES.archives, { replace: true });
