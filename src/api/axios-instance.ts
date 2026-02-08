@@ -17,7 +17,10 @@ AXIOS_INSTANCE.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const { accessToken } = useAuthStore.getState();
     if (accessToken) {
+      console.log(`[Axios Request] Attaching accessToken to: ${config.url}`);
       config.headers.Authorization = `Bearer ${accessToken}`;
+    } else {
+      console.log(`[Axios Request] No accessToken found for: ${config.url}`);
     }
     return config;
   },
@@ -80,18 +83,26 @@ AXIOS_INSTANCE.interceptors.response.use(
     isRefreshing = true;
 
     try {
+      console.log('[Axios Response] Attempting token reissue...');
       const response = await AXIOS_INSTANCE.post('/v1/auth/reissue');
       const newToken: string = response.data?.result;
 
       if (newToken) {
+        console.log(
+          '[Axios Response] Token reissue successful, storing new token'
+        );
         useAuthStore.getState().setAccessToken(newToken);
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         processQueue(null, newToken);
         return AXIOS_INSTANCE(originalRequest);
       } else {
+        console.error(
+          '[Axios Response] Token reissue failed: No token in response'
+        );
         throw new Error('토큰 갱신 응답이 올바르지 않습니다');
       }
     } catch (refreshError) {
+      console.error('[Axios Response] Token reissue error:', refreshError);
       useAuthStore.getState().clearAuth();
       processQueue(refreshError, null);
       return Promise.reject(refreshError);
