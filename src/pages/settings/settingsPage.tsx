@@ -9,7 +9,8 @@ import { GreyLine } from '@/components/common/line/greyLine';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { logout } from '@/api/generated/endpoints/user/user';
+import { logout, useGetUser } from '@/api/generated/endpoints/user/user';
+import type { ApiResponseUserResponse } from '@/api/generated/models';
 import { APP_VERSION } from '@/constants/appVersion';
 import { ROUTES } from '@/constants/routes';
 import { fetchAppVersionInfo } from '@/api/appVersion';
@@ -22,6 +23,13 @@ const SettingsPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+
+  // API: 사용자 프로필
+  const { data: userData } = useGetUser();
+  const userResponse = (userData as unknown as ApiResponseUserResponse)?.result;
+  const memberName =
+    userResponse?.nickname ?? userResponse?.socialName ?? '사용자';
+  const profileImage = userResponse?.profileImageUrl;
   const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [versionFetchState, setVersionFetchState] = useState<
     'loading' | 'success' | 'error'
@@ -99,9 +107,13 @@ const SettingsPage = () => {
       <main className='grow space-y-4'>
         <div className='rounded-[16px] p-6'>
           <div className='flex items-center gap-3'>
-            <img src={kakaoIcon} alt='로그인 아이콘' className='h-12 w-12' />
+            <img
+              src={profileImage ?? kakaoIcon}
+              alt='프로필'
+              className='h-12 w-12 rounded-full object-cover'
+            />
             <span className='flex flex-col gap-1 text-heading-lg text-grey-900'>
-              홍길동 님
+              {memberName} 님
             </span>
           </div>
 

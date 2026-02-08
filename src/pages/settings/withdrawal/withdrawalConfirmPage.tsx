@@ -1,12 +1,18 @@
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { BackDetailBar } from '@/components/common/appBar/backDetailAppBar';
 import { Button, FeedBack } from '@/components/common';
 import { ROUTES } from '@/constants/routes';
 import { useModalStore } from '@/stores/useModalStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useWithdraw, logout } from '@/api/generated/endpoints/user/user';
 
 const WithdrawalConfirmPage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+  const { mutate: withdraw, isPending } = useWithdraw();
   const {
     isOpen: isModalOpen,
     type: modalType,
@@ -20,11 +26,22 @@ const WithdrawalConfirmPage = () => {
   };
 
   const handleWithdraw = () => {
-    openConfirm({
-      title: '회원 탈퇴가 완료되었습니다.',
-      subtitle: 'DoLink를 이용해 주셔서 감사합니다.',
-      positiveLabel: '확인',
-      onPositive: () => navigate(ROUTES.home, { replace: true }),
+    withdraw(undefined, {
+      onSuccess: async () => {
+        try {
+          await logout();
+        } catch {
+          // 탈퇴 후 로그아웃 실패해도 무시
+        }
+        clearAuth();
+        queryClient.clear();
+        openConfirm({
+          title: '회원 탈퇴가 완료되었습니다.',
+          subtitle: 'DoLink를 이용해 주셔서 감사합니다.',
+          positiveLabel: '확인',
+          onPositive: () => navigate(ROUTES.home, { replace: true }),
+        });
+      },
     });
   };
 
@@ -70,9 +87,10 @@ const WithdrawalConfirmPage = () => {
           </Button.BlueButton>
           <Button.CtaButton
             onClick={handleWithdraw}
+            disabled={isPending}
             className='flex-1 rounded-2xl py-4 text-body-lg'
           >
-            탈퇴하기
+            {isPending ? '처리 중...' : '탈퇴하기'}
           </Button.CtaButton>
         </div>
       </main>
