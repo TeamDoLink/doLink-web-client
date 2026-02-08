@@ -144,7 +144,7 @@ const sections = [
     description:
       'radius 6px, px-3 py-2 패딩을 가진 토글형 칩입니다. 외부에서 selected 상태를 내려 제어하며, 선택 시 point 컬러 테두리/텍스트가 활성화됩니다.',
     component: (
-      <div className='gap- flex flex-wrap'>
+      <div className='flex flex-wrap gap-4'>
         <ChipButtonDemo />
       </div>
     ),
@@ -201,11 +201,11 @@ const sections = [
       <div className='flex flex-wrap gap-6'>
         <div className='flex flex-col items-center gap-2'>
           <FloatingButton aria-label='Enabled plus' />
-          <span className='text-caption text-grey-500'>Enabled</span>
+          <span className='text-caption-sm text-grey-500'>Enabled</span>
         </div>
         <div className='flex flex-col items-center gap-2'>
           <FloatingButton visualState='disabled' aria-label='Disabled plus' />
-          <span className='text-caption text-grey-500'>Disabled</span>
+          <span className='text-caption-sm text-grey-500'>Disabled</span>
         </div>
       </div>
     ),

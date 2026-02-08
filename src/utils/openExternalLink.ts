@@ -11,7 +11,7 @@ export const openExternalLink = (url: string) => {
     }
 
     window.open(parsed.toString(), '_blank', 'noopener,noreferrer');
-  } catch (error) {
+  } catch {
     console.error('Invalid URL:', url);
   }
 };

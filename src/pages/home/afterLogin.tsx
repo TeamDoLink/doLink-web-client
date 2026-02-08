@@ -76,15 +76,9 @@ const HomeAfterLogin = () => {
 
   // API: 최근 할 일
   const { data: recentData } = useListRecent({ limit: 3 });
-  const recentTasks =
-    (recentData as unknown as ApiResponseListTaskResponse)?.result ?? [];
 
   // API: 모음 목록
   const { data: archiveData } = useListAll({ page: 0, size: 8 });
-  const archiveSlice = (
-    archiveData as unknown as ApiResponseSliceCollectionResponse
-  )?.result;
-  const archiveContent = archiveSlice?.content ?? [];
 
   // Mutations
   const { mutate: completeTask } = useCompleteTask();
@@ -111,6 +105,8 @@ const HomeAfterLogin = () => {
 
   // API 응답 → TodoItem[] 매핑
   const latestTodos: TodoItem[] = useMemo(() => {
+    const recentTasks =
+      (recentData as unknown as ApiResponseListTaskResponse)?.result ?? [];
     return recentTasks.map((t) => ({
       id: String(t.taskId ?? 0),
       title: t.title ?? '',
@@ -118,10 +114,14 @@ const HomeAfterLogin = () => {
       checked: todoOverrides[String(t.taskId ?? 0)] ?? t.status ?? false,
       createdAt: t.createdAt ?? new Date().toISOString(),
     }));
-  }, [recentTasks, todoOverrides]);
+  }, [recentData, todoOverrides]);
 
   // API 응답 → ArchiveSectionItem[] 매핑
   const latestArchives = useMemo(() => {
+    const archiveSlice = (
+      archiveData as unknown as ApiResponseSliceCollectionResponse
+    )?.result;
+    const archiveContent = archiveSlice?.content ?? [];
     return archiveContent.map((a) => ({
       id: String(a.collectionId ?? 0),
       title: a.name ?? '',
@@ -132,7 +132,7 @@ const HomeAfterLogin = () => {
         : [],
       createdAt: '',
     }));
-  }, [archiveContent]);
+  }, [archiveData]);
 
   const handleToggleTodo = (id: string, nextChecked: boolean) => {
     setTodoOverrides((prev) => ({ ...prev, [id]: nextChecked }));

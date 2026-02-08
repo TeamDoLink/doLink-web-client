@@ -1,5 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
-import ExternalLink, { type ShareIntentData } from '@/components/link/externalLink';
+import ExternalLink, {
+  type ShareIntentData,
+} from '@/components/link/externalLink';
 
 /**
  * ExternalLinkPage
@@ -8,20 +10,26 @@ import ExternalLink, { type ShareIntentData } from '@/components/link/externalLi
 export default function ExternalLinkPage() {
   const [searchParams] = useSearchParams();
   const isVisible = true;
-  
+
   // URL 파라미터로부터 초기 데이터 파싱 (필요 시)
   const shareValue = searchParams.get('value');
   const shareType = searchParams.get('type') as 'text' | 'weburl' | null;
-  
-  const shareIntent: ShareIntentData | null = shareValue && shareType ? {
-    value: shareValue,
-    type: shareType
-  } : null;
+
+  const shareIntent: ShareIntentData | null =
+    shareValue && shareType
+      ? {
+          value: shareValue,
+          type: shareType,
+        }
+      : null;
 
   /**
    * React Native로 메시지 전송
    */
-  const postMessageToNative = (data: any) => {
+  const postMessageToNative = (data: {
+    type: string;
+    [key: string]: unknown;
+  }) => {
     if (window.ReactNativeWebView) {
       window.ReactNativeWebView.postMessage(JSON.stringify(data));
     } else {
@@ -38,7 +46,7 @@ export default function ExternalLinkPage() {
   };
 
   return (
-    <div className="h-screen w-screen bg-white">
+    <div className='h-screen w-screen bg-white'>
       <ExternalLink
         visible={isVisible}
         onClose={handleClose}
