@@ -15,6 +15,8 @@ import TaskCreatePage from '@/pages/task/taskCreatePage';
 import Test from '@/pages/test';
 import Test2 from '@/pages/test2';
 import Test3 from '@/pages/test3';
+import LinkTestPage from '@/pages/linkTestPage';
+import ExternalLinkPage from '@/pages/externalLinkPage';
 
 const AppRouter = () => {
   return (
@@ -46,6 +48,8 @@ const AppRouter = () => {
       <Route path={ROUTES.test} element={<Test />} />
       <Route path={ROUTES.test2} element={<Test2 />} />
       <Route path={ROUTES.test3} element={<Test3 />} />
+      <Route path={ROUTES.linkTest} element={<LinkTestPage />} />
+      <Route path={ROUTES.shareIntent} element={<ExternalLinkPage />} />
     </Routes>
   );
 };

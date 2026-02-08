@@ -14,6 +14,8 @@ export const ROUTES = {
   test3: '/test3',
   taskCreate: '/task/create',
   login: '/login',
+  linkTest: '/link-test',
+  shareIntent: '/share-intent',
 } as const;
 
 export const TAB_ROUTE_MAP = {
