@@ -59,7 +59,7 @@ export const InfiniteScrollList = <T,>({
   if (isLoading) {
     return (
       <div className='flex items-center justify-center py-8'>
-        <p className='text-gray-500'>{loadingMessage}</p>
+        <p className='text-body-md text-gray-500'>{loadingMessage}</p>
       </div>
     );
   }
@@ -67,7 +67,7 @@ export const InfiniteScrollList = <T,>({
   if (isError) {
     return (
       <div className='flex items-center justify-center py-8'>
-        <p className='text-red-500'>{errorMessage}</p>
+        <p className='text-body-md text-red-500'>{errorMessage}</p>
       </div>
     );
   }
@@ -75,7 +75,7 @@ export const InfiniteScrollList = <T,>({
   if (items.length === 0) {
     return (
       <div className='flex items-center justify-center py-8'>
-        <p className='text-gray-500'>{emptyMessage}</p>
+        <p className='text-body-md text-gray-500'>{emptyMessage}</p>
       </div>
     );
   }
@@ -90,7 +90,9 @@ export const InfiniteScrollList = <T,>({
       <div ref={lastElementRef} className='h-6' />
 
       {isFetchingNextPage && (
-        <div className='py-4 text-center text-gray-500'>{loadingMessage}</div>
+        <div className='py-4 text-center'>
+          <p className='text-body-md text-gray-500'>{loadingMessage}</p>
+        </div>
       )}
     </div>
   );
