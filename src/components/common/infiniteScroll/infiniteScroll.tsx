@@ -29,7 +29,7 @@ export const InfiniteScrollList = <T,>({
   keyExtractor,
   className = '',
 }: InfiniteScrollListProps<T>) => {
-  const observerRef = useRef<IntersectionObserver>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
   const lastElementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
