@@ -1,17 +1,22 @@
 import { create } from 'zustand';
 
 type AuthStoreState = {
+  accessToken: string | null;
   isAuthenticated: boolean;
-  signIn: () => void;
-  signOut: () => void;
-  reset: () => void;
+  isAuthInitialized: boolean;
+  setAccessToken: (token: string) => void;
+  clearAuth: () => void;
+  setAuthInitialized: () => void;
 };
 
 export const useAuthStore = create<AuthStoreState>((set) => ({
-  isAuthenticated: true,
-  signIn: () => set({ isAuthenticated: true }),
-  signOut: () => set({ isAuthenticated: false }),
-  reset: () => set({ isAuthenticated: false }),
+  accessToken: null,
+  isAuthenticated: false,
+  isAuthInitialized: false,
+  setAccessToken: (token: string) =>
+    set({ accessToken: token, isAuthenticated: true }),
+  clearAuth: () => set({ accessToken: null, isAuthenticated: false }),
+  setAuthInitialized: () => set({ isAuthInitialized: true }),
 }));
 
 export default useAuthStore;

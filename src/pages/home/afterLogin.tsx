@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Background, FeedBack, TabBar } from '@/components/common';
 import { FloatingButton } from '@/components/common/button';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
@@ -10,9 +11,45 @@ import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import { ROUTES } from '@/constants/routes';
-import { useArchiveDataStore } from '@/stores/useArchiveDataStore';
-import { useTodoDataStore } from '@/stores/useTodoDataStore';
-import { selectLatestArchivePreviews } from '@/utils/archivePreview';
+import {
+  useListRecent,
+  getListRecentQueryKey,
+  useCompleteTask,
+} from '@/api/generated/endpoints/task/task';
+import {
+  useListAll1 as useListAll,
+  useDeleteCollect,
+  getListAll1QueryKey as getListAllQueryKey,
+  getListByCategoryQueryKey,
+} from '@/api/generated/endpoints/collection/collection';
+import { useGetUser } from '@/api/generated/endpoints/user/user';
+import type {
+  ApiResponseListTaskResponse,
+  ApiResponseSliceCollectionResponse,
+  ApiResponseUserResponse,
+} from '@/api/generated/models';
+import {
+  ARCHIVE_CATEGORY_LABEL,
+  type ArchiveCategoryKey,
+} from '@/utils/archiveCategory';
+import type { TodoItem } from '@/types';
+
+// Korean category label → English key 역매핑
+const CATEGORY_LABEL_TO_KEY = Object.fromEntries(
+  Object.entries(ARCHIVE_CATEGORY_LABEL)
+    .filter(([key]) => key !== 'all')
+    .map(([key, label]) => [label, key])
+) as Record<string, ArchiveCategoryKey>;
+
+// URL에서 도메인 추출
+const extractDomain = (url: string | undefined | null): string => {
+  if (!url) return '';
+  try {
+    return new URL(url).hostname.replace('www.', '');
+  } catch {
+    return url;
+  }
+};
 
 // 시간 계산 함수
 const getGreetingPeriod = (hour: number) => {
@@ -22,22 +59,37 @@ const getGreetingPeriod = (hour: number) => {
   return '밤';
 };
 
-type HomeAfterLoginProps = {
-  memberName?: string;
-};
-
-const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
+const HomeAfterLogin = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { handleTabChange } = useBottomTabNavigation();
   const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
-  // 로그인 유무 확인 후 할 일 목록 API 호출
-  const todoItems = useTodoDataStore((state) => state.todos);
-  // 로그인 후 할 일 완료/취소 API 호출
-  const updateTodo = useTodoDataStore((state) => state.updateTodo);
-  // 로그인 유무 확인 후 모음 목록 API 호출
-  const archiveItems = useArchiveDataStore((state) => state.archives);
-  // 로그인 후 모음 삭제 API 호출
-  const deleteArchive = useArchiveDataStore((state) => state.deleteArchive);
+  const [todoOverrides, setTodoOverrides] = useState<Record<string, boolean>>(
+    {}
+  );
+
+  // API: 사용자 프로필
+  const { data: userData } = useGetUser();
+  const userResponse = (userData as unknown as ApiResponseUserResponse)?.result;
+  const memberName =
+    userResponse?.nickname ?? userResponse?.socialName ?? '사용자';
+
+  // API: 최근 할 일
+  const { data: recentData } = useListRecent({ limit: 3 });
+  const recentTasks =
+    (recentData as unknown as ApiResponseListTaskResponse)?.result ?? [];
+
+  // API: 모음 목록
+  const { data: archiveData } = useListAll({ page: 0, size: 8 });
+  const archiveSlice = (
+    archiveData as unknown as ApiResponseSliceCollectionResponse
+  )?.result;
+  const archiveContent = archiveSlice?.content ?? [];
+
+  // Mutations
+  const { mutate: completeTask } = useCompleteTask();
+  const { mutate: deleteCollect } = useDeleteCollect();
+
   const setSelectedArchiveId = useArchiveUIStore(
     (state) => state.setSelectedArchiveId
   );
@@ -50,9 +102,6 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     openConfirm,
     close: closeModal,
   } = useModalStore();
-  const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
-    string | null
-  >(null);
 
   const greeting = useMemo(() => {
     const now = new Date();
@@ -60,78 +109,91 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
     return `좋은 ${period}이에요 😊`;
   }, []);
 
-  const latestArchives = useMemo(
-    () => selectLatestArchivePreviews(archiveItems),
-    [archiveItems]
-  );
+  // API 응답 → TodoItem[] 매핑
+  const latestTodos: TodoItem[] = useMemo(() => {
+    return recentTasks.map((t) => ({
+      id: String(t.taskId ?? 0),
+      title: t.title ?? '',
+      platform: extractDomain(t.link),
+      checked: todoOverrides[String(t.taskId ?? 0)] ?? t.status ?? false,
+      createdAt: t.createdAt ?? new Date().toISOString(),
+    }));
+  }, [recentTasks, todoOverrides]);
 
-  const latestTodos = useMemo(() => {
-    return [...todoItems]
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-      .slice(0, 3);
-  }, [todoItems]);
+  // API 응답 → ArchiveSectionItem[] 매핑
+  const latestArchives = useMemo(() => {
+    return archiveContent.map((a) => ({
+      id: String(a.collectionId ?? 0),
+      title: a.name ?? '',
+      category: CATEGORY_LABEL_TO_KEY[a.category ?? ''] ?? 'etc',
+      itemCount: 0,
+      previewImages: Array.isArray(a.thumbnails)
+        ? a.thumbnails.slice(0, 4)
+        : [],
+      createdAt: '',
+    }));
+  }, [archiveContent]);
 
   const handleToggleTodo = (id: string, nextChecked: boolean) => {
-    const updatedTodo = updateTodo(id, { checked: nextChecked });
-    if (!updatedTodo) {
-      return;
-    }
-
-    if (nextChecked && !suppressCompleteModal) {
-      openAlert({
-        title: '할 일을 완료했어요',
-        subtitle: '완료한 일들은 해당 모음에서 확인할 수 있어요.',
-        primaryLabel: '확인',
-        secondaryLabel: '다시 보지 않기',
-        onSecondary: () => setSuppressCompleteModal(true),
-      });
-    }
-  };
-
-  const handleConfirmDeleteArchive = () => {
-    if (!pendingDeleteArchiveId) return;
-    deleteArchive(pendingDeleteArchiveId);
-    setSelectedArchiveId(null);
-    setPendingDeleteArchiveId(null);
-  };
-
-  const handleCancelDeleteArchive = () => {
-    setPendingDeleteArchiveId(null);
+    setTodoOverrides((prev) => ({ ...prev, [id]: nextChecked }));
+    completeTask(
+      { taskId: Number(id) },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getListRecentQueryKey(),
+          });
+          setTodoOverrides({});
+          if (nextChecked && !suppressCompleteModal) {
+            openAlert({
+              title: '할 일을 완료했어요',
+              subtitle: '완료한 일들은 해당 모음에서 확인할 수 있어요.',
+              primaryLabel: '확인',
+              secondaryLabel: '다시 보지 않기',
+              onSecondary: () => setSuppressCompleteModal(true),
+            });
+          }
+        },
+        onError: () => {
+          setTodoOverrides((prev) => ({ ...prev, [id]: !nextChecked }));
+        },
+      }
+    );
   };
 
   const handleRequestDeleteArchive = (id: string) => {
-    setPendingDeleteArchiveId(id);
     openConfirm({
       title: '모음을 삭제할까요?',
       subtitle: '모음 내 할 일도 함께 삭제돼요.',
       positiveLabel: '삭제하기',
       negativeLabel: '취소',
-      onPositive: handleConfirmDeleteArchive,
-      onNegative: handleCancelDeleteArchive,
+      onPositive: () => {
+        deleteCollect(
+          { collectId: Number(id) },
+          {
+            onSuccess: () => {
+              queryClient.invalidateQueries({
+                queryKey: getListAllQueryKey(),
+              });
+              queryClient.invalidateQueries({
+                queryKey: getListByCategoryQueryKey(),
+              });
+              queryClient.invalidateQueries({
+                queryKey: getListRecentQueryKey(),
+              });
+              setSelectedArchiveId(null);
+              closeModal();
+            },
+          }
+        );
+      },
+      onNegative: closeModal,
     });
   };
 
   const handleRequestEditArchive = (id: string) => {
-    const targetArchive = archiveItems.find((archive) => archive.id === id);
-    if (!targetArchive) {
-      return;
-    }
-
     setSelectedArchiveId(id);
-
-    navigate(ROUTES.archiveEdit, {
-      state: {
-        archive: {
-          id: targetArchive.id,
-          title: targetArchive.title,
-          category: targetArchive.category,
-        },
-        origin: ROUTES.home,
-      },
-    });
+    navigate(`${ROUTES.archiveEdit}/${id}`);
   };
 
   const handleModalClose = () => {
@@ -207,7 +269,6 @@ const HomeAfterLogin = ({ memberName = '이니닝' }: HomeAfterLoginProps) => {
             negativeLabel={confirmConfig.negativeLabel}
             onPositive={() => {
               confirmConfig.onPositive?.();
-              closeModal();
             }}
             onNegative={() => {
               confirmConfig.onNegative?.();

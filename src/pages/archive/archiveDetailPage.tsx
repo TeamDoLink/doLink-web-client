@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { BackDetailBar } from '@/components/common/appBar';
 import { EmptyNotice } from '@/components/common/feedBack';
 import { FloatingButton } from '@/components/common/button/floatingButton';
-import { TabBar } from '@/components/common';
+import { TabBar, FeedBack } from '@/components/common';
 import { StickyTabSection } from '@/components/archive/stickyTabSection';
 import {
   SwipeableDeleteCard,
@@ -12,12 +13,49 @@ import {
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { ROUTES } from '@/constants/routes';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
+import {
+  useListByCollection,
+  getListByCollectionQueryKey,
+  useCompleteTask,
+  useDeleteTask,
+} from '@/api/generated/endpoints/task/task';
+import {
+  useDeleteCollect,
+  useGetCollectDetail,
+  getListAll1QueryKey as getListAllQueryKey,
+  getListByCategoryQueryKey,
+  getGetCollectDetailQueryKey,
+} from '@/api/generated/endpoints/collection/collection';
+import type {
+  ApiResponseSliceTaskResponse,
+  ApiResponseCollectionDetailResponse,
+} from '@/api/generated/models';
 
 // 카테고리 아이콘 임포트
-// TODO 임시 - 카테고리에 맞게 수정 예정
 import restaurantIcon from '@/assets/icons/category/detail/restaurant.svg';
+import hobbyIcon from '@/assets/icons/category/detail/hobby.svg';
+import travelIcon from '@/assets/icons/category/detail/travel.svg';
+import moneyIcon from '@/assets/icons/category/detail/money.svg';
+import shoppingIcon from '@/assets/icons/category/detail/shopping.svg';
+import exerciseIcon from '@/assets/icons/category/detail/exercise.svg';
+import careerIcon from '@/assets/icons/category/detail/career.svg';
+import studyIcon from '@/assets/icons/category/detail/study.svg';
+import tipsIcon from '@/assets/icons/category/detail/tips.svg';
 import etcIcon from '@/assets/icons/category/detail/etc.svg';
 import todoIcon from '@/assets/icons/category/detail/todo.svg';
+
+const CATEGORY_ICON_MAP: Record<string, string> = {
+  맛집: restaurantIcon,
+  취미: hobbyIcon,
+  여행: travelIcon,
+  재테크: moneyIcon,
+  쇼핑: shoppingIcon,
+  운동: exerciseIcon,
+  커리어: careerIcon,
+  자기개발: studyIcon,
+  꿀팁: tipsIcon,
+  기타: etcIcon,
+};
 
 type TabType = 'all' | 'incomplete' | 'complete';
 type SortOption = 'newest' | 'oldest';
@@ -39,211 +77,6 @@ const TAB_OPTIONS = [
   { value: 'complete', label: '완료' },
 ];
 
-// Task 타입은 SwipeableDeleteCard에서 import
-
-const MOCK_TASK_ITEM: Task[] = [
-  {
-    taskId: 101,
-    title: 'API 명세 작성',
-    link: null,
-    memo: '우선순위 높음',
-    status: false,
-    inout: true,
-    createdAt: '2025-01-10T13:10:00',
-    modifiedAt: '2025-01-10T13:10:00',
-  },
-  {
-    taskId: 102,
-    title: 'ERD 설계',
-    link: 'https://example.com/erd',
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2025-12-10T13:10:00',
-    modifiedAt: '2025-12-12T18:40:10',
-  },
-  {
-    taskId: 103,
-    title: '회원가입 API 구현',
-    link: 'https://example.com/signup',
-    memo: 'validation 필요',
-    status: false,
-    inout: true,
-    createdAt: '2025-02-10T13:10:00',
-    modifiedAt: '2025-02-12T10:30:00',
-  },
-  {
-    taskId: 104,
-    title: '로그인 기능 개발',
-    link: null,
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2025-02-13T14:20:00',
-    modifiedAt: '2025-02-14T11:05:30',
-  },
-  {
-    taskId: 105,
-    title: 'JWT 인증 적용',
-    link: 'https://example.com/jwt',
-    memo: 'refresh token 포함',
-    status: false,
-    inout: true,
-    createdAt: '2025-02-13T14:20:00',
-    modifiedAt: '2025-02-14T16:00:00',
-  },
-  {
-    taskId: 106,
-    title: '게시글 CRUD API',
-    link: null,
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2025-02-13T14:20:00',
-    modifiedAt: '2025-02-16T13:45:00',
-  },
-  {
-    taskId: 107,
-    title: '댓글 기능 구현',
-    link: 'https://example.com/comment',
-    memo: '대댓글 포함',
-    status: false,
-    inout: true,
-    createdAt: '2025-02-16T11:00:00',
-    modifiedAt: '2025-02-16T11:00:00',
-  },
-  {
-    taskId: 108,
-    title: '좋아요 기능 추가',
-    link: null,
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2025-02-17T15:30:00',
-    modifiedAt: '2025-02-18T10:20:00',
-  },
-  {
-    taskId: 109,
-    title: '검색 API 구현',
-    link: 'https://example.com/search',
-    memo: 'index 고려',
-    status: false,
-    inout: true,
-    createdAt: '2025-02-18T17:00:00',
-    modifiedAt: '2025-02-18T17:00:00',
-  },
-  {
-    taskId: 110,
-    title: '페이징 처리',
-    link: null,
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2025-02-19T09:40:00',
-    modifiedAt: '2025-02-19T14:10:00',
-  },
-  {
-    taskId: 111,
-    title: '예외 처리 공통화',
-    link: 'https://example.com/error',
-    memo: 'global handler',
-    status: false,
-    inout: true,
-    createdAt: '2025-12-20T10:00:00',
-    modifiedAt: '2025-12-20T10:00:00',
-  },
-  {
-    taskId: 112,
-    title: '로그 설정',
-    link: null,
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2025-12-20T10:00:00',
-    modifiedAt: '2025-12-20T10:00:00',
-  },
-  {
-    taskId: 113,
-    title: '환경변수 분리',
-    link: null,
-    memo: '.env 사용',
-    status: false,
-    inout: true,
-    createdAt: '2025-12-20T10:00:00',
-    modifiedAt: '2025-12-20T10:00:00',
-  },
-  {
-    taskId: 114,
-    title: 'Swagger 문서화',
-    link: 'https://example.com/swagger',
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2026-02-23T14:00:00',
-    modifiedAt: '2026-02-24T10:30:00',
-  },
-  {
-    taskId: 115,
-    title: '단위 테스트 작성',
-    link: null,
-    memo: 'service 중심',
-    status: false,
-    inout: true,
-    createdAt: '2026-02-24T15:40:00',
-    modifiedAt: '2026-02-24T15:40:00',
-  },
-  {
-    taskId: 116,
-    title: '통합 테스트',
-    link: 'https://example.com/test',
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2026-02-25T11:10:00',
-    modifiedAt: '2026-02-26T09:55:00',
-  },
-  {
-    taskId: 117,
-    title: 'CI 파이프라인 구성',
-    link: null,
-    memo: 'GitHub Actions',
-    status: false,
-    inout: true,
-    createdAt: '2026-02-26T16:30:00',
-    modifiedAt: '2026-02-26T16:30:00',
-  },
-  {
-    taskId: 118,
-    title: 'CD 설정',
-    link: 'https://example.com/cd',
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2026-02-27T10:00:00',
-    modifiedAt: '2026-02-28T13:20:00',
-  },
-  {
-    taskId: 119,
-    title: '배포 스크립트 작성',
-    link: null,
-    memo: 'rollback 고려',
-    status: false,
-    inout: true,
-    createdAt: '2026-02-28T15:00:00',
-    modifiedAt: '2026-02-28T15:00:00',
-  },
-  {
-    taskId: 120,
-    title: '운영 서버 모니터링',
-    link: 'https://example.com/monitoring',
-    memo: null,
-    status: true,
-    inout: false,
-    createdAt: '2024-03-01T09:30:00',
-    modifiedAt: '2024-03-02T11:45:00',
-  },
-];
-
 const BEFORE_LOGIN_TASKS: Task[] = [
   {
     taskId: 1,
@@ -257,12 +90,6 @@ const BEFORE_LOGIN_TASKS: Task[] = [
   },
 ];
 
-const AUTH_ARCHIVE_META = {
-  title: '최대 19글자 오육칠팔구십일이삼사오육칠팔구십십일ㄴㅇㄹㄴㅇㄹ',
-  category: '맛집',
-  categoryIcon: restaurantIcon,
-};
-
 const BEFORE_LOGIN_ARCHIVE_META = {
   title: '두링크(DoLink) 튜토리얼',
   category: '기타',
@@ -272,14 +99,46 @@ const BEFORE_LOGIN_ARCHIVE_META = {
 const ArchiveDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { id } = useParams<{ id: string }>();
   const isBeforeLoginArchive = location.pathname === ROUTES.archiveTutorial;
+
+  const queryClient = useQueryClient();
+  const collectionId = id ? Number(id) : 0;
+
+  const { data: taskData } = useListByCollection(collectionId, undefined, {
+    query: { enabled: !isBeforeLoginArchive && !!collectionId },
+  });
+
+  const { data: collectionData } = useGetCollectDetail(collectionId, {
+    query: { enabled: !isBeforeLoginArchive && !!collectionId },
+  });
+
+  const { mutate: completeTask } = useCompleteTask();
+  const { mutate: deleteTask } = useDeleteTask();
+  const { mutate: deleteCollect } = useDeleteCollect();
+
+  // API 데이터만 사용
+  const apiCollectionData =
+    collectionData as unknown as ApiResponseCollectionDetailResponse;
+  const apiTitle = apiCollectionData?.result?.name;
+  const apiCategory = apiCollectionData?.result?.category;
+
   const archiveMeta = isBeforeLoginArchive
     ? BEFORE_LOGIN_ARCHIVE_META
-    : AUTH_ARCHIVE_META;
+    : {
+        title: apiTitle ?? '모음',
+        category: apiCategory ?? '',
+        categoryIcon: CATEGORY_ICON_MAP[apiCategory ?? ''] ?? etcIcon,
+      };
+
   const [selectedTab, setSelectedTab] = useState<TabType>('all');
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [isTitleVisible, setIsTitleVisible] = useState(true);
   const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
+  const [pendingDeleteTaskId, setPendingDeleteTaskId] = useState<number | null>(
+    null
+  );
+  const [isCollectionDeleteOpen, setIsCollectionDeleteOpen] = useState(false);
   const titleSectionRef = useRef<HTMLDivElement>(null);
 
   // 나중에 API로 데이터 받을 예정이면
@@ -299,11 +158,26 @@ const ArchiveDetailPage = () => {
     }, 0);
   }, [linkStates, taskList]);
 
-  // TODO API 호출 값 받아오기
   useEffect(() => {
-    const sourceTasks = isBeforeLoginArchive
-      ? BEFORE_LOGIN_TASKS
-      : MOCK_TASK_ITEM;
+    let sourceTasks: Task[];
+
+    if (isBeforeLoginArchive) {
+      sourceTasks = BEFORE_LOGIN_TASKS;
+    } else {
+      const apiResponse = taskData as unknown as ApiResponseSliceTaskResponse;
+      const apiTasks = apiResponse?.result?.content ?? [];
+
+      sourceTasks = apiTasks.map((t) => ({
+        taskId: t.taskId ?? 0,
+        title: t.title ?? '',
+        link: t.link ?? null,
+        memo: t.memo ?? null,
+        status: t.status ?? false,
+        inout: t.inout ?? false,
+        createdAt: new Date().toISOString(),
+        modifiedAt: new Date().toISOString(),
+      }));
+    }
 
     setTaskList(sourceTasks);
     setLinkStates(
@@ -315,10 +189,23 @@ const ArchiveDetailPage = () => {
     setLinkEditModes(
       sourceTasks.reduce((acc, task) => ({ ...acc, [task.taskId]: false }), {})
     );
-  }, [isBeforeLoginArchive]);
+  }, [isBeforeLoginArchive, taskData]);
 
-  const handleLinkCheck = (id: number, checked: boolean) => {
-    setLinkStates((prev) => ({ ...prev, [id]: checked }));
+  const handleLinkCheck = (taskId: number, checked: boolean) => {
+    setLinkStates((prev) => ({ ...prev, [taskId]: checked }));
+    completeTask(
+      { taskId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getListByCollectionQueryKey(collectionId),
+          });
+        },
+        onError: () => {
+          setLinkStates((prev) => ({ ...prev, [taskId]: !checked }));
+        },
+      }
+    );
   };
 
   const handleEditModeChange = (id: number, isEditMode: boolean) => {
@@ -343,19 +230,50 @@ const ArchiveDetailPage = () => {
   };
 
   const handleOptionSelect = (key: string) => {
-    if (key === 'edit') {
-      console.log('모음 수정');
-      // TODO: 모음 수정 로직 구현
-    } else if (key === 'delete') {
-      console.log('모음 삭제');
-      // TODO: 모음 삭제 로직 구현
-    }
     setIsOptionMenuOpen(false);
+    if (key === 'edit') {
+      navigate(`${ROUTES.archiveEdit}/${collectionId}`);
+    } else if (key === 'delete') {
+      setIsCollectionDeleteOpen(true);
+    }
+  };
+
+  const handleConfirmCollectionDelete = () => {
+    deleteCollect(
+      { collectId: collectionId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListAllQueryKey() });
+          queryClient.invalidateQueries({
+            queryKey: getListByCategoryQueryKey(),
+          });
+          queryClient.invalidateQueries({
+            queryKey: getGetCollectDetailQueryKey(collectionId),
+          });
+          setIsCollectionDeleteOpen(false);
+          navigate(ROUTES.archives, { replace: true });
+        },
+      }
+    );
+  };
+
+  const handleConfirmTaskDelete = () => {
+    if (pendingDeleteTaskId === null) return;
+    deleteTask(
+      { taskId: pendingDeleteTaskId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getListByCollectionQueryKey(collectionId),
+          });
+          setPendingDeleteTaskId(null);
+        },
+      }
+    );
   };
 
   const handleFloatingButtonClick = () => {
-    // 할일 추가로 이동 route
-    console.log('할일 추가로 이동 route');
+    navigate(ROUTES.taskCreate);
   };
 
   const handleSortChange = (newSort: SortOption) => {
@@ -557,13 +475,7 @@ const ArchiveDetailPage = () => {
                   }
                 }}
                 onDeleteClick={(taskId) => {
-                  const task = tasks.find((t) => t.taskId === taskId);
-                  if (task) {
-                    console.log('삭제 클릭:', task.title);
-                    if (confirm(`${task.title}을(를) 삭제하시겠습니까?`)) {
-                      alert('삭제됨');
-                    }
-                  }
+                  setPendingDeleteTaskId(taskId);
                 }}
                 capsuleDisabled={isBeforeLoginArchive}
               />
@@ -584,6 +496,35 @@ const ArchiveDetailPage = () => {
       <footer className='sticky bottom-0 bg-white shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
         <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
       </footer>
+
+      {/* 할 일 삭제 확인 모달 */}
+      <FeedBack.ModalLayout
+        open={pendingDeleteTaskId !== null}
+        onClose={() => setPendingDeleteTaskId(null)}
+      >
+        <FeedBack.ConfirmDialog
+          title='할 일을 삭제할까요?'
+          positiveLabel='삭제하기'
+          negativeLabel='취소'
+          onPositive={handleConfirmTaskDelete}
+          onNegative={() => setPendingDeleteTaskId(null)}
+        />
+      </FeedBack.ModalLayout>
+
+      {/* 모음 삭제 확인 모달 */}
+      <FeedBack.ModalLayout
+        open={isCollectionDeleteOpen}
+        onClose={() => setIsCollectionDeleteOpen(false)}
+      >
+        <FeedBack.ConfirmDialog
+          title='모음을 삭제할까요?'
+          subtitle='모음 내 할 일도 함께 삭제돼요.'
+          positiveLabel='삭제하기'
+          negativeLabel='취소'
+          onPositive={handleConfirmCollectionDelete}
+          onNegative={() => setIsCollectionDeleteOpen(false)}
+        />
+      </FeedBack.ModalLayout>
     </div>
   );
 };

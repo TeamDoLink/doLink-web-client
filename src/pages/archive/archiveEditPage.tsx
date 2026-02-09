@@ -1,64 +1,60 @@
-import { useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 
 import {
   ArchiveBottomSheet,
   type ArchiveSelectCategory,
 } from '@/components/archive';
 import { ROUTES } from '@/constants/routes';
-import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import {
-  useArchiveDataStore,
-  type ArchiveRecord,
-} from '@/stores/useArchiveDataStore';
+  useUpdateCollect,
+  useGetCollectDetail,
+  getListAll1QueryKey as getListAllQueryKey,
+  getListByCategoryQueryKey,
+  getGetCollectDetailQueryKey,
+} from '@/api/generated/endpoints/collection/collection';
+import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
+import type {
+  CollectionUpdateRequestCategory,
+  ApiResponseCollectionDetailResponse,
+} from '@/api/generated/models';
 
-type ArchiveEditLocationState = {
-  origin?: string;
-  archive?: {
-    id: string;
-    title: string;
-    category: ArchiveSelectCategory;
-  };
-};
+// 한글 카테고리 → 영문 키 역매핑
+const CATEGORY_LABEL_TO_KEY = Object.fromEntries(
+  Object.entries(ARCHIVE_CATEGORY_LABEL)
+    .filter(([key]) => key !== 'all')
+    .map(([key, label]) => [label, key])
+) as Record<string, ArchiveSelectCategory>;
 
 const ArchiveEditPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  // 로그인 유무 확인 후 모음 상세 API 호출
-  const archives = useArchiveDataStore((state) => state.archives);
-  // 로그인 후 모음 수정 API 호출
-  const updateArchive = useArchiveDataStore((state) => state.updateArchive);
-  const selectedArchiveId = useArchiveUIStore(
-    (state) => state.selectedArchiveId
-  );
-  const setSelectedArchiveId = useArchiveUIStore(
-    (state) => state.setSelectedArchiveId
-  );
-  const { archive, origin } =
-    (location.state as ArchiveEditLocationState | undefined) ?? {};
+  const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+  const { mutate: updateCollect } = useUpdateCollect();
 
-  const targetArchive = useMemo<ArchiveRecord | undefined>(() => {
-    const targetId = archive?.id ?? selectedArchiveId;
-    if (!targetId) {
-      return undefined;
+  const collectionId = id ? Number(id) : 0;
+
+  // API에서 모음 정보 가져오기
+  const { data: collectionData, isLoading } = useGetCollectDetail(
+    collectionId,
+    {
+      query: { enabled: !!collectionId },
     }
+  );
 
-    return archives.find((item) => item.id === targetId);
-  }, [archive, archives, selectedArchiveId]);
-
-  const hasArchive = Boolean(targetArchive);
+  const apiCollectionData =
+    collectionData as unknown as ApiResponseCollectionDetailResponse;
+  const apiTitle = apiCollectionData?.result?.name;
+  const apiCategory = apiCollectionData?.result?.category;
 
   useEffect(() => {
-    if (!hasArchive) {
+    if (!collectionId) {
       navigate(ROUTES.archives, { replace: true });
     }
-  }, [hasArchive, navigate]);
+  }, [collectionId, navigate]);
 
-  useEffect(() => {
-    return () => setSelectedArchiveId(null);
-  }, [setSelectedArchiveId]);
-
-  if (!targetArchive) {
+  if (!collectionId || isLoading) {
     return null;
   }
 
@@ -66,20 +62,40 @@ const ArchiveEditPage = () => {
     name: string;
     category: ArchiveSelectCategory;
   }) => {
-    updateArchive(targetArchive.id, {
-      title: payload.name,
-      category: payload.category,
-    });
-    setSelectedArchiveId(null);
-    const fallbackPath = origin ?? ROUTES.archives;
-    navigate(fallbackPath, { replace: true });
+    updateCollect(
+      {
+        collectId: collectionId,
+        data: {
+          name: payload.name,
+          category: ARCHIVE_CATEGORY_LABEL[
+            payload.category
+          ] as CollectionUpdateRequestCategory,
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListAllQueryKey() });
+          queryClient.invalidateQueries({
+            queryKey: getListByCategoryQueryKey(),
+          });
+          queryClient.invalidateQueries({
+            queryKey: getGetCollectDetailQueryKey(collectionId),
+          });
+          navigate(`${ROUTES.archiveDetail}/${collectionId}`, {
+            replace: true,
+          });
+        },
+      }
+    );
   };
+
+  const categoryKey = CATEGORY_LABEL_TO_KEY[apiCategory ?? ''] ?? 'etc';
 
   return (
     <ArchiveBottomSheet
       mode='edit'
-      initialName={targetArchive.title}
-      initialCategory={targetArchive.category}
+      initialName={apiTitle ?? ''}
+      initialCategory={categoryKey}
       onSubmit={handleSubmit}
     />
   );

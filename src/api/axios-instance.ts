@@ -1,12 +1,107 @@
 import axios from 'axios';
+import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 // ==============================
 // Axios 기본 인스턴스 생성
 // ==============================
 export const AXIOS_INSTANCE = axios.create({
-  baseURL: 'http://localhost:8080', // 기본 URL 설정
-  withCredentials: true, // 쿠키 등 인증 정보 포함
+  // TODO 환경변수로 대체 필요
+  // TODO proxy 사용시 주석
+  // baseURL: 'http://localhost:8080',
+  withCredentials: true,
 });
+
+// ==============================
+// Request 인터셉터: access token을 Authorization 헤더에 첨부
+// ==============================
+AXIOS_INSTANCE.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const { accessToken } = useAuthStore.getState();
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// ==============================
+// Response 인터셉터: 401 응답 시 토큰 갱신 후 원래 요청 재시도
+// ==============================
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string | null) => void;
+  reject: (error: unknown) => void;
+}> = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+AXIOS_INSTANCE.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
+
+    // 401이 아니거나 이미 재시도한 요청 → 그냥 에러 reject
+    if (error.response?.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error);
+    }
+
+    // reissue 엔드포인트 자체의 401은 인터셉터에서 제외 (무한 루프 방지)
+    if (originalRequest.url === '/v1/auth/reissue') {
+      return Promise.reject(error);
+    }
+
+    // 이미 refresh 진행 중이면 큐에 저장
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({
+          resolve: (token) => {
+            if (token) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            resolve(AXIOS_INSTANCE(originalRequest));
+          },
+          reject,
+        });
+      });
+    }
+
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    try {
+      const response = await AXIOS_INSTANCE.post('/v1/auth/reissue');
+      const newToken: string = response.data?.result;
+
+      if (newToken) {
+        useAuthStore.getState().setAccessToken(newToken);
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        processQueue(null, newToken);
+        return AXIOS_INSTANCE(originalRequest);
+      } else {
+        throw new Error('토큰 갱신 응답이 올바르지 않습니다');
+      }
+    } catch (refreshError) {
+      useAuthStore.getState().clearAuth();
+      processQueue(refreshError, null);
+      return Promise.reject(refreshError);
+    } finally {
+      isRefreshing = false;
+    }
+  }
+);
 
 // ==============================
 // Orval v8용 커스텀 요청 함수

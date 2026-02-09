@@ -6,29 +6,12 @@ import { useDraftBridge } from '@/hooks/useDraftBridge';
 import type { TaskDraft } from '@/types/draft';
 import { ModalLayout } from '@/components/common/feedBack';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useCreate } from '@/api/generated/endpoints/task/task';
+import { useListCollectSelectOptions } from '@/api/generated/endpoints/collection/collection';
+import type { ApiResponseListCollectionSimpleResponse } from '@/api/generated/models';
 
 // 임시저장 키
 const DRAFT_KEY = 'task-create-draft';
-
-// 임시 데이터 - 실제로는 API에서 받아올 데이터
-const MOCK_COLLECTIONS: CollectionChip[] = [
-  { id: '1', label: '2025 연말 도쿄 여행' },
-  { id: '2', label: '넷플릭스 볼 영화' },
-  { id: '3', label: '가을 축제' },
-  { id: '4', label: '게임 신작' },
-  { id: '5', label: '아무거나' },
-  { id: '7', label: '재테크' },
-  { id: '6', label: '퇴사 후 할 일' },
-  { id: '8', label: '용산' },
-  { id: '10', label: '뭐하지' },
-  { id: '11', label: '할 일' },
-  { id: '12', label: '할 일' },
-  { id: '13', label: '할 일' },
-  { id: '14', label: '할 일' },
-  { id: '15', label: '할 일' },
-  { id: '16', label: '할 일' },
-  { id: '17', label: '할 일' },
-];
 
 /**
  * 업무 생성 페이지
@@ -39,6 +22,21 @@ function TaskCreatePage() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { clipboardLinkValue, requestClipboard, hasClipboardLink, error } =
     useClipboardBridge();
+
+  // 모음 선택 목록 API
+  const { data: collectionsData } = useListCollectSelectOptions();
+
+  // TODO collectio(archive) 0개일떄 어떻게 보여줄건지 논의
+  const collections: CollectionChip[] = (
+    (collectionsData as unknown as ApiResponseListCollectionSimpleResponse)
+      ?.result ?? []
+  ).map((item) => ({
+    id: String(item.collectionId),
+    label: item.name ?? '',
+  }));
+
+  // 할 일 생성 API
+  const { mutate: createTask, isPending } = useCreate();
 
   // TODO 임시저장 불러오기 시  isLoading  error 화면 UI 처리
   const { saveDraft, loadDraft, deleteDraft } = useDraftBridge<TaskDraft>();
@@ -88,7 +86,7 @@ function TaskCreatePage() {
             setMemo(draft.memo || '');
             if (draft.archive) {
               // archive 이름으로 collection 찾기
-              const collection = MOCK_COLLECTIONS.find(
+              const collection = collections.find(
                 (c) => c.label === draft.archive
               );
               if (collection) {
@@ -170,7 +168,7 @@ function TaskCreatePage() {
    * 모음 선택 핸들러
    */
   const handleCollectionSelect = (id: string) => {
-    const selected = MOCK_COLLECTIONS.find((item) => item.id === id);
+    const selected = collections.find((item) => item.id === id);
     if (selected) {
       setSelectedArchiveCollection({
         id: selected.id,
@@ -197,16 +195,23 @@ function TaskCreatePage() {
   };
 
   const handleAddClick = () => {
-    // TODO 추가하기 시 , 할 일 API 로직 연결 예
-    const data = {
-      archive: selectedArchiveCollection?.name || '',
-      title,
-      link: linkValue,
-      memo,
-    };
-    alert('debug 할 일 추가 완료: ' + JSON.stringify(data));
+    if (!selectedArchiveCollection) return;
 
-    navigate(-1);
+    createTask(
+      {
+        data: {
+          collectionId: Number(selectedArchiveCollection.id),
+          title,
+          link: linkValue || undefined,
+          memo: memo || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          navigate(-1);
+        },
+      }
+    );
   };
 
   /**
@@ -321,7 +326,7 @@ function TaskCreatePage() {
       <div className='flex h-full flex-col gap-6 overflow-y-auto bg-white px-5 py-4'>
         {/* 담을 모음 선택 섹션 */}
         <CollectionChipSelector
-          items={MOCK_COLLECTIONS}
+          items={collections}
           selectedId={selectedArchiveCollection?.id || ''}
           onSelect={handleCollectionSelect}
           expandedItemCount={8}
@@ -412,7 +417,7 @@ function TaskCreatePage() {
 
         {/* 추가하기 버튼 */}
         <Button.CtaButton
-          disabled={!isAddButtonEnabled}
+          disabled={!isAddButtonEnabled || isPending}
           onClick={handleAddClick}
           className='w-full'
         >

@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { TabBar, List, FeedBack } from '@/components/common';
 import { FloatingButton } from '@/components/common/button';
 import { SearchAppBar } from '@/components/common/appBar/searchAppBar';
@@ -10,12 +11,18 @@ import {
 } from '@/components/archive';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { ROUTES } from '@/constants/routes';
-import { useArchiveDataStore } from '@/stores/useArchiveDataStore';
-import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
+import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import {
-  ARCHIVE_CATEGORY_LABEL,
-  type ArchiveCategory,
-} from '@/utils/archiveCategory';
+  useListAll1 as useListAll,
+  useListByCategory,
+  useDeleteCollect,
+  getListAll1QueryKey as getListAllQueryKey,
+  getListByCategoryQueryKey,
+} from '@/api/generated/endpoints/collection/collection';
+import type {
+  ApiResponseSliceCollectionResponse,
+  ListByCategoryCategory,
+} from '@/api/generated/models';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveCategoryKey[] = [
   'all',
@@ -39,36 +46,63 @@ const ARCHIVE_CATEGORIES = ARCHIVE_CATEGORY_KEYS.map((key) => ({
 const ArchiveAfterLogin = () => {
   const { handleTabChange } = useBottomTabNavigation();
   const navigate = useNavigate();
-  // 로그인 유무 확인 후 모음 목록 API 호출
-  const archives = useArchiveDataStore((state) => state.archives);
-  const deleteArchive = useArchiveDataStore((state) => state.deleteArchive);
-  const setSelectedArchiveId = useArchiveUIStore(
-    (state) => state.setSelectedArchiveId
-  );
-  const selectedCategory = useArchiveUIStore((state) => state.selectedCategory);
-  const setSelectedCategory = useArchiveUIStore(
-    (state) => state.setSelectedCategory
-  );
+  const queryClient = useQueryClient();
+
+  const [selectedCategory, setSelectedCategory] =
+    useState<ArchiveCategoryKey>('all');
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
-    string | null
+    number | null
   >(null);
 
-  const filteredArchives = useMemo(() => {
-    if (selectedCategory === 'all') {
-      return archives;
-    }
-    return archives.filter((archive) => archive.category === selectedCategory);
-  }, [archives, selectedCategory]);
+  const isAll = selectedCategory === 'all';
 
-  const handleRequestDelete = (id: string) => {
+  // 전체 모음 조회
+  // TODO: 무한 스크롤 적용
+  const { data: allData } = useListAll(
+    { page: 0, size: 10 },
+    { query: { enabled: isAll } }
+  );
+
+  // 카테고리별 모음 조회
+  // TODO: 무한 스크롤 적용
+  const { data: categoryData } = useListByCategory(
+    {
+      category: ARCHIVE_CATEGORY_LABEL[
+        isAll ? 'etc' : selectedCategory
+      ] as ListByCategoryCategory,
+      page: 0,
+      size: 10,
+    },
+    { query: { enabled: !isAll } }
+  );
+
+  const responseData = isAll ? allData : categoryData;
+  const sliceResponse = (
+    responseData as unknown as ApiResponseSliceCollectionResponse
+  )?.result;
+  const archives = sliceResponse?.content ?? [];
+
+  // 모음 삭제
+  const { mutate: deleteCollect } = useDeleteCollect();
+
+  const handleRequestDelete = (id: number) => {
     setPendingDeleteArchiveId(id);
   };
 
   const handleConfirmDelete = () => {
-    if (!pendingDeleteArchiveId) return;
-    deleteArchive(pendingDeleteArchiveId);
-    setSelectedArchiveId(null);
-    setPendingDeleteArchiveId(null);
+    if (pendingDeleteArchiveId === null) return;
+    deleteCollect(
+      { collectId: pendingDeleteArchiveId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListAllQueryKey() });
+          queryClient.invalidateQueries({
+            queryKey: getListByCategoryQueryKey(),
+          });
+          setPendingDeleteArchiveId(null);
+        },
+      }
+    );
   };
 
   const handleCancelDelete = () => {
@@ -78,18 +112,8 @@ const ArchiveAfterLogin = () => {
     navigate(ROUTES.archiveAdd);
   };
 
-  const handleEdit = (id: string, title: string, category: ArchiveCategory) => {
-    setSelectedArchiveId(id);
-    navigate(ROUTES.archiveEdit, {
-      state: {
-        archive: {
-          id,
-          title,
-          category,
-        },
-        origin: ROUTES.archives,
-      },
-    });
+  const handleEdit = (id: number) => {
+    navigate(`${ROUTES.archiveEdit}/${id}`);
   };
 
   return (
@@ -116,29 +140,29 @@ const ArchiveAfterLogin = () => {
             </div>
           </div>
           <ArchiveSummaryBar
-            totalCount={filteredArchives.length}
+            totalCount={archives.length}
             className='bg-white'
             onClickAdd={handleClickAdd}
           />
         </section>
         <section className='space-y-3 bg-grey-50 px-5 pb-24 pt-6'>
-          {filteredArchives.map((archive) => {
-            const previewImages = Array.isArray(archive.images)
-              ? archive.images.slice(0, 4)
+          {archives.map((archive) => {
+            const previewImages = Array.isArray(archive.thumbnails)
+              ? archive.thumbnails.slice(0, 4)
               : [];
 
             return (
               <List.ArchiveCard
-                key={archive.id}
-                title={archive.title}
-                category={ARCHIVE_CATEGORY_LABEL[archive.category]}
-                itemCount={archive.itemCount}
+                key={archive.collectionId}
+                title={archive.name}
+                category={archive.category}
                 images={previewImages}
                 width='w-full'
-                onEditClick={() =>
-                  handleEdit(archive.id, archive.title, archive.category)
+                onClick={() =>
+                  navigate(`${ROUTES.archiveDetail}/${archive.collectionId}`)
                 }
-                onDeleteClick={() => handleRequestDelete(archive.id)}
+                onEditClick={() => handleEdit(archive.collectionId!)}
+                onDeleteClick={() => handleRequestDelete(archive.collectionId!)}
               />
             );
           })}
