@@ -21,12 +21,17 @@ import {
   listAll1,
   listByCategory,
   useDeleteCollect,
+  useGetTotalCollectionCount,
+  useGetCategoryCounts,
 } from '@/api/generated/endpoints/collection/collection';
 import type {
   ApiResponseSliceCollectionResponse,
   ListByCategoryCategory,
   SliceCollectionResponse,
   CollectionResponse,
+  ApiResponseCollectionCountResponse,
+  ApiResponseListCollectionCategoryCountResponse,
+  CollectionCategoryCountResponse,
 } from '@/api/generated/models';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveCategoryKey[] = [
@@ -125,7 +130,31 @@ const ArchiveAfterLogin = () => {
     [data]
   );
 
-  const totalCount = archives.length;
+  // 전체 모음 개수 조회
+  const { data: totalCountData } = useGetTotalCollectionCount({
+    query: { enabled: isAll },
+  }) as { data?: ApiResponseCollectionCountResponse };
+
+  // 카테고리별 모음 개수 조회
+  const { data: categoryCountsData } = useGetCategoryCounts({
+    query: { enabled: !isAll },
+  }) as { data?: ApiResponseListCollectionCategoryCountResponse };
+
+  // 선택된 카테고리에 맞는 총 개수 계산
+  const totalCount = useMemo(() => {
+    if (isAll) {
+      return totalCountData?.result?.count ?? 0;
+    }
+
+    const categoryLabel = ARCHIVE_CATEGORY_LABEL[selectedCategory];
+    const list = categoryCountsData?.result ?? [];
+
+    const matched = (list as CollectionCategoryCountResponse[]).find(
+      (item) => item.categoryKorean === categoryLabel
+    );
+
+    return matched?.count ?? 0;
+  }, [isAll, totalCountData, categoryCountsData, selectedCategory]);
 
   const { mutate: deleteCollect } = useDeleteCollect();
 
@@ -140,46 +169,9 @@ const ArchiveAfterLogin = () => {
       { collectId: pendingDeleteArchiveId },
       {
         onSuccess: () => {
-          const currentQueryKey = [
-            'collections',
-            selectedCategory,
-            PAGE_SIZE,
-          ] as const;
-
-          queryClient.setQueryData<InfiniteData<SliceCollectionResponse>>(
-            currentQueryKey,
-            (current) => {
-              if (!current) return current;
-
-              const nextPages = current.pages.map((page) => {
-                if (!page.content?.length) return page;
-
-                const filtered = page.content.filter(
-                  (archive) => archive.collectionId !== pendingDeleteArchiveId
-                );
-
-                if (filtered.length === page.content.length) return page;
-
-                return {
-                  ...page,
-                  content: filtered,
-                  numberOfElements: filtered.length,
-                  empty: filtered.length === 0,
-                };
-              });
-
-              return {
-                ...current,
-                pages: nextPages,
-              };
-            }
-          );
-
           queryClient.invalidateQueries({
             queryKey: ['collections'],
-            exact: false,
           });
-
           setPendingDeleteArchiveId(null);
         },
       }
