@@ -189,6 +189,11 @@ const SearchPage = () => {
           placeholder='모음, 할 일을 검색해 주세요'
           leadingIcon={<img src={searchIcon} alt='' className='h-5 w-5' />}
           width='w-full'
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.currentTarget.blur(); // 키보드 enter 처리
+            }
+          }}
         />
       </header>
 
