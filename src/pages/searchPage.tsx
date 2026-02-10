@@ -160,7 +160,7 @@ const SearchResults = ({
   isFetchingMoreTasks: boolean;
   isFetchingMoreArchives: boolean;
 }) => (
-  <div className='flex flex-1 flex-col gap-6 px-5 py-6'>
+  <div className='flex flex-1 flex-col px-5 py-6'>
     {tasks.length > 0 && (
       <section className='flex flex-col gap-4'>
         <h2 className='text-body-lg text-grey-600'>할 일</h2>
