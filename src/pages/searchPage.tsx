@@ -199,8 +199,11 @@ const SearchPage = () => {
 
       {/* Content */}
       {/* 임시 로딩 화면 */}
-      {isLoading && <p className='text-body-lg text-grey-600'>검색 중...</p>}
-
+      {isLoading && (
+        <div className='flex flex-1 items-center justify-center'>
+          <p className='text-body-lg text-grey-600'>검색 중...</p>
+        </div>
+      )}
       {error && (
         <div className='flex flex-1 flex-col items-center justify-center'>
           <EmptyNotice title='오류가 발생했습니다.' subtitle={error} />
