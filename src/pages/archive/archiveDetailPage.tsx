@@ -220,9 +220,8 @@ const ArchiveDetailPage = () => {
     navigate(-1);
   };
 
-  const handleSearch = () => {
-    // 검색 기능 구현
-    console.log('검색');
+  const handleClickSearch = () => {
+    navigate(ROUTES.search);
   };
 
   const handleOption = () => {
@@ -369,7 +368,7 @@ const ArchiveDetailPage = () => {
           title={isTitleVisible ? '모음 상세' : archiveMeta.title}
           rightIcons={['search', 'option']}
           onClickBack={handleBack}
-          onClickSearch={handleSearch}
+          onClickSearch={handleClickSearch}
           onClickOption={handleOption}
         />
       </div>

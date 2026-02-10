@@ -56,6 +56,10 @@ const ArchiveAfterLogin = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  const handleClickSearch = () => {
+    navigate(ROUTES.search);
+  };
+
   const [selectedCategory, setSelectedCategory] =
     useState<ArchiveCategoryKey>('all');
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
@@ -211,6 +215,7 @@ const ArchiveAfterLogin = () => {
           ARCHIVE_CATEGORIES.find(({ key }) => key === selectedCategory)
             ?.label ?? '전체'
         }
+        onClickSearch={handleClickSearch}
       />
       <main className='flex-1'>
         <section className='bg-white'>

@@ -16,6 +16,8 @@ export type ClearableSearchInputFieldProps = {
   leadingIcon?: React.ReactNode;
   /** 접근성 레이블(필요 시) */
   ariaLabel?: string;
+  /** 키보드 입력 이벤트 (enter 처리) */
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
 };
 
 /**
@@ -33,6 +35,7 @@ export default function ClearableSearchInputField({
   width = 'w-full',
   leadingIcon,
   ariaLabel,
+  onKeyDown,
 }: ClearableSearchInputFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -66,6 +69,7 @@ export default function ClearableSearchInputField({
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         disabled={disabled}
         aria-label={ariaLabel}
