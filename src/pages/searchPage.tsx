@@ -186,7 +186,7 @@ const SearchPage = () => {
         <ClearableSearchInputField
           value={searchQuery}
           onChange={setSearchQuery}
-          placeholder='모음,할 일을 검색해 주세요'
+          placeholder='모음, 할 일을 검색해 주세요'
           leadingIcon={<img src={searchIcon} alt='' className='h-5 w-5' />}
           width='w-full'
         />
