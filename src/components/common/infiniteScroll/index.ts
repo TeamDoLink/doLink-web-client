@@ -1,1 +1,1 @@
-export { InfiniteScrollList } from './infiniteScroll';
+export { InfiniteScroll } from './infiniteScroll';

@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 
-interface InfiniteScrollListProps<T> {
+interface InfiniteScrollProps<T> {
   items: T[];
   renderItem: (item: T, index: number) => ReactNode;
   onLoadMore: () => void;
@@ -15,7 +15,7 @@ interface InfiniteScrollListProps<T> {
   className?: string;
 }
 
-export const InfiniteScrollList = <T,>({
+export const InfiniteScroll = <T,>({
   items,
   renderItem,
   onLoadMore,
@@ -28,7 +28,7 @@ export const InfiniteScrollList = <T,>({
   errorMessage = '에러가 발생했습니다',
   keyExtractor,
   className = '',
-}: InfiniteScrollListProps<T>) => {
+}: InfiniteScrollProps<T>) => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastElementRef = useRef<HTMLDivElement>(null);
 

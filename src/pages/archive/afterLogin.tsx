@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { TabBar, List, FeedBack } from '@/components/common';
-import { InfiniteScrollList } from '@/components/common/infiniteScroll';
+import { InfiniteScroll } from '@/components/common/infiniteScroll';
 import { FloatingButton } from '@/components/common/button';
 import { SearchAppBar } from '@/components/common/appBar/searchAppBar';
 import {
@@ -242,7 +242,7 @@ const ArchiveAfterLogin = () => {
           />
         </section>
         <section className='bg-grey-50 px-5 pb-24 pt-6'>
-          <InfiniteScrollList<CollectionResponse>
+          <InfiniteScroll<CollectionResponse>
             items={archives}
             keyExtractor={(archive: CollectionResponse) =>
               archive.collectionId?.toString() ?? `collection-${archive.name}`
