@@ -1,10 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  useInfiniteQuery,
-  useQueryClient,
-  type InfiniteData,
-} from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { TabBar, List, FeedBack } from '@/components/common';
 import { InfiniteScrollList } from '@/components/common/infiniteScroll';
 import { FloatingButton } from '@/components/common/button';
@@ -79,6 +75,7 @@ const ArchiveAfterLogin = () => {
   } = useInfiniteQuery<SliceCollectionResponse, Error>({
     queryKey: ['collections', selectedCategory, PAGE_SIZE] as const,
     initialPageParam: 0,
+    refetchOnWindowFocus: true,
     queryFn: async ({ pageParam = 0, signal }) => {
       const page = typeof pageParam === 'number' ? pageParam : 0;
       const params = { page, size: PAGE_SIZE };
@@ -132,12 +129,18 @@ const ArchiveAfterLogin = () => {
 
   // 전체 모음 개수 조회
   const { data: totalCountData } = useGetTotalCollectionCount({
-    query: { enabled: isAll },
+    query: {
+      enabled: isAll,
+      refetchOnWindowFocus: true,
+    },
   }) as { data?: ApiResponseCollectionCountResponse };
 
   // 카테고리별 모음 개수 조회
   const { data: categoryCountsData } = useGetCategoryCounts({
-    query: { enabled: !isAll },
+    query: {
+      enabled: !isAll,
+      refetchOnWindowFocus: true,
+    },
   }) as { data?: ApiResponseListCollectionCategoryCountResponse };
 
   // 선택된 카테고리에 맞는 총 개수 계산
@@ -171,6 +174,12 @@ const ArchiveAfterLogin = () => {
         onSuccess: () => {
           queryClient.invalidateQueries({
             queryKey: ['collections'],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ['/api/v1/collect/count'],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ['/api/v1/collect/category-counts'],
           });
           setPendingDeleteArchiveId(null);
         },
