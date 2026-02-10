@@ -9,6 +9,7 @@ export const ROUTES = {
   settingsWithdrawal: '/settings/withdrawal',
   settingsWithdrawalConfirm: '/settings/withdrawal/confirm',
   taskDetail: '/task/detail',
+  search: '/search',
   test: '/test',
   test2: '/test2',
   test3: '/test3',

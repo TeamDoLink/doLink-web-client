@@ -36,6 +36,9 @@ const ARCHIVE_CATEGORIES = ARCHIVE_CATEGORY_KEYS.map((key) => ({
 const ArchiveBeforeLogin = () => {
   const { handleTabChange } = useBottomTabNavigation();
   const navigate = useNavigate();
+  const handleClickSearch = () => {
+    navigate(ROUTES.search);
+  };
   const selectedCategory = useArchiveUIStore((state) => state.selectedCategory);
   const setSelectedCategory = useArchiveUIStore(
     (state) => state.setSelectedCategory
@@ -95,6 +98,7 @@ const ArchiveBeforeLogin = () => {
           ARCHIVE_CATEGORIES.find(({ key }) => key === selectedCategory)
             ?.label ?? '전체'
         }
+        onClickSearch={handleClickSearch}
       />
       <main className='flex-1'>
         <section className='bg-white'>
