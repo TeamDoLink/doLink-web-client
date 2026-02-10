@@ -169,7 +169,13 @@ const SearchPage = () => {
     fetchResults();
   }, [debouncedQuery]);
 
-  const hasResults = tasks.length > 0 || archives.length > 0;
+  const filteredTasks = tasks.filter((task) =>
+    task.title.includes(searchQuery)
+  );
+  const filteredArchives = archives.filter((archive) =>
+    archive.title.includes(searchQuery)
+  );
+  const hasResults = filteredTasks.length > 0 || filteredArchives.length > 0;
 
   return (
     <div className='flex min-h-screen flex-col bg-white'>
@@ -210,18 +216,16 @@ const SearchPage = () => {
         </div>
       )}
 
-      {!isLoading && !error && hasResults && (
+      {!isLoading && !error && debouncedQuery.trim() && hasResults && (
         // TODO UI  test위해 임시로 필터링 해놓음 백엔드와 연동 시 제거 필요
         <SearchResults
-          tasks={tasks.filter((task) => task.title.includes(searchQuery))}
-          archives={archives.filter((archive) =>
-            archive.title.includes(searchQuery)
-          )}
+          tasks={filteredTasks}
+          archives={filteredArchives}
           searchQuery={searchQuery}
         />
       )}
 
-      {!isLoading && !error && !hasResults && (
+      {!isLoading && !error && (!debouncedQuery.trim() || !hasResults) && (
         <div className='flex flex-1 flex-col items-center justify-center'>
           <EmptyNotice title={'검색 결과가 없어요.'} subtitle='' />
         </div>
