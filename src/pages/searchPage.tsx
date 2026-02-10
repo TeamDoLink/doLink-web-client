@@ -34,7 +34,7 @@ const MOCK_IMG_2 =
   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRi_8McCQneFJHdHmzTsFcZSh3MaTqBf2Q9rw&s';
 
 //   TODO 실제 API 연동 시 대체 필요
-const mockSearchAPI = async (query: string): Promise<SearchResult> =>
+const mockSearchAPI = async (_query: string): Promise<SearchResult> =>
   new Promise((resolve) => {
     setTimeout(
       () =>
