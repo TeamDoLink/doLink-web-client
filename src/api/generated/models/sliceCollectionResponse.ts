@@ -16,7 +16,7 @@ export interface SliceCollectionResponse {
   content?: CollectionResponse[];
   number?: number;
   sort?: SortObject;
-  pageable?: PageableObject;
   numberOfElements?: number;
+  pageable?: PageableObject;
   empty?: boolean;
 }

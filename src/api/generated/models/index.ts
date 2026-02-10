@@ -6,9 +6,12 @@
  * OpenAPI spec version: v1.0.0
  */
 
+export * from './apiResponseCollectionCountResponse';
 export * from './apiResponseCollectionDetailResponse';
 export * from './apiResponseCollectionResponse';
 export * from './apiResponseLinkCreateResult';
+export * from './apiResponseListCollectionCategoryCountResponse';
+export * from './apiResponseListCollectionResponse';
 export * from './apiResponseListCollectionSimpleResponse';
 export * from './apiResponseListTaskResponse';
 export * from './apiResponseSliceCollectionResponse';
@@ -16,6 +19,8 @@ export * from './apiResponseSliceTaskResponse';
 export * from './apiResponseString';
 export * from './apiResponseTaskResponse';
 export * from './apiResponseUserResponse';
+export * from './collectionCategoryCountResponse';
+export * from './collectionCountResponse';
 export * from './collectionCreateRequest';
 export * from './collectionCreateRequestCategory';
 export * from './collectionDetailResponse';

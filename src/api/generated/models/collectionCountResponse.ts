@@ -6,8 +6,6 @@
  * OpenAPI spec version: v1.0.0
  */
 
-export interface SortObject {
-  empty?: boolean;
-  sorted?: boolean;
-  unsorted?: boolean;
+export interface CollectionCountResponse {
+  count?: number;
 }
