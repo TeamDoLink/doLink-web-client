@@ -56,11 +56,15 @@ const HomeBeforeLogin = () => {
     navigate(ROUTES.archiveTutorial);
   };
 
+  const handleClickSearch = () => {
+    navigate(ROUTES.search);
+  };
+
   return (
     <div className='relative flex min-h-screen flex-col'>
       <Background.GradientBackground className='flex min-h-0 flex-1 flex-col'>
         <header className='sticky top-0 z-20'>
-          <HomeAppBar />
+          <HomeAppBar onClickSearch={handleClickSearch} />
         </header>
 
         <main className='relative grow'>

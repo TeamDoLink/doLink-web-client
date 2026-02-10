@@ -207,11 +207,15 @@ const HomeAfterLogin = () => {
     navigate(ROUTES.taskCreate);
   };
 
+  const handleClickSearch = () => {
+    navigate(ROUTES.search);
+  };
+
   return (
     <div className='relative flex min-h-screen flex-col'>
       <Background.GradientBackground>
         <header className='sticky top-0 z-20'>
-          <HomeAppBar />
+          <HomeAppBar onClickSearch={handleClickSearch} />
         </header>
 
         <main className='relative grow'>
