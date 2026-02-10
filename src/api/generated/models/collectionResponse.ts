@@ -12,4 +12,5 @@ export interface CollectionResponse {
   name?: string;
   category?: CollectionResponseCategory;
   thumbnails?: string[];
+  taskCount?: number;
 }
