@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import backIcon from '@/assets/icons/common/back.svg';
 import searchIcon from '@/assets/icons/common/search-24.svg';
 import { ClearableSearchInputField } from '@/components/common/inputField';
@@ -210,16 +211,6 @@ const SearchResults = ({
 const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [archives, setArchives] = useState<Archive[]>([]);
-  const [taskPage, setTaskPage] = useState(0);
-  const [archivePage, setArchivePage] = useState(0);
-  const [hasMoreTasks, setHasMoreTasks] = useState(false);
-  const [hasMoreArchives, setHasMoreArchives] = useState(false);
-  const [isFetchingMoreTasks, setIsFetchingMoreTasks] = useState(false);
-  const [isFetchingMoreArchives, setIsFetchingMoreArchives] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // 디바운싱: 검색어 입력이 300ms 동안 없으면 실제 검색 수행
   useEffect(() => {
@@ -229,115 +220,62 @@ const SearchPage = () => {
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
+  // React Query: 할 일 검색 (무한스크롤)
+  const {
+    data: taskData,
+    fetchNextPage: fetchNextTaskPage,
+    hasNextPage: hasMoreTasks,
+    isFetchingNextPage: isFetchingMoreTasks,
+    isLoading: isLoadingTasks,
+    error: taskError,
+  } = useInfiniteQuery<PagedTaskResult>({
+    queryKey: ['searchTasks', debouncedQuery],
+    queryFn: ({ pageParam = 0 }) =>
+      searchTasksFromApi(debouncedQuery, pageParam as number, PAGE_SIZE),
+    enabled: !!debouncedQuery.trim(),
+    initialPageParam: 0,
+    getNextPageParam: (
+      lastPage: PagedTaskResult,
+      allPages: PagedTaskResult[]
+    ) => (lastPage.hasMore ? allPages.length : undefined),
+  });
 
-  // 디바운싱된 쿼리로 API 요청 (초기 검색)
-  useEffect(() => {
-    let alive = true;
+  // React Query: 모음 검색 (무한스크롤)
+  const {
+    data: archiveData,
+    fetchNextPage: fetchNextArchivePage,
+    hasNextPage: hasMoreArchives,
+    isFetchingNextPage: isFetchingMoreArchives,
+    isLoading: isLoadingArchives,
+    error: archiveError,
+  } = useInfiniteQuery<PagedArchiveResult>({
+    queryKey: ['searchArchives', debouncedQuery],
+    queryFn: ({ pageParam = 0 }) =>
+      searchArchivesFromApi(debouncedQuery, pageParam as number, PAGE_SIZE),
+    enabled: !!debouncedQuery.trim(),
+    initialPageParam: 0,
+    getNextPageParam: (
+      lastPage: PagedArchiveResult,
+      allPages: PagedArchiveResult[]
+    ) => (lastPage.hasMore ? allPages.length : undefined),
+  });
 
-    const fetchResults = async () => {
-      if (!debouncedQuery.trim()) {
-        setTasks([]);
-        setArchives([]);
-        setTaskPage(0);
-        setArchivePage(0);
-        setHasMoreTasks(false);
-        setHasMoreArchives(false);
-        setError(null);
-        return;
-      }
+  const tasks = taskData?.pages.flatMap((page) => page.tasks) ?? [];
+  const archives = archiveData?.pages.flatMap((page) => page.archives) ?? [];
+  const isLoading = isLoadingTasks || isLoadingArchives;
+  const error = taskError || archiveError;
 
-      setIsLoading(true);
-      setError(null);
-      setTaskPage(0);
-      setArchivePage(0);
-
-      try {
-        // 병렬 호출
-        const [taskResult, archiveResult] = await Promise.all([
-          searchTasksFromApi(debouncedQuery, 0, PAGE_SIZE),
-          searchArchivesFromApi(debouncedQuery, 0, PAGE_SIZE),
-        ]);
-
-        if (!alive) return;
-
-        setTasks(taskResult.tasks);
-        setArchives(archiveResult.archives);
-        setHasMoreTasks(taskResult.hasMore);
-        setHasMoreArchives(archiveResult.hasMore);
-      } catch {
-        if (!alive) return;
-        setError('검색 결과를 불러오는 중 오류가 발생했습니다.');
-        setTasks([]);
-        setArchives([]);
-        setHasMoreTasks(false);
-        setHasMoreArchives(false);
-      } finally {
-        if (alive) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchResults();
-
-    return () => {
-      alive = false;
-    };
-  }, [debouncedQuery]);
-
-  // 할 일 더 불러오기
-  const handleLoadMoreTasks = useCallback(async () => {
-    if (!debouncedQuery.trim()) return;
-    if (isFetchingMoreTasks || !hasMoreTasks) return;
-
-    const querySnapshot = debouncedQuery; // 스냅샷
-
-    setIsFetchingMoreTasks(true);
-    try {
-      const nextPage = taskPage + 1;
-      const res = await searchTasksFromApi(querySnapshot, nextPage, PAGE_SIZE);
-
-      // 검색어가 바뀌었으면 append 금지
-      if (querySnapshot !== debouncedQuery) return;
-
-      setTasks((prev) => [...prev, ...res.tasks]);
-      setTaskPage(nextPage);
-      setHasMoreTasks(res.hasMore);
-    } catch {
-      setError('할 일을 더 불러오는 중 오류가 발생했습니다.');
-    } finally {
-      setIsFetchingMoreTasks(false);
+  const handleLoadMoreTasks = () => {
+    if (hasMoreTasks && !isFetchingMoreTasks) {
+      fetchNextTaskPage();
     }
-  }, [debouncedQuery, isFetchingMoreTasks, hasMoreTasks, taskPage]);
+  };
 
-  // 모음 더 불러오기
-  const handleLoadMoreArchives = useCallback(async () => {
-    if (!debouncedQuery.trim()) return;
-    if (isFetchingMoreArchives || !hasMoreArchives) return;
-
-    const querySnapshot = debouncedQuery; // 스냅샷
-
-    setIsFetchingMoreArchives(true);
-    try {
-      const nextPage = archivePage + 1;
-      const res = await searchArchivesFromApi(
-        querySnapshot,
-        nextPage,
-        PAGE_SIZE
-      );
-
-      // 검색어가 바뀌었으면 append 금지
-      if (querySnapshot !== debouncedQuery) return;
-
-      setArchives((prev) => [...prev, ...res.archives]);
-      setArchivePage(nextPage);
-      setHasMoreArchives(res.hasMore);
-    } catch {
-      setError('모음을 더 불러오는 중 오류가 발생했습니다.');
-    } finally {
-      setIsFetchingMoreArchives(false);
+  const handleLoadMoreArchives = () => {
+    if (hasMoreArchives && !isFetchingMoreArchives) {
+      fetchNextArchivePage();
     }
-  }, [debouncedQuery, isFetchingMoreArchives, hasMoreArchives, archivePage]);
+  };
 
   const hasResults = tasks.length > 0 || archives.length > 0;
 
@@ -376,7 +314,10 @@ const SearchPage = () => {
       )}
       {error && (
         <div className='flex flex-1 flex-col items-center justify-center'>
-          <EmptyNotice title='오류가 발생했습니다.' subtitle={error} />
+          <EmptyNotice
+            title='오류가 발생했습니다.'
+            subtitle='검색 결과를 불러오는 중 문제가 발생했습니다.'
+          />
         </div>
       )}
 
