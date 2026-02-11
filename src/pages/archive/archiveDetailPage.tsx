@@ -137,20 +137,29 @@ interface PagedTaskResult {
   hasMore: boolean;
 }
 
-// Mock API - 페이지네이션 시뮬레이션 (프론트에서 필터/정렬 후 페이징)
+// Mock API - 서버 측 정렬 + 페이지네이션 시뮬레이션
 const mockFetchTasks = async (
+  sortOption: SortOption,
   page: number,
   pageSize: number = 10
 ): Promise<PagedTaskResult> =>
   new Promise((resolve) => {
     setTimeout(() => {
+      // 1. 먼저 정렬
+      const sorted = [...ALL_MOCK_TASKS].sort((a, b) => {
+        const aTime = new Date(a.createdAt).getTime();
+        const bTime = new Date(b.createdAt).getTime();
+        return sortOption === 'newest' ? bTime - aTime : aTime - bTime;
+      });
+
+      // 2. 그 다음 페이지네이션
       const start = page * pageSize;
       const end = start + pageSize;
-      const tasks = ALL_MOCK_TASKS.slice(start, end);
+      const tasks = sorted.slice(start, end);
 
       resolve({
         tasks,
-        hasMore: end < ALL_MOCK_TASKS.length,
+        hasMore: end < sorted.length,
       });
     }, 300);
   });
@@ -266,7 +275,7 @@ const ArchiveDetailPage = () => {
       setCurrentPage(0);
 
       try {
-        const result = await mockFetchTasks(0, 10);
+        const result = await mockFetchTasks(sortOption, 0, 10);
 
         if (!alive) return;
 
@@ -296,7 +305,7 @@ const ArchiveDetailPage = () => {
     return () => {
       alive = false;
     };
-  }, [isBeforeLoginArchive]);
+  }, [isBeforeLoginArchive, sortOption]);
 
   // 더 불러오기
   const handleLoadMore = async () => {
@@ -306,7 +315,7 @@ const ArchiveDetailPage = () => {
     setIsFetchingMore(true);
     try {
       const nextPage = currentPage + 1;
-      const result = await mockFetchTasks(nextPage, 10);
+      const result = await mockFetchTasks(sortOption, nextPage, 10);
 
       setTaskList((prev) => [...prev, ...result.tasks]);
       setCurrentPage(nextPage);
@@ -454,7 +463,7 @@ const ArchiveDetailPage = () => {
     };
   }, []);
 
-  // createdAt별로 링크를 필터링, 정렬, 그룹화
+  // createdAt별로 링크를 필터링, 그룹화 (정렬은 서버에서 처리됨)
   const groupedLinks = useMemo(() => {
     // 1. 필터링 - linkStates를 기준으로 필터링하여 실시간 체크 상태 반영
     let filtered: Task[];
@@ -482,21 +491,11 @@ const ArchiveDetailPage = () => {
       grouped.get(key)!.push(link);
     });
 
-    const toTimestamp = (key: string) => {
-      if (key === '오늘') {
-        return new Date().getTime();
-      }
-      return new Date(key).getTime();
-    };
-
-    const result = Array.from(grouped.entries()).sort(([aKey], [bKey]) => {
-      const aDate = toTimestamp(aKey);
-      const bDate = toTimestamp(bKey);
-      return sortOption === 'newest' ? bDate - aDate : aDate - bDate;
-    });
+    // 그룹화된 데이터는 이미 정렬된 순서로 오므로 날짜별로만 변환
+    const result = Array.from(grouped.entries());
 
     return result;
-  }, [taskList, selectedTab, sortOption, linkStates]);
+  }, [taskList, selectedTab, linkStates]);
 
   const hasData = groupedLinks.length > 0;
 
