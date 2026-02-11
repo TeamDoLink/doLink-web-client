@@ -15,6 +15,7 @@ import { ROUTES } from '@/constants/routes';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
 import {
   // useListByCollection, // API 연결 시 주석 해제
+  listByCollection,
   getListByCollectionQueryKey,
   useCompleteTask,
   useDeleteTask,
@@ -27,8 +28,10 @@ import {
   getGetCollectDetailQueryKey,
 } from '@/api/generated/endpoints/collection/collection';
 import type {
-  // ApiResponseSliceTaskResponse, // API 연결 시 주석 해제
+  ApiResponseSliceTaskResponse,
   ApiResponseCollectionDetailResponse,
+  ListByCollectionParams,
+  TaskResponse,
 } from '@/api/generated/models';
 
 // 카테고리 아이콘 임포트
@@ -95,74 +98,67 @@ const BEFORE_LOGIN_ARCHIVE_META = {
   category: '기타',
   categoryIcon: etcIcon,
 };
-
-// Mock 데이터 생성 함수 (30개)
-const generateMockTasks = (count: number): Task[] => {
-  const titles = [
-    '도쿄 디즈니랜드 완벽 가이드',
-    '도쿄 맛집 추천 리스트',
-    '서울 카페 투어',
-    '부산 여행 계획',
-    '제주도 숨은 명소',
-    '일본 여행 준비물',
-    '맛집 리스트 정리',
-    '주말 나들이 코스',
-    '홈 트레이닝 루틴',
-    '재테크 공부 자료',
-  ];
-
-  const now = new Date();
-  return Array.from({ length: count }, (_, i) => {
-    const daysAgo = Math.floor(i / 3);
-    const createdDate = new Date(now);
-    createdDate.setDate(createdDate.getDate() - daysAgo);
-
-    return {
-      taskId: i + 100, // ID 충돌 방지
-      title: `${titles[i % titles.length]} ${i + 1}`,
-      link: `https://example.com/${i}`,
-      memo: i % 3 === 0 ? `메모 ${i + 1}` : '',
-      status: i % 3 === 0, // 완료/미완료 분산
-      inout: i % 2 === 0,
-      createdAt: createdDate.toISOString(),
-      modifiedAt: createdDate.toISOString(),
-    };
-  });
-};
-
-const ALL_MOCK_TASKS = generateMockTasks(30);
+const PAGE_SIZE = 10;
 
 interface PagedTaskResult {
   tasks: Task[];
   hasMore: boolean;
 }
 
-// Mock API - 서버 측 정렬 + 페이지네이션 시뮬레이션
-const mockFetchTasks = async (
-  sortOption: SortOption,
+const mapTaskResponseToTask = (task: TaskResponse): Task => {
+  return {
+    taskId: task.taskId ?? 0,
+    title: task.title ?? '',
+    link: task.link ?? null,
+    memo: task.memo ?? null,
+    status: task.status ?? false,
+    inout: task.inout ?? false,
+    createdAt: task.createdAt ?? new Date().toISOString(),
+    modifiedAt: task.createdAt ?? new Date().toISOString(),
+  };
+};
+
+const getSortParam = (sortOption: SortOption): string =>
+  sortOption === 'newest' ? 'desc' : 'asc';
+
+// 서버에서는 completed 필터링을 사용하지 않고,
+// 전체를 받아온 뒤 탭과 linkStates로 클라이언트에서 필터링
+const fetchTasksFromServer = async (
+  collectionId: number,
   page: number,
-  pageSize: number = 10
-): Promise<PagedTaskResult> =>
-  new Promise((resolve) => {
-    setTimeout(() => {
-      // 1. 먼저 정렬
-      const sorted = [...ALL_MOCK_TASKS].sort((a, b) => {
-        const aTime = new Date(a.createdAt).getTime();
-        const bTime = new Date(b.createdAt).getTime();
-        return sortOption === 'newest' ? bTime - aTime : aTime - bTime;
-      });
+  sortOption: SortOption
+): Promise<PagedTaskResult> => {
+  const params: ListByCollectionParams = {
+    page,
+    size: PAGE_SIZE,
+    sort: getSortParam(sortOption),
+  };
 
-      // 2. 그 다음 페이지네이션
-      const start = page * pageSize;
-      const end = start + pageSize;
-      const tasks = sorted.slice(start, end);
+  try {
+    const response = (await listByCollection(
+      collectionId,
+      params
+    )) as unknown as ApiResponseSliceTaskResponse;
 
-      resolve({
-        tasks,
-        hasMore: end < sorted.length,
-      });
-    }, 300);
-  });
+    const result = response?.result;
+
+    if (!result) {
+      return { tasks: [], hasMore: false };
+    }
+
+    const content = result.content ?? [];
+    const tasks = content.map(mapTaskResponseToTask);
+    const last = result.last ?? true;
+
+    return {
+      tasks,
+      hasMore: !last,
+    };
+  } catch (error) {
+    console.error('Failed to fetch tasks:', error);
+    return { tasks: [], hasMore: false };
+  }
+};
 
 const ArchiveDetailPage = () => {
   const navigate = useNavigate();
@@ -230,7 +226,7 @@ const ArchiveDetailPage = () => {
 
   // 전체 todo 데이터 기준으로 개수 계산
   const { totalCount, incompleteCount, completeCount } = useMemo(() => {
-    const allTasks = isBeforeLoginArchive ? BEFORE_LOGIN_TASKS : ALL_MOCK_TASKS;
+    const allTasks = isBeforeLoginArchive ? BEFORE_LOGIN_TASKS : taskList;
     let incomplete = 0;
     let complete = 0;
 
@@ -245,7 +241,7 @@ const ArchiveDetailPage = () => {
       incompleteCount: incomplete,
       completeCount: complete,
     };
-  }, [linkStates, isBeforeLoginArchive]);
+  }, [linkStates, isBeforeLoginArchive, taskList]);
 
   // 탭에 따라 보여줄 개수 선택
   const todoCount =
@@ -277,25 +273,13 @@ const ArchiveDetailPage = () => {
         return;
       }
 
-      // API 연결 시 사용할 타입 변환 로직
-      // const apiResponse = taskData as unknown as ApiResponseSliceTaskResponse;
-      // const apiTasks = apiResponse?.result?.content ?? [];
-      // const sourceTasks = apiTasks.map((t) => ({
-      //   taskId: t.taskId ?? 0,
-      //   title: t.title ?? '',
-      //   link: t.link ?? null,
-      //   memo: t.memo ?? null,
-      //   status: t.status ?? false,
-      //   inout: t.inout ?? false,
-      //   createdAt: t.createdAt ?? new Date().toISOString(),
-      //   modifiedAt: new Date().toISOString(),
-      // }));
-
       setIsInitialLoading(true);
       setCurrentPage(0);
 
       try {
-        const result = await mockFetchTasks(sortOption, 0, 10);
+        if (!collectionId) return;
+
+        const result = await fetchTasksFromServer(collectionId, 0, sortOption);
 
         if (!alive) return;
 
@@ -325,17 +309,22 @@ const ArchiveDetailPage = () => {
     return () => {
       alive = false;
     };
-  }, [isBeforeLoginArchive, sortOption]);
+  }, [isBeforeLoginArchive, sortOption, collectionId]);
 
   // 더 불러오기
   const handleLoadMore = async () => {
     if (isBeforeLoginArchive) return;
     if (isFetchingMore || !hasMoreTasks) return;
+    if (!collectionId) return;
 
     setIsFetchingMore(true);
     try {
       const nextPage = currentPage + 1;
-      const result = await mockFetchTasks(sortOption, nextPage, 10);
+      const result = await fetchTasksFromServer(
+        collectionId,
+        nextPage,
+        sortOption
+      );
 
       setTaskList((prev) => [...prev, ...result.tasks]);
       setCurrentPage(nextPage);
@@ -361,12 +350,10 @@ const ArchiveDetailPage = () => {
     }
   };
 
-  const isMockMode = true; // mock test
-
   const handleLinkCheck = (taskId: number, checked: boolean) => {
     setLinkStates((prev) => ({ ...prev, [taskId]: checked }));
 
-    if (isMockMode || isBeforeLoginArchive) return; // mock일 때
+    if (isBeforeLoginArchive) return; // 튜토리얼 모음일 때는 API 호출 X
 
     completeTask(
       { taskId },
