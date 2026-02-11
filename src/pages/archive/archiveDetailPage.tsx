@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { BackDetailBar } from '@/components/common/appBar';
 import { EmptyNotice } from '@/components/common/feedBack';
 import { FloatingButton } from '@/components/common/button/floatingButton';
@@ -14,9 +14,7 @@ import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { ROUTES } from '@/constants/routes';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
 import {
-  // useListByCollection,
   listByCollection,
-  getListByCollectionQueryKey,
   useCompleteTask,
   useDeleteTask,
 } from '@/api/generated/endpoints/task/task';
@@ -207,15 +205,8 @@ const ArchiveDetailPage = () => {
   );
   const [isCollectionDeleteOpen, setIsCollectionDeleteOpen] = useState(false);
   const titleSectionRef = useRef<HTMLDivElement>(null);
-
-  // 나중에 API로 데이터 받을 예정이면
-  const [taskList, setTaskList] = useState<Task[]>([]);
-
-  // Infinite scroll 상태
-  const [currentPage, setCurrentPage] = useState(0);
-  const [hasMoreTasks, setHasMoreTasks] = useState(false);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(false);
+  // 튜토리얼 전용 상태
+  const [tutorialTasks, setTutorialTasks] = useState<Task[]>([]);
 
   // 각 링크의 완료/미완료 상태 관리
   const [linkStates, setLinkStates] = useState<Record<number, boolean>>({});
@@ -225,9 +216,34 @@ const ArchiveDetailPage = () => {
   );
   const [isDeletingTask, setIsDeletingTask] = useState(false);
 
+  // React Query: 할 일 목록 (무한 스크롤)
+  const {
+    data: taskData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isInitialLoading,
+  } = useInfiniteQuery<PagedTaskResult>({
+    queryKey: ['collectionTasks', collectionId, sortOption],
+    queryFn: ({ pageParam = 0 }) =>
+      fetchTasksFromServer(collectionId, pageParam as number, sortOption),
+    enabled: !isBeforeLoginArchive && !!collectionId,
+    initialPageParam: 0,
+    getNextPageParam: (
+      lastPage: PagedTaskResult,
+      allPages: PagedTaskResult[]
+    ) => (lastPage.hasMore ? allPages.length : undefined),
+  });
+
+  // API 기반 task 리스트 평탄화
+  const apiTaskList = taskData?.pages.flatMap((page) => page.tasks) ?? [];
+
+  // 실제 화면에서 사용할 task 리스트
+  const taskList = isBeforeLoginArchive ? tutorialTasks : apiTaskList;
+
   // 전체 todo 데이터 기준으로 개수 계산
   const { totalCount, incompleteCount, completeCount } = useMemo(() => {
-    const allTasks = isBeforeLoginArchive ? BEFORE_LOGIN_TASKS : taskList;
+    const allTasks = taskList;
     let incomplete = 0;
     let complete = 0;
 
@@ -242,7 +258,7 @@ const ArchiveDetailPage = () => {
       incompleteCount: incomplete,
       completeCount: complete,
     };
-  }, [linkStates, isBeforeLoginArchive, taskList]);
+  }, [linkStates, taskList]);
 
   // 탭에 따라 보여줄 개수 선택
   const todoCount =
@@ -252,104 +268,49 @@ const ArchiveDetailPage = () => {
         ? incompleteCount
         : completeCount;
 
-  // 초기 데이터 로드
+  // 튜토리얼 초기화
   useEffect(() => {
-    let alive = true;
-
-    const fetchInitialTasks = async () => {
-      if (isBeforeLoginArchive) {
-        setTaskList(BEFORE_LOGIN_TASKS);
-        setLinkStates(
-          BEFORE_LOGIN_TASKS.reduce(
-            (acc, task) => ({ ...acc, [task.taskId]: task.status }),
-            {}
-          )
-        );
-        setLinkEditModes(
-          BEFORE_LOGIN_TASKS.reduce(
-            (acc, task) => ({ ...acc, [task.taskId]: false }),
-            {}
-          )
-        );
-        return;
-      }
-
-      setIsInitialLoading(true);
-      setCurrentPage(0);
-
-      try {
-        if (!collectionId) return;
-
-        const result = await fetchTasksFromServer(collectionId, 0, sortOption);
-
-        if (!alive) return;
-
-        setTaskList(result.tasks);
-        setHasMoreTasks(result.hasMore);
-        setLinkStates(
-          result.tasks.reduce(
-            (acc, task) => ({ ...acc, [task.taskId]: task.status }),
-            {}
-          )
-        );
-        setLinkEditModes(
-          result.tasks.reduce(
-            (acc, task) => ({ ...acc, [task.taskId]: false }),
-            {}
-          )
-        );
-      } finally {
-        if (alive) {
-          setIsInitialLoading(false);
-        }
-      }
-    };
-
-    fetchInitialTasks();
-
-    return () => {
-      alive = false;
-    };
-  }, [isBeforeLoginArchive, sortOption, collectionId]);
-
-  // 더 불러오기
-  const handleLoadMore = async () => {
-    if (isBeforeLoginArchive) return;
-    if (isFetchingMore || !hasMoreTasks) return;
-    if (!collectionId) return;
-
-    setIsFetchingMore(true);
-    try {
-      const nextPage = currentPage + 1;
-      const result = await fetchTasksFromServer(
-        collectionId,
-        nextPage,
-        sortOption
-      );
-
-      setTaskList((prev) => [...prev, ...result.tasks]);
-      setCurrentPage(nextPage);
-      setHasMoreTasks(result.hasMore);
-
-      // 새로 추가된 tasks의 상태 초기화
-      setLinkStates((prev) => ({
-        ...prev,
-        ...result.tasks.reduce(
+    if (isBeforeLoginArchive) {
+      setTutorialTasks(BEFORE_LOGIN_TASKS);
+      setLinkStates(
+        BEFORE_LOGIN_TASKS.reduce(
           (acc, task) => ({ ...acc, [task.taskId]: task.status }),
           {}
-        ),
-      }));
-      setLinkEditModes((prev) => ({
-        ...prev,
-        ...result.tasks.reduce(
+        )
+      );
+      setLinkEditModes(
+        BEFORE_LOGIN_TASKS.reduce(
           (acc, task) => ({ ...acc, [task.taskId]: false }),
           {}
-        ),
-      }));
-    } finally {
-      setIsFetchingMore(false);
+        )
+      );
     }
-  };
+  }, [isBeforeLoginArchive]);
+
+  // API 데이터로 linkStates / linkEditModes 초기화
+  useEffect(() => {
+    if (!isBeforeLoginArchive && apiTaskList.length > 0) {
+      setLinkStates((prev) => {
+        const next = { ...prev };
+        apiTaskList.forEach((task) => {
+          if (!(task.taskId in next)) {
+            next[task.taskId] = task.status;
+          }
+        });
+        return next;
+      });
+
+      setLinkEditModes((prev) => {
+        const next = { ...prev };
+        apiTaskList.forEach((task) => {
+          if (!(task.taskId in next)) {
+            next[task.taskId] = false;
+          }
+        });
+        return next;
+      });
+    }
+  }, [apiTaskList, isBeforeLoginArchive]);
 
   const handleLinkCheck = (taskId: number, checked: boolean) => {
     setLinkStates((prev) => ({ ...prev, [taskId]: checked }));
@@ -361,7 +322,7 @@ const ArchiveDetailPage = () => {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({
-            queryKey: getListByCollectionQueryKey(collectionId),
+            queryKey: ['collectionTasks', collectionId],
           });
         },
         onError: () => {
@@ -424,15 +385,29 @@ const ArchiveDetailPage = () => {
 
     setIsDeletingTask(true);
 
-    // 1. 삭제 전 백업 (실패 시 롤백용)
-    const previousTasks = taskList;
+    // 튜토리얼 모음은 로컬 상태만 업데이트
+    if (isBeforeLoginArchive) {
+      setTutorialTasks((prev) =>
+        prev.filter((task) => task.taskId !== pendingDeleteTaskId)
+      );
+      setLinkStates((prev) => {
+        const { [pendingDeleteTaskId]: _, ...rest } = prev;
+        return rest;
+      });
+      setLinkEditModes((prev) => {
+        const { [pendingDeleteTaskId]: _, ...rest } = prev;
+        return rest;
+      });
+      setPendingDeleteTaskId(null);
+      setIsDeletingTask(false);
+      return;
+    }
+
+    // API 모음: 낙관적 업데이트 (linkStates / linkEditModes 기준)
     const previousLinkStates = { ...linkStates };
     const previousLinkEditModes = { ...linkEditModes };
 
-    // 2. 옵티미스틱 UI 업데이트
-    setTaskList((prev) =>
-      prev.filter((task) => task.taskId !== pendingDeleteTaskId)
-    );
+    // 즉시 UI에서 제거: linkStates / linkEditModes에서 삭제
     setLinkStates((prev) => {
       const { [pendingDeleteTaskId]: _, ...rest } = prev;
       return rest;
@@ -442,29 +417,20 @@ const ArchiveDetailPage = () => {
       return rest;
     });
 
-    // 3. 튜토리얼 모음이면 서버 호출 없이 종료
-    if (isBeforeLoginArchive) {
-      setPendingDeleteTaskId(null);
-      setIsDeletingTask(false);
-      return;
-    }
-
-    // 4. 서버 요청
     deleteTask(
       { taskId: pendingDeleteTaskId },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({
-            queryKey: getListByCollectionQueryKey(collectionId),
+            queryKey: ['collectionTasks', collectionId],
           });
           setIsDeletingTask(false);
           setPendingDeleteTaskId(null);
         },
         onError: (error) => {
-          // 5. 실패 시 로그만 남김 (UI는 그대로 유지)
           console.error('할 일 삭제에 실패했습니다.', error);
 
-          setTaskList(previousTasks);
+          // 롤백
           setLinkStates(previousLinkStates);
           setLinkEditModes(previousLinkEditModes);
 
@@ -544,6 +510,11 @@ const ArchiveDetailPage = () => {
     const grouped = new Map<string, Task[]>();
 
     filtered.forEach((link) => {
+      // 삭제된 항목: linkStates에 없으면 스킵 (API 모음용)
+      if (!isBeforeLoginArchive && !(link.taskId in linkStates)) {
+        return;
+      }
+
       const key = link.createdAt.split('T')[0];
       if (!grouped.has(key)) {
         grouped.set(key, []);
@@ -555,7 +526,7 @@ const ArchiveDetailPage = () => {
     const result = Array.from(grouped.entries());
 
     return result;
-  }, [taskList, selectedTab, linkStates]);
+  }, [taskList, selectedTab, linkStates, isBeforeLoginArchive]);
 
   const hasData = groupedLinks.length > 0;
 
@@ -684,9 +655,13 @@ const ArchiveDetailPage = () => {
                 capsuleDisabled={isBeforeLoginArchive}
               />
             )}
-            onLoadMore={handleLoadMore}
-            hasNextPage={hasMoreTasks}
-            isFetchingNextPage={isFetchingMore}
+            onLoadMore={() => {
+              if (!isBeforeLoginArchive && hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+              }
+            }}
+            hasNextPage={isBeforeLoginArchive ? false : hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
             loadingMessage='할 일을 더 불러오는 중입니다'
             emptyMessage='할 일이 없습니다'
             className='space-y-3'
