@@ -5,6 +5,20 @@ import { ClearableSearchInputField } from '@/components/common/inputField';
 import { ArchiveSearchItem, TaskSearchItem } from '@/components/common/list';
 import { InfiniteScroll } from '@/components/common/infiniteScroll/infiniteScroll';
 import EmptyNotice from '@/components/common/feedBack/emptyNotice';
+import { formatRelativeDateLabel } from '@/utils/date';
+import { customInstance } from '@/api/axios-instance';
+import {
+  getSearchTasksUrl,
+  getSearchCollectionsUrl,
+} from '@/api/generated/endpoints/search/search';
+import type {
+  ApiResponseSliceTaskResponse,
+  ApiResponseSliceCollectionResponse,
+  TaskResponse,
+  CollectionResponse,
+  SearchTasksParams,
+  SearchCollectionsParams,
+} from '@/api/generated/models';
 
 // Types
 interface Task {
@@ -32,111 +46,102 @@ interface PagedArchiveResult {
   archives: Archive[];
   hasMore: boolean;
 }
+const PAGE_SIZE = 10;
 
-// Mock API
-const MOCK_IMG =
-  'https://item.kakaocdn.net/do/9d272c87ee51db09570db3d980fc2a124022de826f725e10df604bf1b9725cfd';
-const MOCK_IMG_2 =
-  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRi_8McCQneFJHdHmzTsFcZSh3MaTqBf2Q9rw&s';
-
-// Mock 데이터 생성 (각각 30개)
-const generateMockTasks = (count: number): Task[] => {
-  const titles = [
-    '도쿄 디즈니랜드 완벽 가이드',
-    '도쿄 맛집 추천 리스트',
-    '서울 카페 투어',
-    '부산 여행 계획',
-    '제주도 숨은 명소',
-    '일본 여행 준비물',
-    '맛집 리스트 정리',
-    '주말 나들이 코스',
-  ];
-  const sources = [
-    '인스타그램 (Instagram)',
-    '네이버 블로그',
-    '카카오톡',
-    '유튜브',
-  ];
-
-  return Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    title: `${titles[i % titles.length]} ${i + 1}`,
-    subtitle: `${i + 1}일 전 · ${sources[i % sources.length]}`,
-    thumbnail: i % 3 === 0 ? '' : MOCK_IMG,
-    isCompleted: i % 2 === 0,
-  }));
+const extractDomain = (url: string | undefined | null): string => {
+  if (!url) return '';
+  try {
+    return new URL(url).hostname.replace('www.', '');
+  } catch {
+    return '';
+  }
 };
 
-const generateMockArchives = (count: number): Archive[] => {
-  const titles = [
-    '2025 연말 도쿄 여행',
-    '서울 맛집 탐방',
-    '제주도 힐링 여행',
-    '부산 카페 투어',
-    '일본 쇼핑 리스트',
-  ];
-  const categories = ['여행', '음식점', '취미', '쇼핑', '기타'];
+const mapTaskResponseToTask = (task: TaskResponse): Task => {
+  const relative = task.createdAt
+    ? formatRelativeDateLabel(task.createdAt)
+    : '';
+  const domain = extractDomain(task.link);
+  const subtitleParts = [] as string[];
 
-  return Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    title: `${titles[i % titles.length]} ${i + 1}`,
-    category: categories[i % categories.length],
-    itemCount: (i % 10) + 1,
-    images:
-      i % 2 === 0
-        ? [MOCK_IMG, MOCK_IMG_2, MOCK_IMG, MOCK_IMG_2]
-        : [MOCK_IMG, MOCK_IMG_2],
-  }));
+  if (relative) subtitleParts.push(relative);
+  if (domain) subtitleParts.push(domain);
+
+  return {
+    id: task.taskId ?? 0,
+    title: task.title ?? '',
+    subtitle: subtitleParts.join(' · '),
+    thumbnail: task.thumbnailUrl ?? '',
+    isCompleted: task.status ?? false,
+  };
 };
 
-const ALL_MOCK_TASKS = generateMockTasks(30);
-const ALL_MOCK_ARCHIVES = generateMockArchives(30);
+const mapCollectionResponseToArchive = (
+  collection: CollectionResponse
+): Archive => {
+  return {
+    id: collection.collectionId ?? 0,
+    title: collection.name ?? '',
+    category: collection.category ?? '',
+    itemCount: collection.taskCount ?? 0,
+    images: Array.isArray(collection.thumbnails)
+      ? collection.thumbnails.slice(0, 4)
+      : [],
+  };
+};
 
 // 할 일 검색 API
-const mockSearchTasks = async (
+const searchTasksFromApi = async (
   query: string,
   page: number,
-  pageSize: number = 10
-): Promise<PagedTaskResult> =>
-  new Promise((resolve) => {
-    setTimeout(() => {
-      const filteredTasks = query.trim()
-        ? ALL_MOCK_TASKS.filter((task) => task.title.includes(query))
-        : ALL_MOCK_TASKS;
+  pageSize: number = PAGE_SIZE
+): Promise<PagedTaskResult> => {
+  const params: SearchTasksParams = {
+    keyword: query,
+    page,
+    size: pageSize,
+  };
 
-      const start = page * pageSize;
-      const end = start + pageSize;
-      const tasks = filteredTasks.slice(start, end);
+  const response = await customInstance<ApiResponseSliceTaskResponse>(
+    getSearchTasksUrl(params),
+    { method: 'GET' }
+  );
 
-      resolve({
-        tasks,
-        hasMore: end < filteredTasks.length,
-      });
-    }, 300);
-  });
+  const slice = response.result;
+  const content = slice?.content ?? [];
+
+  return {
+    tasks: content.map(mapTaskResponseToTask),
+    hasMore: !(slice?.last ?? true),
+  };
+};
 
 // 모음 검색 API
-const mockSearchArchives = async (
+const searchArchivesFromApi = async (
   query: string,
   page: number,
-  pageSize: number = 10
-): Promise<PagedArchiveResult> =>
-  new Promise((resolve) => {
-    setTimeout(() => {
-      const filteredArchives = query.trim()
-        ? ALL_MOCK_ARCHIVES.filter((archive) => archive.title.includes(query))
-        : ALL_MOCK_ARCHIVES;
+  pageSize: number = PAGE_SIZE
+): Promise<PagedArchiveResult> => {
+  const params: SearchCollectionsParams = {
+    keyword: query,
+    page,
+    size: pageSize,
+  };
 
-      const start = page * pageSize;
-      const end = start + pageSize;
-      const archives = filteredArchives.slice(start, end);
+  const response = await customInstance<ApiResponseSliceCollectionResponse>(
+    getSearchCollectionsUrl(params),
+    { method: 'GET' }
+  );
 
-      resolve({
-        archives,
-        hasMore: end < filteredArchives.length,
-      });
-    }, 300);
-  });
+  const apiResponse = response as ApiResponseSliceCollectionResponse;
+  const slice = apiResponse.result;
+  const content = slice?.content ?? [];
+
+  return {
+    archives: content.map(mapCollectionResponseToArchive),
+    hasMore: !(slice?.last ?? true),
+  };
+};
 
 // Sub Component
 const SearchResults = ({
@@ -249,8 +254,8 @@ const SearchPage = () => {
       try {
         // 병렬 호출
         const [taskResult, archiveResult] = await Promise.all([
-          mockSearchTasks(debouncedQuery, 0, 10),
-          mockSearchArchives(debouncedQuery, 0, 10),
+          searchTasksFromApi(debouncedQuery, 0, PAGE_SIZE),
+          searchArchivesFromApi(debouncedQuery, 0, PAGE_SIZE),
         ]);
 
         if (!alive) return;
@@ -290,7 +295,7 @@ const SearchPage = () => {
     setIsFetchingMoreTasks(true);
     try {
       const nextPage = taskPage + 1;
-      const res = await mockSearchTasks(querySnapshot, nextPage, 10);
+      const res = await searchTasksFromApi(querySnapshot, nextPage, PAGE_SIZE);
 
       // 검색어가 바뀌었으면 append 금지
       if (querySnapshot !== debouncedQuery) return;
@@ -315,7 +320,11 @@ const SearchPage = () => {
     setIsFetchingMoreArchives(true);
     try {
       const nextPage = archivePage + 1;
-      const res = await mockSearchArchives(querySnapshot, nextPage, 10);
+      const res = await searchArchivesFromApi(
+        querySnapshot,
+        nextPage,
+        PAGE_SIZE
+      );
 
       // 검색어가 바뀌었으면 append 금지
       if (querySnapshot !== debouncedQuery) return;
