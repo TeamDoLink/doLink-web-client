@@ -228,12 +228,32 @@ const ArchiveDetailPage = () => {
     {}
   );
 
-  const todoCount = useMemo(() => {
-    return taskList.reduce((count, task) => {
+  // 전체 todo 데이터 기준으로 개수 계산
+  const { totalCount, incompleteCount, completeCount } = useMemo(() => {
+    const allTasks = isBeforeLoginArchive ? BEFORE_LOGIN_TASKS : ALL_MOCK_TASKS;
+    let incomplete = 0;
+    let complete = 0;
+
+    for (const task of allTasks) {
       const completed = linkStates[task.taskId] ?? task.status;
-      return completed ? count : count + 1;
-    }, 0);
-  }, [linkStates, taskList]);
+      if (completed) complete += 1;
+      else incomplete += 1;
+    }
+
+    return {
+      totalCount: allTasks.length,
+      incompleteCount: incomplete,
+      completeCount: complete,
+    };
+  }, [linkStates, isBeforeLoginArchive]);
+
+  // 탭에 따라 보여줄 개수 선택
+  const todoCount =
+    selectedTab === 'all'
+      ? totalCount
+      : selectedTab === 'incomplete'
+        ? incompleteCount
+        : completeCount;
 
   // 초기 데이터 로드
   useEffect(() => {
