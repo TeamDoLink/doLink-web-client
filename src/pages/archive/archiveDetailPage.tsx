@@ -235,8 +235,11 @@ const ArchiveDetailPage = () => {
     ) => (lastPage.hasMore ? allPages.length : undefined),
   });
 
-  // API 기반 task 리스트 평탄화
-  const apiTaskList = taskData?.pages.flatMap((page) => page.tasks) ?? [];
+  // API 기반 task 리스트 평탄화 (useMemo로 안정화)
+  const apiTaskList = useMemo(
+    () => taskData?.pages.flatMap((page) => page.tasks) ?? [],
+    [taskData]
+  );
 
   // 실제 화면에서 사용할 task 리스트
   const taskList = isBeforeLoginArchive ? tutorialTasks : apiTaskList;
@@ -291,23 +294,31 @@ const ArchiveDetailPage = () => {
   useEffect(() => {
     if (!isBeforeLoginArchive && apiTaskList.length > 0) {
       setLinkStates((prev) => {
+        let hasChanges = false;
         const next = { ...prev };
+
         apiTaskList.forEach((task) => {
           if (!(task.taskId in next)) {
             next[task.taskId] = task.status;
+            hasChanges = true;
           }
         });
-        return next;
+
+        return hasChanges ? next : prev;
       });
 
       setLinkEditModes((prev) => {
+        let hasChanges = false;
         const next = { ...prev };
+
         apiTaskList.forEach((task) => {
           if (!(task.taskId in next)) {
             next[task.taskId] = false;
+            hasChanges = true;
           }
         });
-        return next;
+
+        return hasChanges ? next : prev;
       });
     }
   }, [apiTaskList, isBeforeLoginArchive]);
