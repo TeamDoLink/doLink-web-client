@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { BackDetailBar } from '@/components/common/appBar';
 import { EmptyNotice } from '@/components/common/feedBack';
 import { FloatingButton } from '@/components/common/button/floatingButton';
-import { TabBar, FeedBack } from '@/components/common';
+import { TabBar, FeedBack, InfiniteScroll } from '@/components/common';
 import { StickyTabSection } from '@/components/archive/stickyTabSection';
 import {
   SwipeableDeleteCard,
@@ -14,7 +14,7 @@ import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { ROUTES } from '@/constants/routes';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
 import {
-  useListByCollection,
+  // useListByCollection, // API 연결 시 주석 해제
   getListByCollectionQueryKey,
   useCompleteTask,
   useDeleteTask,
@@ -27,7 +27,7 @@ import {
   getGetCollectDetailQueryKey,
 } from '@/api/generated/endpoints/collection/collection';
 import type {
-  ApiResponseSliceTaskResponse,
+  // ApiResponseSliceTaskResponse, // API 연결 시 주석 해제
   ApiResponseCollectionDetailResponse,
 } from '@/api/generated/models';
 
@@ -96,6 +96,74 @@ const BEFORE_LOGIN_ARCHIVE_META = {
   categoryIcon: etcIcon,
 };
 
+// Mock 데이터 생성 함수 (30개)
+const generateMockTasks = (count: number): Task[] => {
+  const titles = [
+    '도쿄 디즈니랜드 완벽 가이드',
+    '도쿄 맛집 추천 리스트',
+    '서울 카페 투어',
+    '부산 여행 계획',
+    '제주도 숨은 명소',
+    '일본 여행 준비물',
+    '맛집 리스트 정리',
+    '주말 나들이 코스',
+    '홈 트레이닝 루틴',
+    '재테크 공부 자료',
+  ];
+
+  const now = new Date();
+  return Array.from({ length: count }, (_, i) => {
+    const daysAgo = Math.floor(i / 3);
+    const createdDate = new Date(now);
+    createdDate.setDate(createdDate.getDate() - daysAgo);
+
+    return {
+      taskId: i + 100, // ID 충돌 방지
+      title: `${titles[i % titles.length]} ${i + 1}`,
+      link: `https://example.com/${i}`,
+      memo: i % 3 === 0 ? `메모 ${i + 1}` : '',
+      status: i % 3 === 0, // 완료/미완료 분산
+      inout: i % 2 === 0,
+      createdAt: createdDate.toISOString(),
+      modifiedAt: createdDate.toISOString(),
+    };
+  });
+};
+
+const ALL_MOCK_TASKS = generateMockTasks(30);
+
+interface PagedTaskResult {
+  tasks: Task[];
+  hasMore: boolean;
+}
+
+// Mock API - 서버 측 정렬 + 페이지네이션 시뮬레이션
+const mockFetchTasks = async (
+  sortOption: SortOption,
+  page: number,
+  pageSize: number = 10
+): Promise<PagedTaskResult> =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      // 1. 먼저 정렬
+      const sorted = [...ALL_MOCK_TASKS].sort((a, b) => {
+        const aTime = new Date(a.createdAt).getTime();
+        const bTime = new Date(b.createdAt).getTime();
+        return sortOption === 'newest' ? bTime - aTime : aTime - bTime;
+      });
+
+      // 2. 그 다음 페이지네이션
+      const start = page * pageSize;
+      const end = start + pageSize;
+      const tasks = sorted.slice(start, end);
+
+      resolve({
+        tasks,
+        hasMore: end < sorted.length,
+      });
+    }, 300);
+  });
+
 const ArchiveDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -105,9 +173,12 @@ const ArchiveDetailPage = () => {
   const queryClient = useQueryClient();
   const collectionId = id ? Number(id) : 0;
 
-  const { data: taskData } = useListByCollection(collectionId, undefined, {
-    query: { enabled: !isBeforeLoginArchive && !!collectionId },
-  });
+  // API 연결 시 사용: 페이지네이션 파라미터를 전달해야 함
+  // const { data: taskData } = useListByCollection(
+  //   collectionId,
+  //   { page: currentPage, size: 10, sort: 'desc' },
+  //   { query: { enabled: !isBeforeLoginArchive && !!collectionId } }
+  // );
 
   const { data: collectionData } = useGetCollectDetail(collectionId, {
     query: { enabled: !isBeforeLoginArchive && !!collectionId },
@@ -144,6 +215,12 @@ const ArchiveDetailPage = () => {
   // 나중에 API로 데이터 받을 예정이면
   const [taskList, setTaskList] = useState<Task[]>([]);
 
+  // Infinite scroll 상태
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasMoreTasks, setHasMoreTasks] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
+
   // 각 링크의 완료/미완료 상태 관리
   const [linkStates, setLinkStates] = useState<Record<number, boolean>>({});
   // 각 링크의 편집 모드 상태 관리
@@ -151,48 +228,146 @@ const ArchiveDetailPage = () => {
     {}
   );
 
-  const todoCount = useMemo(() => {
-    return taskList.reduce((count, task) => {
+  // 전체 todo 데이터 기준으로 개수 계산
+  const { totalCount, incompleteCount, completeCount } = useMemo(() => {
+    const allTasks = isBeforeLoginArchive ? BEFORE_LOGIN_TASKS : ALL_MOCK_TASKS;
+    let incomplete = 0;
+    let complete = 0;
+
+    for (const task of allTasks) {
       const completed = linkStates[task.taskId] ?? task.status;
-      return completed ? count : count + 1;
-    }, 0);
-  }, [linkStates, taskList]);
-
-  useEffect(() => {
-    let sourceTasks: Task[];
-
-    if (isBeforeLoginArchive) {
-      sourceTasks = BEFORE_LOGIN_TASKS;
-    } else {
-      const apiResponse = taskData as unknown as ApiResponseSliceTaskResponse;
-      const apiTasks = apiResponse?.result?.content ?? [];
-
-      sourceTasks = apiTasks.map((t) => ({
-        taskId: t.taskId ?? 0,
-        title: t.title ?? '',
-        link: t.link ?? null,
-        memo: t.memo ?? null,
-        status: t.status ?? false,
-        inout: t.inout ?? false,
-        createdAt: new Date().toISOString(),
-        modifiedAt: new Date().toISOString(),
-      }));
+      if (completed) complete += 1;
+      else incomplete += 1;
     }
 
-    setTaskList(sourceTasks);
-    setLinkStates(
-      sourceTasks.reduce(
-        (acc, task) => ({ ...acc, [task.taskId]: task.status }),
-        {}
-      )
-    );
-    setLinkEditModes(
-      sourceTasks.reduce((acc, task) => ({ ...acc, [task.taskId]: false }), {})
-    );
-  }, [isBeforeLoginArchive, taskData]);
+    return {
+      totalCount: allTasks.length,
+      incompleteCount: incomplete,
+      completeCount: complete,
+    };
+  }, [linkStates, isBeforeLoginArchive]);
+
+  // 탭에 따라 보여줄 개수 선택
+  const todoCount =
+    selectedTab === 'all'
+      ? totalCount
+      : selectedTab === 'incomplete'
+        ? incompleteCount
+        : completeCount;
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    let alive = true;
+
+    const fetchInitialTasks = async () => {
+      if (isBeforeLoginArchive) {
+        setTaskList(BEFORE_LOGIN_TASKS);
+        setLinkStates(
+          BEFORE_LOGIN_TASKS.reduce(
+            (acc, task) => ({ ...acc, [task.taskId]: task.status }),
+            {}
+          )
+        );
+        setLinkEditModes(
+          BEFORE_LOGIN_TASKS.reduce(
+            (acc, task) => ({ ...acc, [task.taskId]: false }),
+            {}
+          )
+        );
+        return;
+      }
+
+      // API 연결 시 사용할 타입 변환 로직
+      // const apiResponse = taskData as unknown as ApiResponseSliceTaskResponse;
+      // const apiTasks = apiResponse?.result?.content ?? [];
+      // const sourceTasks = apiTasks.map((t) => ({
+      //   taskId: t.taskId ?? 0,
+      //   title: t.title ?? '',
+      //   link: t.link ?? null,
+      //   memo: t.memo ?? null,
+      //   status: t.status ?? false,
+      //   inout: t.inout ?? false,
+      //   createdAt: t.createdAt ?? new Date().toISOString(),
+      //   modifiedAt: new Date().toISOString(),
+      // }));
+
+      setIsInitialLoading(true);
+      setCurrentPage(0);
+
+      try {
+        const result = await mockFetchTasks(sortOption, 0, 10);
+
+        if (!alive) return;
+
+        setTaskList(result.tasks);
+        setHasMoreTasks(result.hasMore);
+        setLinkStates(
+          result.tasks.reduce(
+            (acc, task) => ({ ...acc, [task.taskId]: task.status }),
+            {}
+          )
+        );
+        setLinkEditModes(
+          result.tasks.reduce(
+            (acc, task) => ({ ...acc, [task.taskId]: false }),
+            {}
+          )
+        );
+      } finally {
+        if (alive) {
+          setIsInitialLoading(false);
+        }
+      }
+    };
+
+    fetchInitialTasks();
+
+    return () => {
+      alive = false;
+    };
+  }, [isBeforeLoginArchive, sortOption]);
+
+  // 더 불러오기
+  const handleLoadMore = async () => {
+    if (isBeforeLoginArchive) return;
+    if (isFetchingMore || !hasMoreTasks) return;
+
+    setIsFetchingMore(true);
+    try {
+      const nextPage = currentPage + 1;
+      const result = await mockFetchTasks(sortOption, nextPage, 10);
+
+      setTaskList((prev) => [...prev, ...result.tasks]);
+      setCurrentPage(nextPage);
+      setHasMoreTasks(result.hasMore);
+
+      // 새로 추가된 tasks의 상태 초기화
+      setLinkStates((prev) => ({
+        ...prev,
+        ...result.tasks.reduce(
+          (acc, task) => ({ ...acc, [task.taskId]: task.status }),
+          {}
+        ),
+      }));
+      setLinkEditModes((prev) => ({
+        ...prev,
+        ...result.tasks.reduce(
+          (acc, task) => ({ ...acc, [task.taskId]: false }),
+          {}
+        ),
+      }));
+    } finally {
+      setIsFetchingMore(false);
+    }
+  };
+
+  const isMockMode = true; // mock test
 
   const handleLinkCheck = (taskId: number, checked: boolean) => {
     setLinkStates((prev) => ({ ...prev, [taskId]: checked }));
+
+    if (isMockMode || isBeforeLoginArchive) return; // mock일 때
+
     completeTask(
       { taskId },
       {
@@ -313,7 +488,7 @@ const ArchiveDetailPage = () => {
     };
   }, []);
 
-  // createdAt별로 링크를 필터링, 정렬, 그룹화
+  // createdAt별로 링크를 필터링, 그룹화 (정렬은 서버에서 처리됨)
   const groupedLinks = useMemo(() => {
     // 1. 필터링 - linkStates를 기준으로 필터링하여 실시간 체크 상태 반영
     let filtered: Task[];
@@ -322,10 +497,14 @@ const ArchiveDetailPage = () => {
         filtered = taskList;
         break;
       case 'incomplete':
-        filtered = taskList.filter((task) => !linkStates[task.taskId]);
+        filtered = taskList.filter(
+          (task) => !(linkStates[task.taskId] ?? task.status)
+        );
         break;
       case 'complete':
-        filtered = taskList.filter((task) => linkStates[task.taskId]);
+        filtered = taskList.filter(
+          (task) => linkStates[task.taskId] ?? task.status
+        );
         break;
       default:
         filtered = taskList;
@@ -341,21 +520,11 @@ const ArchiveDetailPage = () => {
       grouped.get(key)!.push(link);
     });
 
-    const toTimestamp = (key: string) => {
-      if (key === '오늘') {
-        return new Date().getTime();
-      }
-      return new Date(key).getTime();
-    };
-
-    const result = Array.from(grouped.entries()).sort(([aKey], [bKey]) => {
-      const aDate = toTimestamp(aKey);
-      const bDate = toTimestamp(bKey);
-      return sortOption === 'newest' ? bDate - aDate : aDate - bDate;
-    });
+    // 그룹화된 데이터는 이미 정렬된 순서로 오므로 날짜별로만 변환
+    const result = Array.from(grouped.entries());
 
     return result;
-  }, [taskList, selectedTab, sortOption, linkStates]);
+  }, [taskList, selectedTab, linkStates]);
 
   const hasData = groupedLinks.length > 0;
 
@@ -426,7 +595,11 @@ const ArchiveDetailPage = () => {
 
       {/* 메인 콘텐츠 */}
       <main className='grow px-5 py-8'>
-        {!hasData ? (
+        {isInitialLoading ? (
+          <div className='flex min-h-[400px] items-center justify-center'>
+            <p className='text-body-md text-grey-500'>불러오는 중...</p>
+          </div>
+        ) : !hasData ? (
           <div className='flex min-h-[400px] items-center justify-center'>
             <EmptyNotice
               title='저장할 링크를 추가해주세요'
@@ -434,10 +607,11 @@ const ArchiveDetailPage = () => {
             />
           </div>
         ) : (
-          <div className='space-y-3'>
-            {groupedLinks.map(([dateKey, tasks], index) => (
+          <InfiniteScroll.InfiniteScroll<[string, Task[]]>
+            items={groupedLinks}
+            keyExtractor={([dateKey]: [string, Task[]]) => dateKey}
+            renderItem={([_dateKey, tasks]: [string, Task[]]) => (
               <SwipeableDeleteCard
-                key={`${dateKey}-${index}`}
                 tasks={tasks}
                 createdAt={
                   tasks[0].createdAt === '오늘'
@@ -478,8 +652,14 @@ const ArchiveDetailPage = () => {
                 }}
                 capsuleDisabled={isBeforeLoginArchive}
               />
-            ))}
-          </div>
+            )}
+            onLoadMore={handleLoadMore}
+            hasNextPage={hasMoreTasks}
+            isFetchingNextPage={isFetchingMore}
+            loadingMessage='할 일을 더 불러오는 중입니다'
+            emptyMessage='할 일이 없습니다'
+            className='space-y-3'
+          />
         )}
       </main>
 
