@@ -341,8 +341,13 @@ const ArchiveDetailPage = () => {
     }
   };
 
+  const isMockMode = true; // mock test
+
   const handleLinkCheck = (taskId: number, checked: boolean) => {
     setLinkStates((prev) => ({ ...prev, [taskId]: checked }));
+
+    if (isMockMode || isBeforeLoginArchive) return; // mock일 때
+
     completeTask(
       { taskId },
       {
