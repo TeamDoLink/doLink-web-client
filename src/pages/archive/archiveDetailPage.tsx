@@ -472,10 +472,14 @@ const ArchiveDetailPage = () => {
         filtered = taskList;
         break;
       case 'incomplete':
-        filtered = taskList.filter((task) => !linkStates[task.taskId]);
+        filtered = taskList.filter(
+          (task) => !(linkStates[task.taskId] ?? task.status)
+        );
         break;
       case 'complete':
-        filtered = taskList.filter((task) => linkStates[task.taskId]);
+        filtered = taskList.filter(
+          (task) => linkStates[task.taskId] ?? task.status
+        );
         break;
       default:
         filtered = taskList;
