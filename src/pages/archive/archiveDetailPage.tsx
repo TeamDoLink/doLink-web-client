@@ -14,7 +14,7 @@ import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { ROUTES } from '@/constants/routes';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
 import {
-  // useListByCollection, // API 연결 시 주석 해제
+  // useListByCollection,
   listByCollection,
   getListByCollectionQueryKey,
   useCompleteTask,
@@ -223,6 +223,7 @@ const ArchiveDetailPage = () => {
   const [linkEditModes, setLinkEditModes] = useState<Record<number, boolean>>(
     {}
   );
+  const [isDeletingTask, setIsDeletingTask] = useState(false);
 
   // 전체 todo 데이터 기준으로 개수 계산
   const { totalCount, incompleteCount, completeCount } = useMemo(() => {
@@ -419,7 +420,36 @@ const ArchiveDetailPage = () => {
   };
 
   const handleConfirmTaskDelete = () => {
-    if (pendingDeleteTaskId === null) return;
+    if (pendingDeleteTaskId === null || isDeletingTask) return;
+
+    setIsDeletingTask(true);
+
+    // 1. 삭제 전 백업 (실패 시 롤백용)
+    const previousTasks = taskList;
+    const previousLinkStates = { ...linkStates };
+    const previousLinkEditModes = { ...linkEditModes };
+
+    // 2. 옵티미스틱 UI 업데이트
+    setTaskList((prev) =>
+      prev.filter((task) => task.taskId !== pendingDeleteTaskId)
+    );
+    setLinkStates((prev) => {
+      const { [pendingDeleteTaskId]: _, ...rest } = prev;
+      return rest;
+    });
+    setLinkEditModes((prev) => {
+      const { [pendingDeleteTaskId]: _, ...rest } = prev;
+      return rest;
+    });
+
+    // 3. 튜토리얼 모음이면 서버 호출 없이 종료
+    if (isBeforeLoginArchive) {
+      setPendingDeleteTaskId(null);
+      setIsDeletingTask(false);
+      return;
+    }
+
+    // 4. 서버 요청
     deleteTask(
       { taskId: pendingDeleteTaskId },
       {
@@ -427,6 +457,20 @@ const ArchiveDetailPage = () => {
           queryClient.invalidateQueries({
             queryKey: getListByCollectionQueryKey(collectionId),
           });
+          setIsDeletingTask(false);
+          setPendingDeleteTaskId(null);
+        },
+        onError: (error) => {
+          // 5. 실패 시 로그만 남김 (UI는 그대로 유지)
+          console.error('할 일 삭제에 실패했습니다.', error);
+
+          setTaskList(previousTasks);
+          setLinkStates(previousLinkStates);
+          setLinkEditModes(previousLinkEditModes);
+
+          alert('삭제에 실패했습니다. 다시 시도해주세요.');
+
+          setIsDeletingTask(false);
           setPendingDeleteTaskId(null);
         },
       }
