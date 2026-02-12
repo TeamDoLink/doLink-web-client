@@ -1,10 +1,25 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import backIcon from '@/assets/icons/common/back.svg';
 import searchIcon from '@/assets/icons/common/search-24.svg';
 import { ClearableSearchInputField } from '@/components/common/inputField';
 import { ArchiveSearchItem, TaskSearchItem } from '@/components/common/list';
 import { InfiniteScroll } from '@/components/common/infiniteScroll/infiniteScroll';
 import EmptyNotice from '@/components/common/feedBack/emptyNotice';
+import { formatRelativeDateLabel } from '@/utils/date';
+import { customInstance } from '@/api/axios-instance';
+import {
+  getSearchTasksUrl,
+  getSearchCollectionsUrl,
+} from '@/api/generated/endpoints/search/search';
+import type {
+  ApiResponseSliceTaskResponse,
+  ApiResponseSliceCollectionResponse,
+  TaskResponse,
+  CollectionResponse,
+  SearchTasksParams,
+  SearchCollectionsParams,
+} from '@/api/generated/models';
 
 // Types
 interface Task {
@@ -32,111 +47,102 @@ interface PagedArchiveResult {
   archives: Archive[];
   hasMore: boolean;
 }
+const PAGE_SIZE = 10;
 
-// Mock API
-const MOCK_IMG =
-  'https://item.kakaocdn.net/do/9d272c87ee51db09570db3d980fc2a124022de826f725e10df604bf1b9725cfd';
-const MOCK_IMG_2 =
-  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRi_8McCQneFJHdHmzTsFcZSh3MaTqBf2Q9rw&s';
-
-// Mock 데이터 생성 (각각 30개)
-const generateMockTasks = (count: number): Task[] => {
-  const titles = [
-    '도쿄 디즈니랜드 완벽 가이드',
-    '도쿄 맛집 추천 리스트',
-    '서울 카페 투어',
-    '부산 여행 계획',
-    '제주도 숨은 명소',
-    '일본 여행 준비물',
-    '맛집 리스트 정리',
-    '주말 나들이 코스',
-  ];
-  const sources = [
-    '인스타그램 (Instagram)',
-    '네이버 블로그',
-    '카카오톡',
-    '유튜브',
-  ];
-
-  return Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    title: `${titles[i % titles.length]} ${i + 1}`,
-    subtitle: `${i + 1}일 전 · ${sources[i % sources.length]}`,
-    thumbnail: i % 3 === 0 ? '' : MOCK_IMG,
-    isCompleted: i % 2 === 0,
-  }));
+const extractDomain = (url: string | undefined | null): string => {
+  if (!url) return '';
+  try {
+    return new URL(url).hostname.replace('www.', '');
+  } catch {
+    return '';
+  }
 };
 
-const generateMockArchives = (count: number): Archive[] => {
-  const titles = [
-    '2025 연말 도쿄 여행',
-    '서울 맛집 탐방',
-    '제주도 힐링 여행',
-    '부산 카페 투어',
-    '일본 쇼핑 리스트',
-  ];
-  const categories = ['여행', '음식점', '취미', '쇼핑', '기타'];
+const mapTaskResponseToTask = (task: TaskResponse): Task => {
+  const relative = task.createdAt
+    ? formatRelativeDateLabel(task.createdAt)
+    : '';
+  const domain = extractDomain(task.link);
+  const subtitleParts = [] as string[];
 
-  return Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    title: `${titles[i % titles.length]} ${i + 1}`,
-    category: categories[i % categories.length],
-    itemCount: (i % 10) + 1,
-    images:
-      i % 2 === 0
-        ? [MOCK_IMG, MOCK_IMG_2, MOCK_IMG, MOCK_IMG_2]
-        : [MOCK_IMG, MOCK_IMG_2],
-  }));
+  if (relative) subtitleParts.push(relative);
+  if (domain) subtitleParts.push(domain);
+
+  return {
+    id: task.taskId ?? 0,
+    title: task.title ?? '',
+    subtitle: subtitleParts.join(' · '),
+    thumbnail: task.thumbnailUrl ?? '',
+    isCompleted: task.status ?? false,
+  };
 };
 
-const ALL_MOCK_TASKS = generateMockTasks(30);
-const ALL_MOCK_ARCHIVES = generateMockArchives(30);
+const mapCollectionResponseToArchive = (
+  collection: CollectionResponse
+): Archive => {
+  return {
+    id: collection.collectionId ?? 0,
+    title: collection.name ?? '',
+    category: collection.category ?? '',
+    itemCount: collection.taskCount ?? 0,
+    images: Array.isArray(collection.thumbnails)
+      ? collection.thumbnails.slice(0, 4)
+      : [],
+  };
+};
 
 // 할 일 검색 API
-const mockSearchTasks = async (
+const searchTasksFromApi = async (
   query: string,
   page: number,
-  pageSize: number = 10
-): Promise<PagedTaskResult> =>
-  new Promise((resolve) => {
-    setTimeout(() => {
-      const filteredTasks = query.trim()
-        ? ALL_MOCK_TASKS.filter((task) => task.title.includes(query))
-        : ALL_MOCK_TASKS;
+  pageSize: number = PAGE_SIZE
+): Promise<PagedTaskResult> => {
+  const params: SearchTasksParams = {
+    keyword: query,
+    page,
+    size: pageSize,
+  };
 
-      const start = page * pageSize;
-      const end = start + pageSize;
-      const tasks = filteredTasks.slice(start, end);
+  const response = await customInstance<ApiResponseSliceTaskResponse>(
+    getSearchTasksUrl(params),
+    { method: 'GET' }
+  );
 
-      resolve({
-        tasks,
-        hasMore: end < filteredTasks.length,
-      });
-    }, 300);
-  });
+  const slice = response.result;
+  const content = slice?.content ?? [];
+
+  return {
+    tasks: content.map(mapTaskResponseToTask),
+    hasMore: !(slice?.last ?? true),
+  };
+};
 
 // 모음 검색 API
-const mockSearchArchives = async (
+const searchArchivesFromApi = async (
   query: string,
   page: number,
-  pageSize: number = 10
-): Promise<PagedArchiveResult> =>
-  new Promise((resolve) => {
-    setTimeout(() => {
-      const filteredArchives = query.trim()
-        ? ALL_MOCK_ARCHIVES.filter((archive) => archive.title.includes(query))
-        : ALL_MOCK_ARCHIVES;
+  pageSize: number = PAGE_SIZE
+): Promise<PagedArchiveResult> => {
+  const params: SearchCollectionsParams = {
+    keyword: query,
+    page,
+    size: pageSize,
+  };
 
-      const start = page * pageSize;
-      const end = start + pageSize;
-      const archives = filteredArchives.slice(start, end);
+  const response = await customInstance<ApiResponseSliceCollectionResponse>(
+    getSearchCollectionsUrl(params),
+    { method: 'GET' }
+  );
 
-      resolve({
-        archives,
-        hasMore: end < filteredArchives.length,
-      });
-    }, 300);
-  });
+  const apiResponse = response as ApiResponseSliceCollectionResponse;
+  const slice = apiResponse.result;
+  const content = slice?.content ?? [];
+
+  return {
+    archives: content.map(mapCollectionResponseToArchive),
+    hasMore: !(slice?.last ?? true),
+  };
+};
 
 // Sub Component
 const SearchResults = ({
@@ -205,16 +211,6 @@ const SearchResults = ({
 const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [archives, setArchives] = useState<Archive[]>([]);
-  const [taskPage, setTaskPage] = useState(0);
-  const [archivePage, setArchivePage] = useState(0);
-  const [hasMoreTasks, setHasMoreTasks] = useState(false);
-  const [hasMoreArchives, setHasMoreArchives] = useState(false);
-  const [isFetchingMoreTasks, setIsFetchingMoreTasks] = useState(false);
-  const [isFetchingMoreArchives, setIsFetchingMoreArchives] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // 디바운싱: 검색어 입력이 300ms 동안 없으면 실제 검색 수행
   useEffect(() => {
@@ -224,111 +220,62 @@ const SearchPage = () => {
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
+  // React Query: 할 일 검색 (무한스크롤)
+  const {
+    data: taskData,
+    fetchNextPage: fetchNextTaskPage,
+    hasNextPage: hasMoreTasks,
+    isFetchingNextPage: isFetchingMoreTasks,
+    isLoading: isLoadingTasks,
+    error: taskError,
+  } = useInfiniteQuery<PagedTaskResult>({
+    queryKey: ['searchTasks', debouncedQuery],
+    queryFn: ({ pageParam = 0 }) =>
+      searchTasksFromApi(debouncedQuery, pageParam as number, PAGE_SIZE),
+    enabled: !!debouncedQuery.trim(),
+    initialPageParam: 0,
+    getNextPageParam: (
+      lastPage: PagedTaskResult,
+      allPages: PagedTaskResult[]
+    ) => (lastPage.hasMore ? allPages.length : undefined),
+  });
 
-  // 디바운싱된 쿼리로 API 요청 (초기 검색)
-  useEffect(() => {
-    let alive = true;
+  // React Query: 모음 검색 (무한스크롤)
+  const {
+    data: archiveData,
+    fetchNextPage: fetchNextArchivePage,
+    hasNextPage: hasMoreArchives,
+    isFetchingNextPage: isFetchingMoreArchives,
+    isLoading: isLoadingArchives,
+    error: archiveError,
+  } = useInfiniteQuery<PagedArchiveResult>({
+    queryKey: ['searchArchives', debouncedQuery],
+    queryFn: ({ pageParam = 0 }) =>
+      searchArchivesFromApi(debouncedQuery, pageParam as number, PAGE_SIZE),
+    enabled: !!debouncedQuery.trim(),
+    initialPageParam: 0,
+    getNextPageParam: (
+      lastPage: PagedArchiveResult,
+      allPages: PagedArchiveResult[]
+    ) => (lastPage.hasMore ? allPages.length : undefined),
+  });
 
-    const fetchResults = async () => {
-      if (!debouncedQuery.trim()) {
-        setTasks([]);
-        setArchives([]);
-        setTaskPage(0);
-        setArchivePage(0);
-        setHasMoreTasks(false);
-        setHasMoreArchives(false);
-        setError(null);
-        return;
-      }
+  const tasks = taskData?.pages.flatMap((page) => page.tasks) ?? [];
+  const archives = archiveData?.pages.flatMap((page) => page.archives) ?? [];
+  const isLoading = isLoadingTasks || isLoadingArchives;
+  const error = taskError || archiveError;
 
-      setIsLoading(true);
-      setError(null);
-      setTaskPage(0);
-      setArchivePage(0);
-
-      try {
-        // 병렬 호출
-        const [taskResult, archiveResult] = await Promise.all([
-          mockSearchTasks(debouncedQuery, 0, 10),
-          mockSearchArchives(debouncedQuery, 0, 10),
-        ]);
-
-        if (!alive) return;
-
-        setTasks(taskResult.tasks);
-        setArchives(archiveResult.archives);
-        setHasMoreTasks(taskResult.hasMore);
-        setHasMoreArchives(archiveResult.hasMore);
-      } catch {
-        if (!alive) return;
-        setError('검색 결과를 불러오는 중 오류가 발생했습니다.');
-        setTasks([]);
-        setArchives([]);
-        setHasMoreTasks(false);
-        setHasMoreArchives(false);
-      } finally {
-        if (alive) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchResults();
-
-    return () => {
-      alive = false;
-    };
-  }, [debouncedQuery]);
-
-  // 할 일 더 불러오기
-  const handleLoadMoreTasks = useCallback(async () => {
-    if (!debouncedQuery.trim()) return;
-    if (isFetchingMoreTasks || !hasMoreTasks) return;
-
-    const querySnapshot = debouncedQuery; // 스냅샷
-
-    setIsFetchingMoreTasks(true);
-    try {
-      const nextPage = taskPage + 1;
-      const res = await mockSearchTasks(querySnapshot, nextPage, 10);
-
-      // 검색어가 바뀌었으면 append 금지
-      if (querySnapshot !== debouncedQuery) return;
-
-      setTasks((prev) => [...prev, ...res.tasks]);
-      setTaskPage(nextPage);
-      setHasMoreTasks(res.hasMore);
-    } catch {
-      setError('할 일을 더 불러오는 중 오류가 발생했습니다.');
-    } finally {
-      setIsFetchingMoreTasks(false);
+  const handleLoadMoreTasks = () => {
+    if (hasMoreTasks && !isFetchingMoreTasks) {
+      fetchNextTaskPage();
     }
-  }, [debouncedQuery, isFetchingMoreTasks, hasMoreTasks, taskPage]);
+  };
 
-  // 모음 더 불러오기
-  const handleLoadMoreArchives = useCallback(async () => {
-    if (!debouncedQuery.trim()) return;
-    if (isFetchingMoreArchives || !hasMoreArchives) return;
-
-    const querySnapshot = debouncedQuery; // 스냅샷
-
-    setIsFetchingMoreArchives(true);
-    try {
-      const nextPage = archivePage + 1;
-      const res = await mockSearchArchives(querySnapshot, nextPage, 10);
-
-      // 검색어가 바뀌었으면 append 금지
-      if (querySnapshot !== debouncedQuery) return;
-
-      setArchives((prev) => [...prev, ...res.archives]);
-      setArchivePage(nextPage);
-      setHasMoreArchives(res.hasMore);
-    } catch {
-      setError('모음을 더 불러오는 중 오류가 발생했습니다.');
-    } finally {
-      setIsFetchingMoreArchives(false);
+  const handleLoadMoreArchives = () => {
+    if (hasMoreArchives && !isFetchingMoreArchives) {
+      fetchNextArchivePage();
     }
-  }, [debouncedQuery, isFetchingMoreArchives, hasMoreArchives, archivePage]);
+  };
 
   const hasResults = tasks.length > 0 || archives.length > 0;
 
@@ -367,7 +314,10 @@ const SearchPage = () => {
       )}
       {error && (
         <div className='flex flex-1 flex-col items-center justify-center'>
-          <EmptyNotice title='오류가 발생했습니다.' subtitle={error} />
+          <EmptyNotice
+            title='오류가 발생했습니다.'
+            subtitle='검색 결과를 불러오는 중 문제가 발생했습니다.'
+          />
         </div>
       )}
 
