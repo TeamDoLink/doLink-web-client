@@ -17,15 +17,15 @@ import {
   useCompleteTask,
 } from '@/api/generated/endpoints/task/task';
 import {
-  useListAll1 as useListAll,
+  useListTop8,
   useDeleteCollect,
-  getListAll1QueryKey as getListAllQueryKey,
+  getListTop8QueryKey,
   getListByCategoryQueryKey,
 } from '@/api/generated/endpoints/collection/collection';
 import { useGetUser } from '@/api/generated/endpoints/user/user';
 import type {
   ApiResponseListTaskResponse,
-  ApiResponseSliceCollectionResponse,
+  ApiResponseListCollectionResponse,
   ApiResponseUserResponse,
 } from '@/api/generated/models';
 import {
@@ -79,12 +79,12 @@ const HomeAfterLogin = () => {
   const recentTasks =
     (recentData as unknown as ApiResponseListTaskResponse)?.result ?? [];
 
-  // API: 모음 목록
-  const { data: archiveData } = useListAll({ page: 0, size: 8 });
-  const archiveSlice = (
-    archiveData as unknown as ApiResponseSliceCollectionResponse
+  // API: 모음 목록 (최근 8개)
+  const { data: archiveData } = useListTop8();
+  const archiveResult = (
+    archiveData as unknown as ApiResponseListCollectionResponse
   )?.result;
-  const archiveContent = archiveSlice?.content ?? [];
+  const archiveContent = archiveResult ?? [];
 
   // Mutations
   const { mutate: completeTask } = useCompleteTask();
@@ -173,7 +173,7 @@ const HomeAfterLogin = () => {
           {
             onSuccess: () => {
               queryClient.invalidateQueries({
-                queryKey: getListAllQueryKey(),
+                queryKey: getListTop8QueryKey(),
               });
               queryClient.invalidateQueries({
                 queryKey: getListByCategoryQueryKey(),
