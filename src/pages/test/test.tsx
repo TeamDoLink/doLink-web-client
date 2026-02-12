@@ -14,7 +14,7 @@ import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import { SearchAppBar } from '@/components/common/appBar/searchAppBar';
 import { BlackLine } from '@/components/common/line/blackLine';
 import { useMemo, useState } from 'react';
-import { FeedBack, List, InputField, Filter } from '../components/common';
+import { FeedBack, List, InputField, Filter } from '@/components/common';
 import ModalLayout from '@/components/common/feedBack/modalLayout';
 import {
   CategoryEditorIconImage,
@@ -690,7 +690,7 @@ function CommonTestComponent() {
                   <InputField.TextInputField
                     state={numericInputState}
                     value={numericInputValue}
-                    onChange={(val) => {
+                    onChange={(val: string) => {
                       setNumericInputValue(val);
                     }}
                     onFocus={() => {
@@ -1145,7 +1145,7 @@ function CommonTestComponent() {
               title={item.title}
               subtitle={`${item.time} · ${item.platform}`}
               checked={item.checked}
-              onChange={(checked) => {
+              onChange={(checked: boolean) => {
                 setTodoItems(
                   todoItems.map((todo) =>
                     todo.id === item.id ? { ...todo, checked } : todo
@@ -1235,7 +1235,9 @@ function CommonTestComponent() {
                 'https://www.figma.com/api/mcp/asset/2653ef1d-ae33-425b-87f8-26e361b2e09e',
               ]}
               onMoreClick={() => console.log('More button clicked!')}
-              onTypeChange={(type) => console.log(`Type changed to: ${type}`)}
+              onTypeChange={(type: string) =>
+                console.log(`Type changed to: ${type}`)
+              }
               onEditClick={() => alert('✏️ Edit clicked!')}
               onDeleteClick={() => alert('🗑️ Delete clicked!')}
             />
