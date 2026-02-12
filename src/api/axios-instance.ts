@@ -5,8 +5,10 @@ import { useAuthStore } from '@/stores/useAuthStore';
 // ==============================
 // Axios 기본 인스턴스 생성
 // ==============================
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export const AXIOS_INSTANCE = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
