@@ -1,3 +1,5 @@
+// ... existing code ...
+import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { ROUTES } from '@/constants/routes';
@@ -13,10 +15,12 @@ import WithdrawalConfirmPage from '@/pages/settings/withdrawal/withdrawalConfirm
 import LoginPage from '@/pages/auth/loginPage';
 import TaskDetailPage from '@/pages/task/detail';
 import TaskCreatePage from '@/pages/task/taskCreatePage';
-import Test from '@/pages/test';
-import Test2 from '@/pages/test2';
-import Test3 from '@/pages/test3';
 import SearchPage from '@/pages/searchPage';
+
+// Test pages are only loaded in development
+const Test = lazy(() => import('@/pages/test/test'));
+const Test2 = lazy(() => import('@/pages/test/test2'));
+const Test3 = lazy(() => import('@/pages/test/test3'));
 
 const AppRouter = () => {
   return (
@@ -45,10 +49,35 @@ const AppRouter = () => {
       <Route path={ROUTES.taskCreate} element={<TaskCreatePage />} />
       <Route path={ROUTES.search} element={<SearchPage />} />
 
-      {/* 공통 컴포넌트 테스트 페이지 */}
-      <Route path={ROUTES.test} element={<Test />} />
-      <Route path={ROUTES.test2} element={<Test2 />} />
-      <Route path={ROUTES.test3} element={<Test3 />} />
+      {/* 공통 컴포넌트 테스트 페이지 - 개발 환경에서만 포함 */}
+      {import.meta.env.DEV && (
+        <>
+          <Route
+            path={ROUTES.test}
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <Test />
+              </Suspense>
+            }
+          />
+          <Route
+            path={ROUTES.test2}
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <Test2 />
+              </Suspense>
+            }
+          />
+          <Route
+            path={ROUTES.test3}
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <Test3 />
+              </Suspense>
+            }
+          />
+        </>
+      )}
     </Routes>
   );
 };
