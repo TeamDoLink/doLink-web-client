@@ -43,7 +43,7 @@ const LoginPage = () => {
             >
               <img src={kakaoIcon} alt='' className={SOCIAL_BUTTON_SIZE} />
             </button>
-            <button
+            {/* <button
               type='button'
               className={`flex ${SOCIAL_BUTTON_SIZE} items-center justify-center rounded-full bg-transparent`}
               aria-label='네이버로 로그인'
@@ -56,7 +56,7 @@ const LoginPage = () => {
               aria-label='애플로 로그인'
             >
               <img src={appleIcon} alt='' className={SOCIAL_BUTTON_SIZE} />
-            </button>
+            </button> */}
           </div>
         </section>
       </main>
