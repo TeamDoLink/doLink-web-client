@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { List } from '@/components/common';
+import { Button, List } from '@/components/common';
 
 // 피그마상에 20*22 아이콘 없어 svg로 적용함
 const DeleteIcon = () => {
@@ -287,12 +287,13 @@ export const SwipeableDeleteCard = ({
         {/* 상단 헤더: 생성 날짜 및 편집 버튼 */}
         <div className='flex w-full items-start justify-between text-caption-md'>
           <p className='text-grey-800'>{formatRelativeTime(createdAt)}</p>
-          <button
+          <Button.TextButton
             onClick={handleEditClick}
-            className='text-point transition-colors hover:text-point/80'
+            disabled={capsuleDisabled}
+            className='text-caption-md'
           >
             편집
-          </button>
+          </Button.TextButton>
         </div>
 
         {/* 링크 아이템 리스트: 같은 날짜의 모든 링크를 List.LinkItem으로 렌더링 */}
