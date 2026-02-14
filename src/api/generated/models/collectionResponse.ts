@@ -13,4 +13,5 @@ export interface CollectionResponse {
   category?: CollectionResponseCategory;
   thumbnails?: string[];
   taskCount?: number;
+  isTutorial?: boolean;
 }
