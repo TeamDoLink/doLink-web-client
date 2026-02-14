@@ -2,8 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { BackDetailBar } from '@/components/common/appBar';
 import { API_BASE_URL } from '@/api/axios-instance';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
-import naverIcon from '@/assets/icons/auth/naver.svg';
-import appleIcon from '@/assets/icons/auth/apple.svg';
+// import naverIcon from '@/assets/icons/auth/naver.svg';
+// import appleIcon from '@/assets/icons/auth/apple.svg';
 import logo from '@/assets/logos/logo.svg';
 
 const SOCIAL_BUTTON_SIZE = 'h-14 w-14';
