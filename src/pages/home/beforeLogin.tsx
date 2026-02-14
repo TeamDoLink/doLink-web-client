@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Background,
@@ -23,25 +23,44 @@ const HomeBeforeLogin = () => {
   const navigate = useNavigate();
   const { handleTabChange } = useBottomTabNavigation();
   const [showToast, setShowToast] = useState(false);
-  const [toastToken, setToastToken] = useState(0);
+  const [toastType, setToastType] = useState<'login' | 'defaultArchive' | null>(
+    null
+  );
+  const toastTimerRef = useRef<number | null>(null);
   const todoItems = BEFORE_LOGIN_TODO();
   const archiveItems = BEFORE_LOGIN_ARCHIVE();
-  useEffect(() => {
-    if (!showToast) {
-      return;
-    }
 
-    const timer = setTimeout(() => setShowToast(false), 3000);
-    return () => clearTimeout(timer);
-  }, [showToast, toastToken]);
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current !== null) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleLoginClick = () => {
     navigate(ROUTES.login);
   };
 
-  const triggerLoginToast = () => {
+  const showToastWithType = (type: 'login' | 'defaultArchive') => {
+    setToastType(type);
     setShowToast(true);
-    setToastToken((prev) => prev + 1);
+    if (toastTimerRef.current !== null) {
+      clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = window.setTimeout(() => {
+      setShowToast(false);
+      toastTimerRef.current = null;
+    }, 3000);
+  };
+
+  const triggerLoginToast = () => {
+    showToastWithType('login');
+  };
+
+  const triggerDefaultArchiveToast = () => {
+    showToastWithType('defaultArchive');
   };
 
   const handleTodoCheckbox = () => {
@@ -121,7 +140,7 @@ const HomeBeforeLogin = () => {
                       width='w-full'
                       disableActionMenu
                       onClick={handleOpenTutorialArchive}
-                      onMoreClick={triggerLoginToast}
+                      onMoreClick={triggerDefaultArchiveToast}
                       onEditClick={triggerLoginToast}
                       onDeleteClick={triggerLoginToast}
                     />
@@ -135,9 +154,17 @@ const HomeBeforeLogin = () => {
         {showToast && (
           <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
             <FeedBack.Toast
-              message='로그인 후 간편하게 DoLink를 이용해보세요.'
-              actionLabel='로그인'
-              onAction={handleLoginClick}
+              message={
+                toastType === 'defaultArchive'
+                  ? '기본 제공 모음은 삭제할 수 없어요.'
+                  : '로그인 후 간편하게 DoLink를 이용해보세요.'
+              }
+              actionLabel={toastType === 'defaultArchive' ? '확인' : '로그인'}
+              onAction={
+                toastType === 'defaultArchive'
+                  ? () => setShowToast(false)
+                  : handleLoginClick
+              }
             />
           </div>
         )}
