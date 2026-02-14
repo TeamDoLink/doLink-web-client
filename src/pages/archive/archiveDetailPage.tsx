@@ -200,6 +200,8 @@ const ArchiveDetailPage = () => {
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [isTitleVisible, setIsTitleVisible] = useState(true);
   const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastToken, setToastToken] = useState(0);
   const [pendingDeleteTaskId, setPendingDeleteTaskId] = useState<number | null>(
     null
   );
@@ -270,6 +272,16 @@ const ArchiveDetailPage = () => {
       : selectedTab === 'incomplete'
         ? incompleteCount
         : completeCount;
+
+  // 토스트 자동 숨김 처리
+  useEffect(() => {
+    if (!showToast) {
+      return;
+    }
+
+    const timer = setTimeout(() => setShowToast(false), 3000);
+    return () => clearTimeout(timer);
+  }, [showToast, toastToken]);
 
   // 튜토리얼 초기화
   useEffect(() => {
@@ -360,6 +372,13 @@ const ArchiveDetailPage = () => {
   };
 
   const handleOption = () => {
+    if (isBeforeLoginArchive) {
+      // 튜토리얼 모음: 옵션 메뉴 대신 토스트 노출
+      setShowToast(true);
+      setToastToken((prev) => prev + 1);
+      return;
+    }
+
     setIsOptionMenuOpen((prev) => !prev);
   };
 
@@ -556,7 +575,7 @@ const ArchiveDetailPage = () => {
       </div>
 
       {/* 옵션 메뉴 */}
-      {isOptionMenuOpen && (
+      {isOptionMenuOpen && !isBeforeLoginArchive && (
         <>
           <div
             className='fixed inset-0 z-modal-overlay'
@@ -653,11 +672,10 @@ const ArchiveDetailPage = () => {
                     alert(`${task.title} 공유하기`);
                   }
                 }}
-                onEditClick={(taskId) => {
-                  const task = tasks.find((t) => t.taskId === taskId);
-                  if (task) {
-                    console.log('편집 클릭:', task.title);
-                    alert(`${task.title} 편집하기`);
+                onEditClick={() => {
+                  // 할 일 편집 버튼(연필 아이콘) 클릭 시 모음 편집 페이지로 이동
+                  if (!isBeforeLoginArchive && collectionId) {
+                    navigate(`${ROUTES.archiveEdit}/${collectionId}`);
                   }
                 }}
                 onDeleteClick={(taskId) => {
@@ -721,6 +739,17 @@ const ArchiveDetailPage = () => {
           onNegative={() => setIsCollectionDeleteOpen(false)}
         />
       </FeedBack.ModalLayout>
+
+      {/* 튜토리얼 모음용 토스트 */}
+      {isBeforeLoginArchive && showToast && (
+        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+          <FeedBack.Toast
+            message='기본 제공 모음은 삭제할 수 없어요.'
+            actionLabel='확인'
+            onAction={() => setShowToast(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

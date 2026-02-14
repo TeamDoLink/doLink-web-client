@@ -8,6 +8,7 @@ import { SettingMenuItem } from '@/components/common/setting/settingMenuItem';
 import { GreyLine } from '@/components/common/line/greyLine';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
+import logoutIcon from '@/assets/icons/auth/logout.svg';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { logout, useGetUser } from '@/api/generated/endpoints/user/user';
 import type { ApiResponseUserResponse } from '@/api/generated/models';
@@ -20,6 +21,7 @@ import { openExternalLink } from '@/utils/openExternalLink';
 const SettingsPage = () => {
   const { handleTabChange } = useBottomTabNavigation();
   const clearAuth = useAuthStore((state) => state.clearAuth);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
@@ -108,13 +110,26 @@ const SettingsPage = () => {
         <div className='rounded-[16px] p-6'>
           <div className='flex items-center gap-3'>
             <img
-              src={profileImage ?? kakaoIcon}
+              src={profileImage ?? (isAuthenticated ? kakaoIcon : logoutIcon)}
               alt='프로필'
               className='h-12 w-12 rounded-full object-cover'
             />
-            <span className='flex flex-col gap-1 text-heading-lg text-grey-900'>
-              {memberName} 님
-            </span>
+            <div className='flex flex-col gap-1 text-heading-lg text-grey-900'>
+              {isAuthenticated ? (
+                <span>{memberName} 님</span>
+              ) : (
+                <span className='flex items-center gap-1'>
+                  <button
+                    type='button'
+                    className='underline'
+                    onClick={() => navigate(ROUTES.login)}
+                  >
+                    로그인
+                  </button>
+                  <span>후 이용해보세요</span>
+                </span>
+              )}
+            </div>
           </div>
 
           <div className='mt-6 overflow-hidden rounded-[16px] bg-white py-2 shadow-[0_4px_12px_rgba(0,0,0,0.03)]'>
@@ -152,20 +167,21 @@ const SettingsPage = () => {
             />
           </div>
         </div>
-
-        <div className='flex justify-center gap-12 text-body-md text-grey-500'>
-          <button type='button' onClick={handleLogoutClick}>
-            로그아웃
-          </button>
-          {/* 추후 컴포넌트로 분리 예정 */}
-          <div className='h-4 w-px bg-grey-200' />
-          <button
-            type='button'
-            onClick={() => navigate(ROUTES.settingsWithdrawal)}
-          >
-            회원탈퇴
-          </button>
-        </div>
+        {isAuthenticated && (
+          <div className='flex justify-center gap-12 text-body-md text-grey-500'>
+            <button type='button' onClick={handleLogoutClick}>
+              로그아웃
+            </button>
+            {/* 추후 컴포넌트로 분리 예정 */}
+            <div className='h-4 w-px bg-grey-200' />
+            <button
+              type='button'
+              onClick={() => navigate(ROUTES.settingsWithdrawal)}
+            >
+              회원탈퇴
+            </button>
+          </div>
+        )}
       </main>
       <footer className='sticky bottom-0 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
         <div className='relative w-full bg-white'>
@@ -180,7 +196,7 @@ const SettingsPage = () => {
       </footer>
 
       <FeedBack.ModalLayout
-        open={isLogoutConfirmOpen}
+        open={isAuthenticated && isLogoutConfirmOpen}
         onClose={handleCancelLogout}
       >
         <FeedBack.ConfirmDialog

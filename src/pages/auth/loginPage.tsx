@@ -2,8 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { BackDetailBar } from '@/components/common/appBar';
 import { API_BASE_URL } from '@/api/axios-instance';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
-import naverIcon from '@/assets/icons/auth/naver.svg';
-import appleIcon from '@/assets/icons/auth/apple.svg';
+// import naverIcon from '@/assets/icons/auth/naver.svg';
+// import appleIcon from '@/assets/icons/auth/apple.svg';
 import logo from '@/assets/logos/logo.svg';
 
 const SOCIAL_BUTTON_SIZE = 'h-14 w-14';
@@ -43,7 +43,7 @@ const LoginPage = () => {
             >
               <img src={kakaoIcon} alt='' className={SOCIAL_BUTTON_SIZE} />
             </button>
-            <button
+            {/* <button
               type='button'
               className={`flex ${SOCIAL_BUTTON_SIZE} items-center justify-center rounded-full bg-transparent`}
               aria-label='네이버로 로그인'
@@ -56,7 +56,7 @@ const LoginPage = () => {
               aria-label='애플로 로그인'
             >
               <img src={appleIcon} alt='' className={SOCIAL_BUTTON_SIZE} />
-            </button>
+            </button> */}
           </div>
         </section>
       </main>
