@@ -12,8 +12,10 @@ export interface TaskResponse {
   title?: string;
   link?: string;
   memo?: string;
+  domain?: string;
   thumbnailUrl?: string;
   status?: boolean;
   inout?: boolean;
   createdAt?: string;
+  isTutorial?: boolean;
 }

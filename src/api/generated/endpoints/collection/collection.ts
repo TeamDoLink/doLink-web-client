@@ -650,6 +650,179 @@ export function useListTop8<
 }
 
 /**
+ * 로그인 사용자의 각 모음에 속한 할 일의 전체 개수를 조회한다.
+ * @summary 각 모음의 할 일 전체 개수 조회
+ */
+export type getTaskCountsForCollectionsResponse200 = {
+  data: Blob;
+  status: 200;
+};
+
+export type getTaskCountsForCollectionsResponseSuccess =
+  getTaskCountsForCollectionsResponse200 & {
+    headers: Headers;
+  };
+export type getTaskCountsForCollectionsResponse =
+  getTaskCountsForCollectionsResponseSuccess;
+
+export const getGetTaskCountsForCollectionsUrl = () => {
+  return `/api/v1/collect/task-counts`;
+};
+
+export const getTaskCountsForCollections = async (
+  options?: RequestInit
+): Promise<getTaskCountsForCollectionsResponse> => {
+  return customInstance<getTaskCountsForCollectionsResponse>(
+    getGetTaskCountsForCollectionsUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  );
+};
+
+export const getGetTaskCountsForCollectionsQueryKey = () => {
+  return [`/api/v1/collect/task-counts`] as const;
+};
+
+export const getGetTaskCountsForCollectionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetTaskCountsForCollectionsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getTaskCountsForCollections>>
+  > = ({ signal }) =>
+    getTaskCountsForCollections({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetTaskCountsForCollectionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTaskCountsForCollections>>
+>;
+export type GetTaskCountsForCollectionsQueryError = unknown;
+
+export function useGetTaskCountsForCollections<
+  TData = Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+          TError,
+          Awaited<ReturnType<typeof getTaskCountsForCollections>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTaskCountsForCollections<
+  TData = Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+          TError,
+          Awaited<ReturnType<typeof getTaskCountsForCollections>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTaskCountsForCollections<
+  TData = Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary 각 모음의 할 일 전체 개수 조회
+ */
+
+export function useGetTaskCountsForCollections<
+  TData = Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getTaskCountsForCollections>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetTaskCountsForCollectionsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
  * 할 일 추가 화면에서 '담을 모음 선택'에 사용할 모음 목록(id, 이름)을 조회한다.
  * @summary 모음 선택 목록 조회
  */
@@ -812,6 +985,176 @@ export function useListCollectSelectOptions<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getListCollectSelectOptionsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * 로그인 사용자의 모음 중 할 일이 가장 많은 모음의 카테고리를 한국어로 반환한다.
+ * @summary 할 일이 가장 많은 모음의 카테고리 조회
+ */
+export type getMostTasksCategoryResponse200 = {
+  data: Blob;
+  status: 200;
+};
+
+export type getMostTasksCategoryResponseSuccess =
+  getMostTasksCategoryResponse200 & {
+    headers: Headers;
+  };
+export type getMostTasksCategoryResponse = getMostTasksCategoryResponseSuccess;
+
+export const getGetMostTasksCategoryUrl = () => {
+  return `/api/v1/collect/most-tasks-category`;
+};
+
+export const getMostTasksCategory = async (
+  options?: RequestInit
+): Promise<getMostTasksCategoryResponse> => {
+  return customInstance<getMostTasksCategoryResponse>(
+    getGetMostTasksCategoryUrl(),
+    {
+      ...options,
+      method: 'GET',
+    }
+  );
+};
+
+export const getGetMostTasksCategoryQueryKey = () => {
+  return [`/api/v1/collect/most-tasks-category`] as const;
+};
+
+export const getGetMostTasksCategoryQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMostTasksCategory>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getMostTasksCategory>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMostTasksCategoryQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMostTasksCategory>>
+  > = ({ signal }) => getMostTasksCategory({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMostTasksCategory>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetMostTasksCategoryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMostTasksCategory>>
+>;
+export type GetMostTasksCategoryQueryError = unknown;
+
+export function useGetMostTasksCategory<
+  TData = Awaited<ReturnType<typeof getMostTasksCategory>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMostTasksCategory>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMostTasksCategory>>,
+          TError,
+          Awaited<ReturnType<typeof getMostTasksCategory>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetMostTasksCategory<
+  TData = Awaited<ReturnType<typeof getMostTasksCategory>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMostTasksCategory>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMostTasksCategory>>,
+          TError,
+          Awaited<ReturnType<typeof getMostTasksCategory>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetMostTasksCategory<
+  TData = Awaited<ReturnType<typeof getMostTasksCategory>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMostTasksCategory>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary 할 일이 가장 많은 모음의 카테고리 조회
+ */
+
+export function useGetMostTasksCategory<
+  TData = Awaited<ReturnType<typeof getMostTasksCategory>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMostTasksCategory>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetMostTasksCategoryQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

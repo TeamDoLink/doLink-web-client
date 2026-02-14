@@ -15,4 +15,5 @@ export interface TaskCreateRequest {
   title: string;
   link?: string;
   memo?: string;
+  inout?: boolean;
 }
