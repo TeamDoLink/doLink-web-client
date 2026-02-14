@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { BackDetailBar } from '@/components/common/appBar';
+import { API_BASE_URL } from '@/api/axios-instance';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
 import naverIcon from '@/assets/icons/auth/naver.svg';
 import appleIcon from '@/assets/icons/auth/apple.svg';
@@ -15,12 +16,7 @@ const LoginPage = () => {
   };
 
   const handleKakaoLogin = () => {
-    // Vite 프록시 사용 시 주석 처리
-    // TODO http://localhost:8080 ->  환경변수 처리
-    // const KAKAO_AUTH_URL = 'http://localhost:8080/oauth2/authorization/kakao';
-
-    const KAKAO_AUTH_URL = '/oauth2/authorization/kakao'; // Vite 프록시가 /oauth2 경로를 백엔드로 전달
-    window.location.href = KAKAO_AUTH_URL;
+    window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
   };
 
   return (

@@ -26,10 +26,7 @@ function highlightText(text: string, searchQuery?: string) {
         // 검색어와 일치하는 부분인지 확인 (대소문자 무시)
         const isMatch = part.toLowerCase() === searchQuery.toLowerCase();
         return (
-          <span
-            key={index}
-            className={`inline-flex items-start ${isMatch ? 'text-point' : ''}`}
-          >
+          <span key={index} className={isMatch ? 'text-point' : ''}>
             {part}
           </span>
         );
