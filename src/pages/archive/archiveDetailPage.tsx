@@ -672,11 +672,10 @@ const ArchiveDetailPage = () => {
                     alert(`${task.title} 공유하기`);
                   }
                 }}
-                onEditClick={(taskId) => {
-                  const task = tasks.find((t) => t.taskId === taskId);
-                  if (task) {
-                    console.log('편집 클릭:', task.title);
-                    alert(`${task.title} 편집하기`);
+                onEditClick={() => {
+                  // 할 일 편집 버튼(연필 아이콘) 클릭 시 모음 편집 페이지로 이동
+                  if (!isBeforeLoginArchive && collectionId) {
+                    navigate(`${ROUTES.archiveEdit}/${collectionId}`);
                   }
                 }}
                 onDeleteClick={(taskId) => {
