@@ -371,6 +371,10 @@ const ArchiveDetailPage = () => {
     navigate(ROUTES.search);
   };
 
+  const handleTaskClick = (taskId: number) => {
+    navigate(`${ROUTES.taskDetail}/${taskId}`);
+  };
+
   const handleOption = () => {
     if (isBeforeLoginArchive) {
       // 튜토리얼 모음: 옵션 메뉴 대신 토스트 노출
@@ -653,6 +657,7 @@ const ArchiveDetailPage = () => {
                 linkStates={linkStates}
                 linkEditModes={linkEditModes}
                 onCheck={handleLinkCheck}
+                onTaskClick={handleTaskClick}
                 onEditModeChange={(isEditMode) => {
                   tasks.forEach((task) => {
                     handleEditModeChange(task.taskId, isEditMode);
