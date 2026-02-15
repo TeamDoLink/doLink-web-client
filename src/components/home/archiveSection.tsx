@@ -13,6 +13,7 @@ type ArchiveSectionProps = {
   items: ArchiveSectionItem[];
   onRequestDelete?: (id: string) => void;
   onRequestEdit?: (id: string) => void;
+  onClick?: (id: string) => void;
   className?: string;
 };
 
@@ -23,6 +24,7 @@ export const ArchiveSection = ({
   items,
   onRequestDelete,
   onRequestEdit,
+  onClick,
   className = '',
 }: ArchiveSectionProps) => {
   const handleEditClick = (id: string) => {
@@ -31,6 +33,10 @@ export const ArchiveSection = ({
 
   const handleDeleteClick = (id: string) => {
     onRequestDelete?.(id);
+  };
+
+  const handleClick = (id: string) => {
+    onClick?.(id);
   };
 
   return (
@@ -49,6 +55,7 @@ export const ArchiveSection = ({
               itemCount={itemCount}
               images={previewImages}
               width='w-full'
+              onClick={() => handleClick(id)}
               onEditClick={() => handleEditClick(id)}
               onDeleteClick={() => handleDeleteClick(id)}
             />

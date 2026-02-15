@@ -52,14 +52,25 @@ export default function LinkItem({
 }: LinkItemProps) {
   const itemRef = useRef<HTMLDivElement>(null);
 
-  const handleCheckboxClick = () => {
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!isEditMode && !actionDisabled) {
       onChange?.(!checked);
     }
   };
 
+  const handleCardClick = () => {
+    if (!isEditMode) {
+      onClick?.();
+    }
+  };
+
   return (
-    <div ref={itemRef} className={`flex ${width} items-start gap-3`}>
+    <div
+      ref={itemRef}
+      className={`flex ${width} items-start gap-3 ${!isEditMode && onClick ? 'cursor-pointer' : ''}`}
+      onClick={handleCardClick}
+    >
       <div className='flex min-h-0 min-w-0 flex-1 items-start gap-3'>
         {/* Thumbnail */}
         <div className='relative h-10 w-10 shrink-0 overflow-hidden rounded-lg'>
@@ -79,10 +90,7 @@ export default function LinkItem({
         {/* Info */}
         <div className='flex min-h-0 min-w-0 flex-1 flex-col items-start gap-1.5'>
           {/* Text */}
-          <div
-            className='flex w-full cursor-pointer flex-col items-start gap-0.5'
-            onClick={onClick}
-          >
+          <div className='flex w-full flex-col items-start gap-0.5'>
             <p
               className={`w-full truncate text-body-lg ${
                 checked && !isEditMode
@@ -99,14 +107,18 @@ export default function LinkItem({
 
           {/* Buttons */}
           <div className='flex items-start gap-1'>
-            <LinkCapsuleButton
-              onClick={onOriginalClick}
-              disabled={actionDisabled}
-            />
-            <ShareCapsuleButton
-              onClick={onShareClick}
-              disabled={actionDisabled}
-            />
+            <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+              <LinkCapsuleButton
+                onClick={onOriginalClick}
+                disabled={actionDisabled}
+              />
+            </div>
+            <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+              <ShareCapsuleButton
+                onClick={onShareClick}
+                disabled={actionDisabled}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -117,14 +129,20 @@ export default function LinkItem({
           {/* Edit Button */}
           <button
             type='button'
-            onClick={onEditClick}
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              onEditClick?.();
+            }}
             className='flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden'
           >
             <img alt='edit' className='h-6 w-6' src={imgEditIcon} />
           </button>
           {/* Delete Button */}
           <button
-            onClick={onDeleteClick}
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              onDeleteClick?.();
+            }}
             className='flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden'
             type='button'
           >
