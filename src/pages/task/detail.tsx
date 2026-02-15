@@ -1,57 +1,91 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { BackDetailBar } from '@/components/common/appBar/backDetailAppBar';
 import { GreyLine } from '@/components/common/line/greyLine';
 import { CtaButton } from '@/components/common/button/ctaButton';
 import { CheckIcon } from '@/components/common/icons/checkIcon';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
 import EmptyNotice from '@/components/common/feedBack/emptyNotice';
+import { FeedBack } from '@/components/common';
+import ModalLayout from '@/components/common/feedBack/modalLayout';
 import { openLink, isReactNativeWebView } from '@/utils/nativeBridge';
+import { ROUTES } from '@/constants/routes';
+import {
+  useGetTask,
+  useCompleteTask,
+  useDeleteTask,
+  getGetTaskQueryKey,
+} from '@/api/generated/endpoints/task/task';
+import { useGetCollectDetail } from '@/api/generated/endpoints/collection/collection';
+import type {
+  ApiResponseTaskResponse,
+  ApiResponseCollectionDetailResponse,
+} from '@/api/generated/models';
 
 // 아이콘
-import imgNoData from '@/assets/icons/common/no-img-data.svg';
 import restaurantIcon from '@/assets/icons/category/detail/restaurant.svg';
+import hobbyIcon from '@/assets/icons/category/detail/hobby.svg';
+import travelIcon from '@/assets/icons/category/detail/travel.svg';
+import moneyIcon from '@/assets/icons/category/detail/money.svg';
+import shoppingIcon from '@/assets/icons/category/detail/shopping.svg';
+import exerciseIcon from '@/assets/icons/category/detail/exercise.svg';
+import careerIcon from '@/assets/icons/category/detail/career.svg';
+import studyIcon from '@/assets/icons/category/detail/study.svg';
+import tipsIcon from '@/assets/icons/category/detail/tips.svg';
+import etcIcon from '@/assets/icons/category/detail/etc.svg';
+import todoIcon from '@/assets/icons/category/detail/todo.svg';
 import calendarIcon from '@/assets/icons/category/detail/calendar.svg';
 import memoIcon from '@/assets/icons/category/detail/memo.svg';
 
-// TODO: 임시 데이터 - 실제로는 API 또는 라우팅 파라미터로 받아올 예정
-// API 응답 예시:
-// {
-//   taskId: number;
-//   title: string;
-//   archiveTitle: string;
-//   category: string;
-//   thumbnail: string | null; // link URL에서 추출한 썸네일 (Open Graph image 등)
-//   addedDate: string;
-//   memo: string;
-//   link: string;
-//   isCompleted: boolean;
-// }
-
-// TODO : 임시 데이터 API 연동 후 제거
-const MOCK_TASK_DATA = {
-  taskId: 1,
-  title: '스카이트리 근처 맛집 모음',
-  archiveTitle: '2025 2월 도쿄 여행',
-  category: '맛집',
-  categoryIcon: restaurantIcon,
-  thumbnail: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400', // link에서 추출된 썸네일 이미지
-  addedDate: '2일 전 추가',
-  // memo: '1. 스카이트리 근처 설명서에 가격 확인하기\n2. 매드 가이드는 최대 4층 누룽지/저수 최대 100차 기계 가는게너닝나다\n알이삭으욕활만구달만이삭으욕활만구달만이삭으욕활만구달만이삭으욕활만구달만이삭으욕활만구달만이',
-  memo: '',
-  link: 'https://www.youtube.com/watch?v=f7GrX2-rUOs&list=RDf7GrX2-rUOs&start_radio=1',
-  isCompleted: false,
+const CATEGORY_ICON_MAP: Record<string, string> = {
+  맛집: restaurantIcon,
+  취미: hobbyIcon,
+  여행: travelIcon,
+  '재테크/금융': moneyIcon,
+  쇼핑: shoppingIcon,
+  운동: exerciseIcon,
+  '진로/취업': careerIcon,
+  공부: studyIcon,
+  '생활 꿀팁': tipsIcon,
+  기타: etcIcon,
+  투두: todoIcon,
 };
 
 const TaskDetailPage = () => {
   const navigate = useNavigate();
-  const [isCompleted, setIsCompleted] = useState(MOCK_TASK_DATA.isCompleted);
+  const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+  const taskId = Number(id);
+
+  // API 호출
+  const { data: taskResponse, isLoading: isLoadingTask } = useGetTask(taskId);
+  const apiTaskResponse = taskResponse as unknown as ApiResponseTaskResponse;
+  const taskData = apiTaskResponse?.result;
+  const collectionId = taskData?.collectionId;
+
+  const { data: collectionResponse, isLoading: isLoadingCollection } =
+    useGetCollectDetail(collectionId ?? 0, {
+      query: { enabled: !!collectionId },
+    });
+  const apiCollectionResponse =
+    collectionResponse as unknown as ApiResponseCollectionDetailResponse;
+  const collectionData = apiCollectionResponse?.result;
+
+  const { mutate: completeTask } = useCompleteTask();
+  const { mutate: deleteTask } = useDeleteTask();
+
   const [imageError, setImageError] = useState(false);
-  const [appBarHeight, setAppBarHeight] = useState(56); // 초기값: 앱바 예상 높이
-  const [bottomHeight, setBottomHeight] = useState(104); // 초기값: 하단 버튼 영역 예상 높이
+  const [appBarHeight, setAppBarHeight] = useState(56);
+  const [bottomHeight, setBottomHeight] = useState(104);
   const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const appBarRef = useRef<HTMLDivElement>(null);
   const bottomBarRef = useRef<HTMLDivElement>(null);
+
+  const isCompleted = taskData?.status ?? false;
+  const categoryLabel = collectionData?.category ?? '';
+  const categoryIcon = CATEGORY_ICON_MAP[categoryLabel] ?? etcIcon;
 
   // 앱바 및 하단 버튼 영역 높이 동적 계산
   useEffect(() => {
@@ -75,116 +109,152 @@ const TaskDetailPage = () => {
 
   const handleOptionSelect = (key: string) => {
     if (key === 'edit') {
-      console.log('할 일 수정');
-      // TODO: 할 일 수정 로직 구현
+      navigate(`${ROUTES.taskEdit}/${taskId}`);
     } else if (key === 'delete') {
-      console.log('할 일 삭제');
-      // TODO: 할 일 삭제 로직 구현
+      setIsDeleteModalOpen(true);
     }
     setIsOptionMenuOpen(false);
   };
 
+  const handleConfirmDelete = () => {
+    deleteTask(
+      { taskId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getGetTaskQueryKey(taskId),
+          });
+          setIsDeleteModalOpen(false);
+          navigate(-1);
+        },
+      }
+    );
+  };
+
   const handleLinkClick = () => {
-    if (MOCK_TASK_DATA.link) {
+    if (taskData?.link) {
       if (isReactNativeWebView()) {
-        // React Native 환경에서는 네이티브 브릿지 사용
-        openLink(MOCK_TASK_DATA.link);
+        openLink(taskData.link);
       } else {
-        // 웹 브라우저 환경에서는 새 탭으로 열기
-        window.open(MOCK_TASK_DATA.link, '_blank');
+        window.open(taskData.link, '_blank');
       }
     }
   };
 
   const handleComplete = () => {
-    setIsCompleted(!isCompleted);
-    console.log('할 일 완료 토글:', !isCompleted);
-    // TODO: API 호출로 완료 상태 업데이트
+    completeTask(
+      { taskId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getGetTaskQueryKey(taskId),
+          });
+        },
+      }
+    );
   };
 
-  return (
-    <div className='flex min-h-screen flex-col bg-white'>
-      {/* 상단 앱바 */}
-      {/* TODO  app bar 고정으로 통일 작업 시 제거 예정 */}
-      <div className='fixed left-0 right-0 top-0 z-header' ref={appBarRef}>
-        <BackDetailBar
-          title='할 일 상세'
-          rightIcons='option'
-          onClickBack={handleBack}
-          onClickOption={handleOption}
+  if (isLoadingTask || isLoadingCollection) {
+    return (
+      <div className='flex min-h-screen items-center justify-center'>
+        <p className='text-body-lg text-grey-600'>로딩 중...</p>
+      </div>
+    );
+  }
+
+  if (!taskData) {
+    return (
+      <div className='flex min-h-screen flex-col items-center justify-center'>
+        <EmptyNotice
+          title='할 일을 찾을 수 없습니다'
+          subtitle='삭제되었거나 존재하지 않는 할 일입니다'
         />
       </div>
+    );
+  }
 
-      {/* 옵션 메뉴 */}
-      {isOptionMenuOpen && (
-        <>
-          <div
-            className='fixed inset-0 z-modal-overlay'
-            onClick={() => setIsOptionMenuOpen(false)}
+  return (
+    <div className='relative flex min-h-screen flex-col bg-white'>
+      <main>
+        {/* 헤더 */}
+        <div ref={appBarRef} className='sticky top-0 z-20 bg-white'>
+          <BackDetailBar
+            title='할 일 상세'
+            rightIcons={['option']}
+            onClickBack={handleBack}
+            onClickOption={handleOption}
           />
-          <div className='fixed right-5 top-14 z-modal-content'>
-            <OptionMenu onSelect={handleOptionSelect} />
-          </div>
-        </>
-      )}
-
-      {/* 메인 콘텐츠 */}
-      <main
-        className='relative flex flex-1 flex-col'
-        style={{
-          paddingTop: `${appBarHeight}px`,
-          paddingBottom: `${bottomHeight}px`,
-        }}
-      >
-        {/* 썸네일 이미지 - link에서 추출한 썸네일 표시, 없으면 기본 이미지 */}
-        <div
-          className='sticky z-0 h-40 w-full shrink-0 overflow-hidden bg-grey-200'
-          style={{ top: `${appBarHeight}px` }}
-        >
-          {MOCK_TASK_DATA.thumbnail && !imageError ? (
-            <img
-              src={MOCK_TASK_DATA.thumbnail}
-              alt='task thumbnail'
-              className='h-full w-full object-cover'
-              onError={() => {
-                setImageError(true);
-              }}
-            />
-          ) : (
-            <div className='flex h-full w-full items-center justify-center'>
-              <img src={imgNoData} alt='no image' className='h-auto w-auto' />
-            </div>
-          )}
         </div>
-        {/* 할 일 정보 섹션 */}
+
+        {/* 옵션 메뉴 */}
+        {isOptionMenuOpen && (
+          <>
+            <div
+              className='fixed inset-0 z-40 bg-transparent'
+              onClick={() => setIsOptionMenuOpen(false)}
+            />
+            <div className='fixed right-5 top-16 z-50'>
+              <OptionMenu onSelect={handleOptionSelect} />
+            </div>
+          </>
+        )}
+
+        {/* 삭제 확인 모달 */}
+        {isDeleteModalOpen && (
+          <ModalLayout
+            open={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+          >
+            <FeedBack.ConfirmDialog
+              title='정말 삭제하시겠어요?'
+              subtitle='삭제된 할 일은 복구할 수 없어요'
+              positiveLabel='삭제하기'
+              negativeLabel='취소'
+              onPositive={handleConfirmDelete}
+              onNegative={() => setIsDeleteModalOpen(false)}
+            />
+          </ModalLayout>
+        )}
+
+        {/* 본문 */}
         <div
-          className='relative z-10 -mt-4 flex flex-col gap-4 bg-white px-5 py-6'
+          className='overflow-y-auto px-5 pt-8'
           style={{
-            // 계산식: 화면 전체 높이 - 앱바 높이  - 하단 버튼 높이
-            minHeight: `calc(100vh - ${appBarHeight}px  - ${bottomHeight}px)`,
+            paddingBottom: `${bottomHeight + 16}px`,
+            minHeight: `calc(100vh - ${appBarHeight}px)`,
           }}
         >
           {/* 제목 */}
-          <h1 className='text-heading-lg text-grey-900'>
-            {MOCK_TASK_DATA.title}
+          <h1 className='mb-6 text-body-xl font-semibold text-black'>
+            {taskData.title}
           </h1>
 
+          {/* 썸네일 */}
+          {taskData.thumbnailUrl && !imageError && (
+            <div className='mb-6'>
+              <img
+                src={taskData.thumbnailUrl}
+                alt=''
+                className='h-auto w-full rounded-2xl object-cover'
+                onError={() => setImageError(true)}
+              />
+            </div>
+          )}
+
           {/* 모음 제목 */}
-          <p className='text-body-md text-grey-600'>
-            {MOCK_TASK_DATA.archiveTitle}
-          </p>
+          <div className='mb-3 rounded-2xl bg-grey-50 px-4 py-3'>
+            <span className='text-body-md text-grey-700'>
+              {collectionData?.name ?? '모음 없음'}
+            </span>
+          </div>
 
           <GreyLine />
 
           {/* 카테고리 */}
           <div className='flex items-center gap-2'>
-            <img
-              src={MOCK_TASK_DATA.categoryIcon}
-              alt=''
-              className='h-4 w-4 shrink-0'
-            />
+            <img src={categoryIcon} alt='' className='h-4 w-4 shrink-0' />
             <span className='text-body-md text-grey-700'>
-              {MOCK_TASK_DATA.category}
+              {categoryLabel || '카테고리 없음'}
             </span>
           </div>
 
@@ -192,16 +262,18 @@ const TaskDetailPage = () => {
           <div className='flex items-center gap-2'>
             <img src={calendarIcon} alt='' className='h-4 w-4 shrink-0' />
             <span className='text-body-md text-grey-700'>
-              {MOCK_TASK_DATA.addedDate}
+              {taskData.createdAt
+                ? new Date(taskData.createdAt).toLocaleDateString('ko-KR')
+                : '날짜 없음'}
             </span>
           </div>
 
           {/* 메모 */}
-          {MOCK_TASK_DATA.memo && (
+          {taskData.memo && (
             <div className='flex items-start gap-2'>
               <img src={memoIcon} alt='' className='mt-0.5 h-4 w-4 shrink-0' />
               <p className='truncate whitespace-pre-wrap text-body-md text-grey-700'>
-                {MOCK_TASK_DATA.memo}
+                {taskData.memo}
               </p>
             </div>
           )}
@@ -214,6 +286,7 @@ const TaskDetailPage = () => {
             />
           </div>
         </div>
+
         {/* 하단 버튼 영역 */}
         <div
           ref={bottomBarRef}
