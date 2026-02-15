@@ -15,6 +15,7 @@ export type LinkItemProps = {
   checked?: boolean;
   isEditMode?: boolean;
   onChange?: (checked: boolean) => void;
+  onClick?: () => void;
 
   onOriginalClick?: () => void;
   onShareClick?: () => void;
@@ -41,6 +42,7 @@ export default function LinkItem({
   checked = false,
   isEditMode = false,
   onChange,
+  onClick,
   onOriginalClick,
   onShareClick,
   onEditClick,
@@ -77,7 +79,10 @@ export default function LinkItem({
         {/* Info */}
         <div className='flex min-h-0 min-w-0 flex-1 flex-col items-start gap-1.5'>
           {/* Text */}
-          <div className='flex w-full flex-col items-start gap-0.5'>
+          <div
+            className='flex w-full cursor-pointer flex-col items-start gap-0.5'
+            onClick={onClick}
+          >
             <p
               className={`w-full truncate text-body-lg ${
                 checked && !isEditMode
