@@ -196,6 +196,10 @@ const HomeAfterLogin = () => {
     navigate(`${ROUTES.archiveEdit}/${id}`);
   };
 
+  const handleClickArchive = (id: string) => {
+    navigate(`${ROUTES.archiveDetail}/${id}`);
+  };
+
   const handleModalClose = () => {
     if (modalType === 'confirm') {
       confirmConfig?.onNegative?.();
@@ -226,6 +230,7 @@ const HomeAfterLogin = () => {
               items={latestArchives}
               onRequestDelete={handleRequestDeleteArchive}
               onRequestEdit={handleRequestEditArchive}
+              onClick={handleClickArchive}
             />
           </div>
         </main>
