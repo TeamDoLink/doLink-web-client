@@ -1,42 +1,63 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { InputField, Button, AppBar, FeedBack } from '@/components/common';
 import { CollectionChipSelector, type CollectionChip } from '@/components/task';
 import { useClipboardBridge } from '@/hooks/useClipboardBridge';
 import { useDraftBridge } from '@/hooks/useDraftBridge';
 import type { TaskDraft } from '@/types/draft';
 import { ModalLayout } from '@/components/common/feedBack';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useCreate } from '@/api/generated/endpoints/task/task';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import {
+  useCreate,
+  useGetTask,
+  useUpdateTask,
+} from '@/api/generated/endpoints/task/task';
 import { useListCollectSelectOptions } from '@/api/generated/endpoints/collection/collection';
-import type { ApiResponseListCollectionSimpleResponse } from '@/api/generated/models';
+import type {
+  ApiResponseListCollectionSimpleResponse,
+  ApiResponseTaskResponse,
+} from '@/api/generated/models';
 
 // 임시저장 키
 const DRAFT_KEY = 'task-create-draft';
 
 /**
- * 업무 생성 페이지
- * 할일 추가를 위한 전체 폼 페이지
+ * 할 일 생성/수정 페이지
+ * 할 일 추가 및 수정을 위한 전체 폼 페이지
  */
-function TaskCreatePage() {
+function TaskFormPage() {
   const MAX_LENGTH = 100; // 가장 일반적인 경우
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { clipboardLinkValue, requestClipboard, hasClipboardLink, error } =
     useClipboardBridge();
 
+  const { id } = useParams<{ id?: string }>();
+  const isEditMode = !!id;
+
   // 모음 선택 목록 API
   const { data: collectionsData } = useListCollectSelectOptions();
 
-  // TODO collectio(archive) 0개일떄 어떻게 보여줄건지 논의
-  const collections: CollectionChip[] = (
-    (collectionsData as unknown as ApiResponseListCollectionSimpleResponse)
-      ?.result ?? []
-  ).map((item) => ({
-    id: String(item.collectionId),
-    label: item.name ?? '',
-  }));
+  const collections: CollectionChip[] = useMemo(
+    () =>
+      (
+        (collectionsData as unknown as ApiResponseListCollectionSimpleResponse)
+          ?.result ?? []
+      ).map((item) => ({
+        id: String(item.collectionId),
+        label: item.name ?? '',
+      })),
+    [collectionsData]
+  );
 
-  // 할 일 생성 API
-  const { mutate: createTask, isPending } = useCreate();
+  // 할 일 상세 (수정 모드에서만 사용)
+  const { data: taskData } = useGetTask(Number(id), {
+    query: { enabled: isEditMode },
+  });
+  const apiTaskData = taskData as unknown as ApiResponseTaskResponse;
+  const task = apiTaskData?.result;
+
+  // 할 일 생성/수정 API
+  const { mutate: createTask, isPending: isCreating } = useCreate();
+  const { mutate: updateTask, isPending: isUpdating } = useUpdateTask();
 
   // TODO 임시저장 불러오기 시  isLoading  error 화면 UI 처리
   const { saveDraft, loadDraft, deleteDraft } = useDraftBridge<TaskDraft>();
@@ -55,11 +76,31 @@ function TaskCreatePage() {
   const [titleFocused, setTitleFocused] = useState(false);
   const [linkFocused, setLinkFocused] = useState(false);
 
+  const isPending = isCreating || isUpdating;
+
+  // 수정 모드일 때 API 결과로 초기값 세팅
+  useEffect(() => {
+    if (!isEditMode || !task || !collections.length) return;
+
+    setTitle(task.title ?? '');
+    setLinkValue(task.link ?? '');
+    setMemo(task.memo ?? '');
+
+    if (task.collectionId != null) {
+      const found = collections.find((c) => Number(c.id) === task.collectionId);
+      if (found) {
+        setSelectedArchiveCollection({ id: found.id, name: found.label });
+      }
+    }
+  }, [isEditMode, task, collections]);
+
   /**
    * 페이지 진입 시 임시저장 복구
    */
   useEffect(() => {
     const restoreDraft = async () => {
+      // 수정 모드일 때는 임시저장 복구 사용 안 함
+      if (isEditMode) return;
       // location.state로 전달된 restoreDraft 확인
       const shouldRestore = (
         location.state as { restoreDraft?: boolean } | null | undefined
@@ -105,7 +146,7 @@ function TaskCreatePage() {
 
     restoreDraft();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.state]);
+  }, [location.state, isEditMode]);
 
   /**
    * 제목 입력필드 focus 핸들러
@@ -196,6 +237,26 @@ function TaskCreatePage() {
 
   const handleAddClick = () => {
     if (!selectedArchiveCollection) return;
+
+    if (isEditMode && task) {
+      updateTask(
+        {
+          taskId: Number(id),
+          data: {
+            collectionId: Number(selectedArchiveCollection.id),
+            title,
+            link: linkValue || undefined,
+            memo: memo || undefined,
+          },
+        },
+        {
+          onSuccess: () => {
+            navigate(-1);
+          },
+        }
+      );
+      return;
+    }
 
     createTask(
       {
@@ -316,8 +377,8 @@ function TaskCreatePage() {
       </ModalLayout>
 
       <AppBar.BackDetailBar
-        title='할 일 추가'
-        rightIcons={['save']}
+        title={isEditMode ? '할 일 수정' : '할 일 추가'}
+        rightIcons={isEditMode ? [] : ['save']}
         isSaveDisabled={!isDraftSaveEnabled}
         onClickSave={() => setShowConfirmDialog(true)}
         onClickBack={handleBackClick}
@@ -421,11 +482,11 @@ function TaskCreatePage() {
           onClick={handleAddClick}
           className='w-full'
         >
-          추가하기
+          {isEditMode ? '수정하기' : '추가하기'}
         </Button.CtaButton>
       </div>
     </div>
   );
 }
 
-export default TaskCreatePage;
+export default TaskFormPage;
