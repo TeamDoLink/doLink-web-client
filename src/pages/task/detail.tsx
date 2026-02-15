@@ -24,6 +24,7 @@ import type {
 } from '@/api/generated/models';
 
 // 아이콘
+import imgNoData from '@/assets/icons/common/no-img-data.svg';
 import restaurantIcon from '@/assets/icons/category/detail/restaurant.svg';
 import hobbyIcon from '@/assets/icons/category/detail/hobby.svg';
 import travelIcon from '@/assets/icons/category/detail/travel.svg';
@@ -133,9 +134,11 @@ const TaskDetailPage = () => {
 
   const handleLinkClick = () => {
     if (taskData?.link) {
+      // React Native 환경에서는 네이티브 브릿지 사용
       if (isReactNativeWebView()) {
         openLink(taskData.link);
       } else {
+        // 웹 브라우저 환경에서는 새 탭으로 열기
         window.open(taskData.link, '_blank');
       }
     }
@@ -174,79 +177,92 @@ const TaskDetailPage = () => {
   }
 
   return (
-    <div className='relative flex min-h-screen flex-col bg-white'>
-      <main>
-        {/* 헤더 */}
-        <div ref={appBarRef} className='sticky top-0 z-20 bg-white'>
-          <BackDetailBar
-            title='할 일 상세'
-            rightIcons={['option']}
-            onClickBack={handleBack}
-            onClickOption={handleOption}
+    <div className='flex min-h-screen flex-col bg-white'>
+      {/* 상단 앱바 */}
+      {/* TODO  app bar 고정으로 통일 작업 시 제거 예정 */}
+      <div className='fixed left-0 right-0 top-0 z-header' ref={appBarRef}>
+        <BackDetailBar
+          title='할 일 상세'
+          rightIcons='option'
+          onClickBack={handleBack}
+          onClickOption={handleOption}
+        />
+      </div>
+
+      {/* 옵션 메뉴 */}
+      {isOptionMenuOpen && (
+        <>
+          <div
+            className='fixed inset-0 z-modal-overlay'
+            onClick={() => setIsOptionMenuOpen(false)}
           />
+          <div className='fixed right-5 top-14 z-modal-content'>
+            <OptionMenu onSelect={handleOptionSelect} />
+          </div>
+        </>
+      )}
+
+      {/* 삭제 확인 모달 */}
+      {isDeleteModalOpen && (
+        <ModalLayout
+          open={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+        >
+          <FeedBack.ConfirmDialog
+            title='정말 삭제하시겠어요?'
+            subtitle='삭제된 할 일은 복구할 수 없어요'
+            positiveLabel='삭제하기'
+            negativeLabel='취소'
+            onPositive={handleConfirmDelete}
+            onNegative={() => setIsDeleteModalOpen(false)}
+          />
+        </ModalLayout>
+      )}
+
+      {/* 메인 콘텐츠 */}
+      <main
+        className='relative flex flex-1 flex-col'
+        style={{
+          paddingTop: `${appBarHeight}px`,
+          paddingBottom: `${bottomHeight}px`,
+        }}
+      >
+        {/* 썸네일 이미지 - link에서 추출한 썸네일 표시, 없으면 기본 이미지 */}
+        <div
+          className='sticky z-0 h-40 w-full shrink-0 overflow-hidden bg-grey-200'
+          style={{ top: `${appBarHeight}px` }}
+        >
+          {taskData.thumbnailUrl && !imageError ? (
+            <img
+              src={taskData.thumbnailUrl}
+              alt='task thumbnail'
+              className='h-full w-full object-cover'
+              onError={() => {
+                setImageError(true);
+              }}
+            />
+          ) : (
+            <div className='flex h-full w-full items-center justify-center'>
+              <img src={imgNoData} alt='no image' className='h-auto w-auto' />
+            </div>
+          )}
         </div>
 
-        {/* 옵션 메뉴 */}
-        {isOptionMenuOpen && (
-          <>
-            <div
-              className='fixed inset-0 z-40 bg-transparent'
-              onClick={() => setIsOptionMenuOpen(false)}
-            />
-            <div className='fixed right-5 top-16 z-50'>
-              <OptionMenu onSelect={handleOptionSelect} />
-            </div>
-          </>
-        )}
-
-        {/* 삭제 확인 모달 */}
-        {isDeleteModalOpen && (
-          <ModalLayout
-            open={isDeleteModalOpen}
-            onClose={() => setIsDeleteModalOpen(false)}
-          >
-            <FeedBack.ConfirmDialog
-              title='정말 삭제하시겠어요?'
-              subtitle='삭제된 할 일은 복구할 수 없어요'
-              positiveLabel='삭제하기'
-              negativeLabel='취소'
-              onPositive={handleConfirmDelete}
-              onNegative={() => setIsDeleteModalOpen(false)}
-            />
-          </ModalLayout>
-        )}
-
-        {/* 본문 */}
+        {/* 할 일 정보 섹션 */}
         <div
-          className='overflow-y-auto px-5 pt-8'
+          className='relative z-10 -mt-4 flex flex-col gap-3 bg-white px-5 py-6'
           style={{
-            paddingBottom: `${bottomHeight + 16}px`,
-            minHeight: `calc(100vh - ${appBarHeight}px)`,
+            // 계산식: 화면 전체 높이 - 앱바 높이  - 하단 버튼 높이
+            minHeight: `calc(100vh - ${appBarHeight}px  - ${bottomHeight}px)`,
           }}
         >
           {/* 제목 */}
-          <h1 className='mb-6 text-body-xl font-semibold text-black'>
-            {taskData.title}
-          </h1>
-
-          {/* 썸네일 */}
-          {taskData.thumbnailUrl && !imageError && (
-            <div className='mb-6'>
-              <img
-                src={taskData.thumbnailUrl}
-                alt=''
-                className='h-auto w-full rounded-2xl object-cover'
-                onError={() => setImageError(true)}
-              />
-            </div>
-          )}
+          <h1 className='text-heading-xl text-black'>{taskData.title}</h1>
 
           {/* 모음 제목 */}
-          <div className='mb-3 rounded-2xl bg-grey-50 px-4 py-3'>
-            <span className='text-body-md text-grey-700'>
-              {collectionData?.name ?? '모음 없음'}
-            </span>
-          </div>
+          <p className='text-body-xl text-black'>
+            {collectionData?.name ?? '모음 없음'}
+          </p>
 
           <GreyLine />
 
@@ -279,7 +295,7 @@ const TaskDetailPage = () => {
           )}
 
           {/* 서비스 준비 중 섹션 */}
-          <div className='rounded-2xl bg-grey-50 py-12'>
+          <div className='mt-5 rounded-2xl bg-grey-50 py-12'>
             <EmptyNotice
               title='서비스 준비 중입니다'
               subtitle='빠른 시일 내에 만나요 :)'
