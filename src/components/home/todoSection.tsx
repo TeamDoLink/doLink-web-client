@@ -6,6 +6,7 @@ type TodoSectionProps = {
   className?: string;
   items: TodoItem[];
   onToggle: (id: string, checked: boolean) => void;
+  onTaskClick?: (id: string) => void;
 };
 
 /**
@@ -15,6 +16,7 @@ export const TodoSection = ({
   className = '',
   items,
   onToggle,
+  onTaskClick,
 }: TodoSectionProps) => {
   return (
     <section className={`mt-5 space-y-4 ${className}`}>
@@ -27,6 +29,7 @@ export const TodoSection = ({
             subtitle={`${formatRelativeDateLabel(createdAt)} · ${platform}`}
             checked={checked}
             onChange={(next) => onToggle(id, next)}
+            onClick={() => onTaskClick?.(id)}
           />
         ))}
       </div>
