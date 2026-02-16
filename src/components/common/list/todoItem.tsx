@@ -5,6 +5,7 @@ export type TodoItemProps = {
   subtitle?: string;
   checked?: boolean;
   onChange?: (checked: boolean) => void;
+  onClick?: () => void;
   width?: string;
 };
 
@@ -13,16 +14,22 @@ export default function TodoItem({
   subtitle,
   checked = false,
   onChange,
+  onClick,
   width = 'w-full',
 }: TodoItemProps) {
-  const handleToggle = () => {
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onChange?.(!checked);
   };
 
+  const handleCardClick = () => {
+    onClick?.();
+  };
+
   return (
-    <button
-      onClick={handleToggle}
-      className={`flex ${width} items-start gap-3 px-5 py-0`}
+    <div
+      onClick={handleCardClick}
+      className={`flex ${width} cursor-pointer items-start gap-3 px-5 py-0`}
     >
       {/* Content */}
       <div className='flex min-w-0 flex-1 flex-col items-start gap-0'>
@@ -38,9 +45,9 @@ export default function TodoItem({
       </div>
 
       {/* Checkbox */}
-      <div className='flex-shrink-0'>
+      <button onClick={handleToggle} className='flex-shrink-0' type='button'>
         <CheckBox checked={checked} />
-      </div>
-    </button>
+      </button>
+    </div>
   );
 }
