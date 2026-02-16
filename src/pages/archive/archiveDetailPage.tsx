@@ -202,8 +202,8 @@ const ArchiveDetailPage = () => {
   const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastToken, setToastToken] = useState(0);
-  const [pendingDeleteTaskId, setPendingDeleteTaskId] = useState<number | null>(
-    null
+  const [pendingDeleteTaskIds, setPendingDeleteTaskIds] = useState<number[]>(
+    []
   );
   const [isCollectionDeleteOpen, setIsCollectionDeleteOpen] = useState(false);
   const titleSectionRef = useRef<HTMLDivElement>(null);
@@ -373,6 +373,12 @@ const ArchiveDetailPage = () => {
 
   const handleTaskClick = (taskId: number) => {
     navigate(`${ROUTES.taskDetail}/${taskId}`);
+  };
+
+  // 그룹 단위 삭제 핸들러 (같은 날짜의 모든 할 일을 삭제)
+  const handleDeleteGroup = (taskIds: number[]) => {
+    // 모달 표시를 위해 pendingDeleteTaskIds에 저장
+    setPendingDeleteTaskIds(taskIds);
   };
 
   const handleOption = () => {
@@ -549,7 +555,18 @@ const ArchiveDetailPage = () => {
         return;
       }
 
-      const key = link.createdAt.split('T')[0];
+      // createdAt을 로컬 날짜로 변환하여 날짜만 추출 (yyyy-MM-dd)
+      const date = new Date(link.createdAt);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const key = `${year}-${month}-${day}`;
+
+      // 디버깅: 날짜 그룹화 확인
+      console.log(
+        `Task ${link.taskId}: createdAt=${link.createdAt}, key=${key}`
+      );
+
       if (!grouped.has(key)) {
         grouped.set(key, []);
       }
@@ -658,6 +675,7 @@ const ArchiveDetailPage = () => {
                 linkEditModes={linkEditModes}
                 onCheck={handleLinkCheck}
                 onTaskClick={handleTaskClick}
+                onDeleteGroup={handleDeleteGroup}
                 onEditModeChange={(isEditMode) => {
                   tasks.forEach((task) => {
                     handleEditModeChange(task.taskId, isEditMode);
@@ -684,7 +702,7 @@ const ArchiveDetailPage = () => {
                   }
                 }}
                 onDeleteClick={(taskId) => {
-                  setPendingDeleteTaskId(taskId);
+                  setPendingDeleteTaskIds([taskId]);
                 }}
                 capsuleDisabled={isBeforeLoginArchive}
               />
@@ -718,15 +736,15 @@ const ArchiveDetailPage = () => {
 
       {/* 할 일 삭제 확인 모달 */}
       <FeedBack.ModalLayout
-        open={pendingDeleteTaskId !== null}
-        onClose={() => setPendingDeleteTaskId(null)}
+        open={pendingDeleteTaskIds.length > 0}
+        onClose={() => setPendingDeleteTaskIds([])}
       >
         <FeedBack.ConfirmDialog
           title='할 일을 삭제할까요?'
           positiveLabel='삭제하기'
           negativeLabel='취소'
           onPositive={handleConfirmTaskDelete}
-          onNegative={() => setPendingDeleteTaskId(null)}
+          onNegative={() => setPendingDeleteTaskIds([])}
         />
       </FeedBack.ModalLayout>
 
