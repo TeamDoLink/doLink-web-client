@@ -368,10 +368,15 @@ function TaskFormPage() {
         onClose={() => setShowConfirmDialog(false)}
       >
         <FeedBack.ConfirmDialog
-          title={`작성 중인 할 일을\n저장하고 나갈까요?`}
-          positiveLabel='저장하고 나가기'
-          negativeLabel='취소'
-          onPositive={handleSave}
+          title={
+            isEditMode
+              ? '할 일 수정을 그만둘까요?'
+              : `작성 중인 할 일을\n저장하고 나갈까요?`
+          }
+          subtitle={isEditMode ? '수정한 내용은 저장되지 않아요.' : undefined}
+          positiveLabel={isEditMode ? '그만두기' : '저장하고 나가기'}
+          negativeLabel={isEditMode ? '계속 수정하기' : '취소'}
+          onPositive={isEditMode ? () => navigate(-1) : handleSave}
           onNegative={hanldeCancel}
         />
       </ModalLayout>
