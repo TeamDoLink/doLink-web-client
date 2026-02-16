@@ -421,24 +421,36 @@ const ArchiveDetailPage = () => {
   };
 
   const handleConfirmTaskDelete = () => {
-    if (pendingDeleteTaskId === null || isDeletingTask) return;
+    if (pendingDeleteTaskIds.length === 0 || isDeletingTask) return;
 
     setIsDeletingTask(true);
+
+    // ✅ 복사본 생성 (스코프 명확화)
+    const taskIdsToDelete = [...pendingDeleteTaskIds];
 
     // 튜토리얼 모음은 로컬 상태만 업데이트
     if (isBeforeLoginArchive) {
       setTutorialTasks((prev) =>
-        prev.filter((task) => task.taskId !== pendingDeleteTaskId)
+        prev.filter((task) => !taskIdsToDelete.includes(task.taskId))
       );
+
       setLinkStates((prev) => {
-        const { [pendingDeleteTaskId]: _, ...rest } = prev;
-        return rest;
+        const next = { ...prev };
+        taskIdsToDelete.forEach((taskId) => {
+          delete next[taskId];
+        });
+        return next;
       });
+
       setLinkEditModes((prev) => {
-        const { [pendingDeleteTaskId]: _, ...rest } = prev;
-        return rest;
+        const next = { ...prev };
+        taskIdsToDelete.forEach((taskId) => {
+          delete next[taskId];
+        });
+        return next;
       });
-      setPendingDeleteTaskId(null);
+
+      setPendingDeleteTaskIds([]);
       setIsDeletingTask(false);
       return;
     }
@@ -447,40 +459,54 @@ const ArchiveDetailPage = () => {
     const previousLinkStates = { ...linkStates };
     const previousLinkEditModes = { ...linkEditModes };
 
-    // 즉시 UI에서 제거: linkStates / linkEditModes에서 삭제
+    // 즉시 UI에서 제거
     setLinkStates((prev) => {
-      const { [pendingDeleteTaskId]: _, ...rest } = prev;
-      return rest;
+      const next = { ...prev };
+      taskIdsToDelete.forEach((taskId) => {
+        delete next[taskId];
+      });
+      return next;
     });
+
     setLinkEditModes((prev) => {
-      const { [pendingDeleteTaskId]: _, ...rest } = prev;
-      return rest;
+      const next = { ...prev };
+      taskIdsToDelete.forEach((taskId) => {
+        delete next[taskId];
+      });
+      return next;
     });
 
-    deleteTask(
-      { taskId: pendingDeleteTaskId },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: ['collectionTasks', collectionId],
-          });
-          setIsDeletingTask(false);
-          setPendingDeleteTaskId(null);
-        },
-        onError: (error) => {
-          console.error('할 일 삭제에 실패했습니다.', error);
+    // 모달 닫기
+    setPendingDeleteTaskIds([]);
 
-          // 롤백
-          setLinkStates(previousLinkStates);
-          setLinkEditModes(previousLinkEditModes);
-
-          alert('삭제에 실패했습니다. 다시 시도해주세요.');
-
-          setIsDeletingTask(false);
-          setPendingDeleteTaskId(null);
-        },
-      }
-    );
+    // ✅ 복사본 사용
+    Promise.all(
+      taskIdsToDelete.map(
+        (taskId) =>
+          new Promise((resolve, reject) => {
+            deleteTask(
+              { taskId },
+              {
+                onSuccess: () => resolve(taskId),
+                onError: (error) => reject({ taskId, error }),
+              }
+            );
+          })
+      )
+    )
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: ['collectionTasks', collectionId],
+        });
+        setIsDeletingTask(false);
+      })
+      .catch((error) => {
+        console.error('할 일 삭제 실패:', error);
+        setLinkStates(previousLinkStates);
+        setLinkEditModes(previousLinkEditModes);
+        setIsDeletingTask(false);
+        alert('삭제에 실패했습니다. 다시 시도해주세요.');
+      });
   };
 
   const handleFloatingButtonClick = () => {
