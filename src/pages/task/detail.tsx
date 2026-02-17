@@ -290,6 +290,7 @@ const TaskDetailPage = () => {
             <div className='flex items-start gap-2'>
               <img src={memoIcon} alt='' className='mt-0.5 h-4 w-4 shrink-0' />
               <p className='truncate whitespace-pre-wrap text-body-md text-grey-700'>
+                <span>메모가이드: </span>
                 {taskData.memo}
               </p>
             </div>
