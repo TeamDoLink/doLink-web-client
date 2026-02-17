@@ -17,6 +17,7 @@ import {
   useDeleteTask,
   getGetTaskQueryKey,
 } from '@/api/generated/endpoints/task/task';
+import { formatRelativeDateLabel } from '@/utils/date';
 import { useGetCollectDetail } from '@/api/generated/endpoints/collection/collection';
 import type {
   ApiResponseTaskResponse,
@@ -279,7 +280,7 @@ const TaskDetailPage = () => {
             <img src={calendarIcon} alt='' className='h-4 w-4 shrink-0' />
             <span className='text-body-md text-grey-700'>
               {taskData.createdAt
-                ? new Date(taskData.createdAt).toLocaleDateString('ko-KR')
+                ? formatRelativeDateLabel(taskData.createdAt)
                 : '날짜 없음'}
             </span>
           </div>
