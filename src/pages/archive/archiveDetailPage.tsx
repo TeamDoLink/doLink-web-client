@@ -179,7 +179,7 @@ const ArchiveDetailPage = () => {
   });
 
   const { mutate: completeTask } = useCompleteTask();
-  const { mutate: deleteTask } = useDeleteTask();
+  const { mutateAsync: deleteTask } = useDeleteTask();
   const { mutate: deleteCollect } = useDeleteCollect();
 
   // API 데이터만 사용
@@ -479,21 +479,8 @@ const ArchiveDetailPage = () => {
     // 모달 닫기
     setPendingDeleteTaskIds([]);
 
-    // ✅ 복사본 사용
-    Promise.all(
-      taskIdsToDelete.map(
-        (taskId) =>
-          new Promise((resolve, reject) => {
-            deleteTask(
-              { taskId },
-              {
-                onSuccess: () => resolve(taskId),
-                onError: (error) => reject({ taskId, error }),
-              }
-            );
-          })
-      )
-    )
+    // 복사본 사용
+    Promise.all(taskIdsToDelete.map((taskId) => deleteTask({ taskId })))
       .then(() => {
         queryClient.invalidateQueries({
           queryKey: ['collectionTasks', collectionId],
