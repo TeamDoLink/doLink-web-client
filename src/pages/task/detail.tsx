@@ -36,7 +36,6 @@ import careerIcon from '@/assets/icons/category/detail/career.svg';
 import studyIcon from '@/assets/icons/category/detail/study.svg';
 import tipsIcon from '@/assets/icons/category/detail/tips.svg';
 import etcIcon from '@/assets/icons/category/detail/etc.svg';
-import todoIcon from '@/assets/icons/category/detail/todo.svg';
 import calendarIcon from '@/assets/icons/category/detail/calendar.svg';
 import memoIcon from '@/assets/icons/category/detail/memo.svg';
 
@@ -44,14 +43,13 @@ const CATEGORY_ICON_MAP: Record<string, string> = {
   맛집: restaurantIcon,
   취미: hobbyIcon,
   여행: travelIcon,
-  '재테크/금융': moneyIcon,
+  재테크: moneyIcon,
   쇼핑: shoppingIcon,
   운동: exerciseIcon,
-  '진로/취업': careerIcon,
+  커리어: careerIcon,
   공부: studyIcon,
-  '생활 꿀팁': tipsIcon,
+  꿀팁: tipsIcon,
   기타: etcIcon,
-  투두: todoIcon,
 };
 
 const TaskDetailPage = () => {
