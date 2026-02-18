@@ -16,6 +16,7 @@ import {
   useCompleteTask,
   useDeleteTask,
   getGetTaskQueryKey,
+  getListRecentQueryKey,
 } from '@/api/generated/endpoints/task/task';
 import { formatRelativeDateLabel } from '@/utils/date';
 import { useGetCollectDetail } from '@/api/generated/endpoints/collection/collection';
@@ -121,8 +122,14 @@ const TaskDetailPage = () => {
       { taskId },
       {
         onSuccess: () => {
+          // 관련 목록 캐시 무효화
           queryClient.invalidateQueries({
-            queryKey: getGetTaskQueryKey(taskId),
+            predicate: (query) =>
+              Array.isArray(query.queryKey) &&
+              query.queryKey[0] === 'collectionTasks',
+          });
+          queryClient.invalidateQueries({
+            queryKey: getListRecentQueryKey(),
           });
           setIsDeleteModalOpen(false);
           navigate(-1);
@@ -147,10 +154,33 @@ const TaskDetailPage = () => {
     completeTask(
       { taskId },
       {
-        onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: getGetTaskQueryKey(taskId),
-          });
+        onSuccess: async () => {
+          // 모든 관련 캐시 무효화
+          await Promise.all([
+            queryClient.invalidateQueries({
+              queryKey: getGetTaskQueryKey(taskId),
+            }),
+            queryClient.invalidateQueries({
+              predicate: (query) =>
+                Array.isArray(query.queryKey) &&
+                query.queryKey[0] === 'collectionTasks',
+            }),
+            queryClient.invalidateQueries({
+              queryKey: getListRecentQueryKey(),
+            }),
+          ]);
+
+          // ✅ 추가: 즉시 재요청 (afterLogin.tsx의 handleToggleTodo와 동일)
+          await Promise.all([
+            queryClient.refetchQueries({
+              predicate: (query) =>
+                Array.isArray(query.queryKey) &&
+                query.queryKey[0] === 'collectionTasks',
+            }),
+            queryClient.refetchQueries({
+              queryKey: getListRecentQueryKey(),
+            }),
+          ]);
         },
       }
     );
