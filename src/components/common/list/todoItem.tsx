@@ -28,7 +28,15 @@ export default function TodoItem({
 
   return (
     <div
+      role='button'
+      tabIndex={0}
       onClick={handleCardClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
       className={`flex ${width} cursor-pointer items-start gap-3 px-5 py-0`}
     >
       {/* Content */}
