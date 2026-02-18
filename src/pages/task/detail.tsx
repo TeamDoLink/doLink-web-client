@@ -122,15 +122,22 @@ const TaskDetailPage = () => {
       { taskId },
       {
         onSuccess: () => {
-          // 관련 목록 캐시 무효화
+          // 모음 관련 태스크 목록 캐시 무효화
           queryClient.invalidateQueries({
             predicate: (query) =>
               Array.isArray(query.queryKey) &&
               query.queryKey[0] === 'collectionTasks',
           });
+
+          // 최근 태스크 목록 캐시 무효화
           queryClient.invalidateQueries({
-            queryKey: getListRecentQueryKey(),
+            predicate: (
+              query // ← 이 부분 변경
+            ) =>
+              Array.isArray(query.queryKey) &&
+              query.queryKey[0] === 'listRecent',
           });
+
           setIsDeleteModalOpen(false);
           navigate(-1);
         },
