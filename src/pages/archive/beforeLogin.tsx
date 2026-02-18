@@ -39,16 +39,15 @@ const ArchiveBeforeLogin = () => {
   const handleClickSearch = () => {
     navigate(ROUTES.search);
   };
+
+  // 전역 상태: 선택된 카테고리 (페이지 간 상태 유지용)
   const selectedCategory = useArchiveUIStore((state) => state.selectedCategory);
   const setSelectedCategory = useArchiveUIStore(
     (state) => state.setSelectedCategory
   );
+
   const [showToast, setShowToast] = useState(false);
   const [toastToken, setToastToken] = useState(0);
-
-  useEffect(() => {
-    setSelectedCategory('all');
-  }, [setSelectedCategory]);
 
   useEffect(() => {
     if (!showToast) {
