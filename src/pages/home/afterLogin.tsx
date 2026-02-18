@@ -9,7 +9,6 @@ import { TodoSection } from '@/components/home/todoSection';
 import { ArchiveSection } from '@/components/home/archiveSection';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useModalStore } from '@/stores/useModalStore';
-import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import { ROUTES } from '@/constants/routes';
 import {
   useListRecent,
@@ -90,9 +89,6 @@ const HomeAfterLogin = () => {
   const { mutate: completeTask } = useCompleteTask();
   const { mutate: deleteCollect } = useDeleteCollect();
 
-  const setSelectedArchiveId = useArchiveUIStore(
-    (state) => state.setSelectedArchiveId
-  );
   const {
     isOpen: isModalOpen,
     type: modalType,
@@ -139,10 +135,28 @@ const HomeAfterLogin = () => {
     completeTask(
       { taskId: Number(id) },
       {
-        onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: getListRecentQueryKey(),
-          });
+        onSuccess: async () => {
+          // 모든 관련 캐시 무효화
+          await Promise.all([
+            queryClient.invalidateQueries({
+              queryKey: getListRecentQueryKey(),
+            }),
+            // 모든 모음 상세 페이지 캐시 무효화
+            queryClient.invalidateQueries({
+              predicate: (query) =>
+                Array.isArray(query.queryKey) &&
+                query.queryKey[0] === 'collectionTasks',
+            }),
+            // 홈 화면 모음 목록 캐시 무효화
+            queryClient.invalidateQueries({
+              queryKey: getListTop8QueryKey(),
+            }),
+            // 아카이브 탭 모음 목록 캐시 무효화
+            queryClient.invalidateQueries({
+              queryKey: getListByCategoryQueryKey(),
+            }),
+          ]);
+
           setTodoOverrides({});
           if (nextChecked && !suppressCompleteModal) {
             openAlert({
@@ -181,7 +195,6 @@ const HomeAfterLogin = () => {
               queryClient.invalidateQueries({
                 queryKey: getListRecentQueryKey(),
               });
-              setSelectedArchiveId(null);
               closeModal();
             },
           }
@@ -192,8 +205,11 @@ const HomeAfterLogin = () => {
   };
 
   const handleRequestEditArchive = (id: string) => {
-    setSelectedArchiveId(id);
     navigate(`${ROUTES.archiveEdit}/${id}`);
+  };
+
+  const handleClickArchive = (id: string) => {
+    navigate(`${ROUTES.archiveDetail}/${id}`);
   };
 
   const handleModalClose = () => {
@@ -211,6 +227,10 @@ const HomeAfterLogin = () => {
     navigate(ROUTES.search);
   };
 
+  const handleTaskClick = (id: string) => {
+    navigate(`${ROUTES.taskDetail}/${id}`);
+  };
+
   return (
     <div className='relative flex min-h-screen flex-col'>
       <Background.GradientBackground>
@@ -221,11 +241,16 @@ const HomeAfterLogin = () => {
         <main className='relative grow'>
           <div className='mx-auto flex flex-col px-5 py-2'>
             <GreetingSection memberName={memberName} greeting={greeting} />
-            <TodoSection items={latestTodos} onToggle={handleToggleTodo} />
+            <TodoSection
+              items={latestTodos}
+              onToggle={handleToggleTodo}
+              onTaskClick={handleTaskClick}
+            />
             <ArchiveSection
               items={latestArchives}
               onRequestDelete={handleRequestDeleteArchive}
               onRequestEdit={handleRequestEditArchive}
+              onClick={handleClickArchive}
             />
           </div>
         </main>

@@ -68,6 +68,10 @@ interface SwipeableDeleteCardProps {
   onEditClick: (linkId: number) => void;
   /** '삭제' 버튼 클릭 시 호출되는 콜백 함수 */
   onDeleteClick: (linkId: number) => void;
+  /** 카드 단위 삭제 버튼 클릭 시 호출되는 콜백 함수 (선택) */
+  onDeleteGroup?: (linkIds: number[]) => void;
+  /** 할 일 카드 클릭 시 호출되는 콜백 함수 (선택) */
+  onTaskClick?: (taskId: number) => void;
   /** 캡슐 버튼 및 체크박스 비활성화 여부 */
   capsuleDisabled?: boolean;
 }
@@ -118,6 +122,8 @@ export const SwipeableDeleteCard = ({
   onShareClick,
   onEditClick,
   onDeleteClick,
+  onDeleteGroup,
+  onTaskClick,
   capsuleDisabled = false,
 }: SwipeableDeleteCardProps) => {
   // Task를 LinkItem 형식으로 변환
@@ -244,9 +250,13 @@ export const SwipeableDeleteCard = ({
   };
 
   const handleDeleteGroup = () => {
-    links.forEach((link) => {
-      onDeleteClick(link.id);
-    });
+    const ids = links.map((link) => link.id);
+
+    if (onDeleteGroup) {
+      onDeleteGroup(ids);
+    } else {
+      ids.forEach((id) => onDeleteClick(id));
+    }
     setSwipeOffset(0);
   };
 
@@ -307,6 +317,7 @@ export const SwipeableDeleteCard = ({
               checked={linkStates[link.id]} // 체크박스 상태
               isEditMode={linkEditModes[link.id]} // 수정 모드 상태
               onChange={(checked) => onCheck(link.id, checked)} // 체크박스 변경 핸들러
+              onClick={() => onTaskClick?.(link.id)} // 할 일 클릭 핸들러
               onOriginalClick={() => onOriginalClick(link.id)} // 원본 보기 클릭 핸들러
               onShareClick={() => onShareClick(link.id)} // 공유 클릭 핸들러
               onEditClick={() => onEditClick(link.id)} // 편집 클릭 핸들러

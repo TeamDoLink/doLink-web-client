@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import backIcon from '@/assets/icons/common/back.svg';
 import searchIcon from '@/assets/icons/common/search-24.svg';
@@ -8,6 +9,7 @@ import { InfiniteScroll } from '@/components/common/infiniteScroll/infiniteScrol
 import EmptyNotice from '@/components/common/feedBack/emptyNotice';
 import { formatRelativeDateLabel } from '@/utils/date';
 import { customInstance } from '@/api/axios-instance';
+import { ROUTES } from '@/constants/routes';
 import {
   getSearchTasksUrl,
   getSearchCollectionsUrl,
@@ -155,6 +157,8 @@ const SearchResults = ({
   hasMoreArchives,
   isFetchingMoreTasks,
   isFetchingMoreArchives,
+  onTaskClick,
+  onArchiveClick,
 }: {
   tasks: Task[];
   archives: Archive[];
@@ -165,6 +169,8 @@ const SearchResults = ({
   hasMoreArchives: boolean;
   isFetchingMoreTasks: boolean;
   isFetchingMoreArchives: boolean;
+  onTaskClick: (taskId: number) => void;
+  onArchiveClick: (archiveId: number) => void;
 }) => (
   <div className='flex flex-1 flex-col px-5 py-6'>
     {tasks.length > 0 && (
@@ -174,7 +180,11 @@ const SearchResults = ({
           items={tasks}
           keyExtractor={(task: Task) => task.id.toString()}
           renderItem={(task: Task) => (
-            <TaskSearchItem {...task} searchQuery={searchQuery} />
+            <TaskSearchItem
+              {...task}
+              searchQuery={searchQuery}
+              onClick={() => onTaskClick(task.id)}
+            />
           )}
           onLoadMore={onLoadMoreTasks}
           hasNextPage={hasMoreTasks}
@@ -193,7 +203,11 @@ const SearchResults = ({
           items={archives}
           keyExtractor={(archive: Archive) => archive.id.toString()}
           renderItem={(archive: Archive) => (
-            <ArchiveSearchItem {...archive} searchQuery={searchQuery} />
+            <ArchiveSearchItem
+              {...archive}
+              searchQuery={searchQuery}
+              onClick={() => onArchiveClick(archive.id)}
+            />
           )}
           onLoadMore={onLoadMoreArchives}
           hasNextPage={hasMoreArchives}
@@ -209,6 +223,7 @@ const SearchResults = ({
 
 // Main Component
 const SearchPage = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
@@ -277,6 +292,14 @@ const SearchPage = () => {
     }
   };
 
+  const handleTaskClick = (taskId: number) => {
+    navigate(`${ROUTES.taskDetail}/${taskId}`);
+  };
+
+  const handleArchiveClick = (archiveId: number) => {
+    navigate(`${ROUTES.archiveDetail}/${archiveId}`);
+  };
+
   const hasResults = tasks.length > 0 || archives.length > 0;
 
   return (
@@ -332,6 +355,8 @@ const SearchPage = () => {
           hasMoreArchives={hasMoreArchives}
           isFetchingMoreTasks={isFetchingMoreTasks}
           isFetchingMoreArchives={isFetchingMoreArchives}
+          onTaskClick={handleTaskClick}
+          onArchiveClick={handleArchiveClick}
         />
       )}
 

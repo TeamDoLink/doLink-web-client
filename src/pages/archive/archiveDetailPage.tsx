@@ -179,7 +179,7 @@ const ArchiveDetailPage = () => {
   });
 
   const { mutate: completeTask } = useCompleteTask();
-  const { mutate: deleteTask } = useDeleteTask();
+  const { mutateAsync: deleteTask } = useDeleteTask();
   const { mutate: deleteCollect } = useDeleteCollect();
 
   // API 데이터만 사용
@@ -202,8 +202,8 @@ const ArchiveDetailPage = () => {
   const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastToken, setToastToken] = useState(0);
-  const [pendingDeleteTaskId, setPendingDeleteTaskId] = useState<number | null>(
-    null
+  const [pendingDeleteTaskIds, setPendingDeleteTaskIds] = useState<number[]>(
+    []
   );
   const [isCollectionDeleteOpen, setIsCollectionDeleteOpen] = useState(false);
   const titleSectionRef = useRef<HTMLDivElement>(null);
@@ -371,6 +371,16 @@ const ArchiveDetailPage = () => {
     navigate(ROUTES.search);
   };
 
+  const handleTaskClick = (taskId: number) => {
+    navigate(`${ROUTES.taskDetail}/${taskId}`);
+  };
+
+  // 그룹 단위 삭제 핸들러 (같은 날짜의 모든 할 일을 삭제)
+  const handleDeleteGroup = (taskIds: number[]) => {
+    // 모달 표시를 위해 pendingDeleteTaskIds에 저장
+    setPendingDeleteTaskIds(taskIds);
+  };
+
   const handleOption = () => {
     if (isBeforeLoginArchive) {
       // 튜토리얼 모음: 옵션 메뉴 대신 토스트 노출
@@ -411,24 +421,36 @@ const ArchiveDetailPage = () => {
   };
 
   const handleConfirmTaskDelete = () => {
-    if (pendingDeleteTaskId === null || isDeletingTask) return;
+    if (pendingDeleteTaskIds.length === 0 || isDeletingTask) return;
 
     setIsDeletingTask(true);
+
+    // ✅ 복사본 생성 (스코프 명확화)
+    const taskIdsToDelete = [...pendingDeleteTaskIds];
 
     // 튜토리얼 모음은 로컬 상태만 업데이트
     if (isBeforeLoginArchive) {
       setTutorialTasks((prev) =>
-        prev.filter((task) => task.taskId !== pendingDeleteTaskId)
+        prev.filter((task) => !taskIdsToDelete.includes(task.taskId))
       );
+
       setLinkStates((prev) => {
-        const { [pendingDeleteTaskId]: _, ...rest } = prev;
-        return rest;
+        const next = { ...prev };
+        taskIdsToDelete.forEach((taskId) => {
+          delete next[taskId];
+        });
+        return next;
       });
+
       setLinkEditModes((prev) => {
-        const { [pendingDeleteTaskId]: _, ...rest } = prev;
-        return rest;
+        const next = { ...prev };
+        taskIdsToDelete.forEach((taskId) => {
+          delete next[taskId];
+        });
+        return next;
       });
-      setPendingDeleteTaskId(null);
+
+      setPendingDeleteTaskIds([]);
       setIsDeletingTask(false);
       return;
     }
@@ -437,40 +459,41 @@ const ArchiveDetailPage = () => {
     const previousLinkStates = { ...linkStates };
     const previousLinkEditModes = { ...linkEditModes };
 
-    // 즉시 UI에서 제거: linkStates / linkEditModes에서 삭제
+    // 즉시 UI에서 제거
     setLinkStates((prev) => {
-      const { [pendingDeleteTaskId]: _, ...rest } = prev;
-      return rest;
+      const next = { ...prev };
+      taskIdsToDelete.forEach((taskId) => {
+        delete next[taskId];
+      });
+      return next;
     });
+
     setLinkEditModes((prev) => {
-      const { [pendingDeleteTaskId]: _, ...rest } = prev;
-      return rest;
+      const next = { ...prev };
+      taskIdsToDelete.forEach((taskId) => {
+        delete next[taskId];
+      });
+      return next;
     });
 
-    deleteTask(
-      { taskId: pendingDeleteTaskId },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: ['collectionTasks', collectionId],
-          });
-          setIsDeletingTask(false);
-          setPendingDeleteTaskId(null);
-        },
-        onError: (error) => {
-          console.error('할 일 삭제에 실패했습니다.', error);
+    // 모달 닫기
+    setPendingDeleteTaskIds([]);
 
-          // 롤백
-          setLinkStates(previousLinkStates);
-          setLinkEditModes(previousLinkEditModes);
-
-          alert('삭제에 실패했습니다. 다시 시도해주세요.');
-
-          setIsDeletingTask(false);
-          setPendingDeleteTaskId(null);
-        },
-      }
-    );
+    // 복사본 사용
+    Promise.all(taskIdsToDelete.map((taskId) => deleteTask({ taskId })))
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: ['collectionTasks', collectionId],
+        });
+        setIsDeletingTask(false);
+      })
+      .catch((error) => {
+        console.error('할 일 삭제 실패:', error);
+        setLinkStates(previousLinkStates);
+        setLinkEditModes(previousLinkEditModes);
+        setIsDeletingTask(false);
+        alert('삭제에 실패했습니다. 다시 시도해주세요.');
+      });
   };
 
   const handleFloatingButtonClick = () => {
@@ -545,7 +568,18 @@ const ArchiveDetailPage = () => {
         return;
       }
 
-      const key = link.createdAt.split('T')[0];
+      // createdAt을 로컬 날짜로 변환하여 날짜만 추출 (yyyy-MM-dd)
+      const date = new Date(link.createdAt);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const key = `${year}-${month}-${day}`;
+
+      // 디버깅: 날짜 그룹화 확인
+      console.log(
+        `Task ${link.taskId}: createdAt=${link.createdAt}, key=${key}`
+      );
+
       if (!grouped.has(key)) {
         grouped.set(key, []);
       }
@@ -653,6 +687,8 @@ const ArchiveDetailPage = () => {
                 linkStates={linkStates}
                 linkEditModes={linkEditModes}
                 onCheck={handleLinkCheck}
+                onTaskClick={handleTaskClick}
+                onDeleteGroup={handleDeleteGroup}
                 onEditModeChange={(isEditMode) => {
                   tasks.forEach((task) => {
                     handleEditModeChange(task.taskId, isEditMode);
@@ -679,7 +715,7 @@ const ArchiveDetailPage = () => {
                   }
                 }}
                 onDeleteClick={(taskId) => {
-                  setPendingDeleteTaskId(taskId);
+                  setPendingDeleteTaskIds([taskId]);
                 }}
                 capsuleDisabled={isBeforeLoginArchive}
               />
@@ -713,15 +749,15 @@ const ArchiveDetailPage = () => {
 
       {/* 할 일 삭제 확인 모달 */}
       <FeedBack.ModalLayout
-        open={pendingDeleteTaskId !== null}
-        onClose={() => setPendingDeleteTaskId(null)}
+        open={pendingDeleteTaskIds.length > 0}
+        onClose={() => setPendingDeleteTaskIds([])}
       >
         <FeedBack.ConfirmDialog
           title='할 일을 삭제할까요?'
           positiveLabel='삭제하기'
           negativeLabel='취소'
           onPositive={handleConfirmTaskDelete}
-          onNegative={() => setPendingDeleteTaskId(null)}
+          onNegative={() => setPendingDeleteTaskIds([])}
         />
       </FeedBack.ModalLayout>
 

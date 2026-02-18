@@ -13,7 +13,7 @@ import WithdrawalConfirmPage from '@/pages/settings/withdrawal/withdrawalConfirm
 
 import LoginPage from '@/pages/auth/loginPage';
 import TaskDetailPage from '@/pages/task/detail';
-import TaskCreatePage from '@/pages/task/taskCreatePage';
+import TaskFormPage from '@/pages/task/taskFormPage';
 import SearchPage from '@/pages/searchPage';
 
 // Test pages are only loaded in development
@@ -44,8 +44,9 @@ const AppRouter = () => {
         element={<WithdrawalConfirmPage />}
       />
       <Route path={ROUTES.login} element={<LoginPage />} />
-      <Route path={ROUTES.taskDetail} element={<TaskDetailPage />} />
-      <Route path={ROUTES.taskCreate} element={<TaskCreatePage />} />
+      <Route path={`${ROUTES.taskDetail}/:id`} element={<TaskDetailPage />} />
+      <Route path={`${ROUTES.taskEdit}/:id`} element={<TaskFormPage />} />
+      <Route path={ROUTES.taskCreate} element={<TaskFormPage />} />
       <Route path={ROUTES.search} element={<SearchPage />} />
 
       {/* 공통 컴포넌트 테스트 페이지 - 개발 환경에서만 포함 */}

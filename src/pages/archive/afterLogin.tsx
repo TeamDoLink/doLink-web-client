@@ -11,6 +11,7 @@ import {
   type ArchiveCategoryKey,
 } from '@/components/archive';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
+import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import { ROUTES } from '@/constants/routes';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import {
@@ -60,8 +61,8 @@ const ArchiveAfterLogin = () => {
     navigate(ROUTES.search);
   };
 
-  const [selectedCategory, setSelectedCategory] =
-    useState<ArchiveCategoryKey>('all');
+  // 전역 상태: 선택된 카테고리 (페이지 간 상태 유지용)
+  const { selectedCategory, setSelectedCategory } = useArchiveUIStore();
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
     number | null
   >(null);
