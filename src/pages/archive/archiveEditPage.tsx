@@ -74,9 +74,16 @@ const ArchiveEditPage = () => {
       },
       {
         onSuccess: () => {
+          // 모든 쿼리 무효화
           queryClient.invalidateQueries({ queryKey: getListAllQueryKey() });
           queryClient.invalidateQueries({
             queryKey: getListByCategoryQueryKey(),
+          });
+          // 무한스크롤 쿼리 무효화
+          queryClient.invalidateQueries({
+            predicate: (query) =>
+              Array.isArray(query.queryKey) &&
+              query.queryKey[0] === 'collections',
           });
           queryClient.invalidateQueries({
             queryKey: getGetCollectDetailQueryKey(collectionId),
