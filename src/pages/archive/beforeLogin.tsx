@@ -114,6 +114,8 @@ const ArchiveBeforeLogin = () => {
                   onClick={() => setSelectedCategory(key)}
                 />
               ))}
+              {/* 마지막 여백 */}
+              <div className='w-2 shrink-0' />
             </div>
           </div>
           <ArchiveSummaryBar
