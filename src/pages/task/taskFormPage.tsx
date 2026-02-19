@@ -389,7 +389,7 @@ function TaskFormPage() {
         onClickBack={handleBackClick}
       />
 
-      <div className='flex h-full flex-col gap-6 overflow-y-auto bg-white px-5 py-4'>
+      <div className='flex h-full flex-col gap-6 overflow-y-auto bg-white px-5 py-4 pt-[calc(56px+16px)]'>
         {/* 담을 모음 선택 섹션 */}
         <CollectionChipSelector
           items={collections}

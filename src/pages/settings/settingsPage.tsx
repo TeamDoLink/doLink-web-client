@@ -103,10 +103,13 @@ const SettingsPage = () => {
 
   return (
     <div className='flex min-h-screen flex-col bg-grey-50'>
-      <header className='sticky top-0 z-10 flex h-14 items-center px-5'>
+      {/* 헤더 - SettingsAppBar 대신 직접 구현 */}
+      <header className='fixed left-0 right-0 top-0 z-50 flex h-14 items-center px-5 py-[14px]'>
         <span className='text-heading-xl text-grey-900'>설정</span>
       </header>
-      <main className='grow space-y-4'>
+
+      {/* 메인 컨텐츠 - 헤더와 바텀탭바 높이만큼 패딩 */}
+      <main className='grow space-y-4 pb-20 pt-14'>
         <div className='rounded-[16px] p-6'>
           <div className='flex items-center gap-3'>
             <img
@@ -183,17 +186,17 @@ const SettingsPage = () => {
           </div>
         )}
       </main>
-      <footer className='sticky bottom-0 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
-        <div className='relative w-full bg-white'>
-          <div className='pointer-events-none absolute -top-[76px] right-6 z-10 flex h-[52px] w-[52px] items-center justify-center'>
-            <FloatingButton
-              aria-label='새 할 일 추가'
-              className='pointer-events-auto'
-            />
-          </div>
-          <TabBar.BottomTabBar value='setting' onChange={handleTabChange} />
+
+      {/* 바탭탭바 */}
+      <div className='relative w-full'>
+        <div className='pointer-events-none absolute -top-[76px] right-6 z-10 flex h-[52px] w-[52px] items-center justify-center'>
+          <FloatingButton
+            aria-label='새 할 일 추가'
+            className='pointer-events-auto'
+          />
         </div>
-      </footer>
+        <TabBar.BottomTabBar value='setting' onChange={handleTabChange} />
+      </div>
 
       <FeedBack.ModalLayout
         open={isAuthenticated && isLogoutConfirmOpen}

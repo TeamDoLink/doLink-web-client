@@ -99,7 +99,9 @@ const ArchiveBeforeLogin = () => {
         }
         onClickSearch={handleClickSearch}
       />
-      <main className='flex-1'>
+
+      {/* 메인 컨텐츠 - 헤더 높이만큼 패딩 */}
+      <main className='flex-1 pb-20 pt-14'>
         <section className='bg-white'>
           <div className='overflow-x-auto px-5'>
             <div className='flex gap-3 pb-4 pt-2'>
@@ -149,18 +151,16 @@ const ArchiveBeforeLogin = () => {
           )}
         </section>
       </main>
-      <footer className='sticky bottom-0 bg-white shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
-        <div className='relative w-full'>
-          <div className='pointer-events-none absolute -top-[76px] right-6 z-10 flex h-[52px] w-[52px] items-center justify-center'>
-            <FloatingButton
-              aria-label='새 할 일 추가'
-              className='pointer-events-auto'
-              onClick={handleFloatingButtonClick}
-            />
-          </div>
-          <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
-        </div>
-      </footer>
+
+      {/* 하단 고정 버튼 */}
+      <FloatingButton
+        aria-label='새 할 일 추가'
+        className='fixed bottom-[88px] right-5 z-40'
+        onClick={handleFloatingButtonClick}
+      />
+
+      {/* 바탭탭바 */}
+      <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
 
       {showToast && (
         <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>

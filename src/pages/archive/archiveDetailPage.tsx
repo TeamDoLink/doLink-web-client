@@ -622,7 +622,7 @@ const ArchiveDetailPage = () => {
       )}
 
       {/* 제목 및 정보 영역 */}
-      <div ref={titleSectionRef} className='bg-white pb-4 pt-6'>
+      <div ref={titleSectionRef} className='bg-white pb-4 pt-20'>
         {/* 제목 */}
         <div className='px-5'>
           <h1 className='truncate text-heading-lg text-grey-900'>

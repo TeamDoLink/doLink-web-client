@@ -64,7 +64,7 @@ const WithdrawalConfirmPage = () => {
         onClickBack={handleBack}
       />
 
-      <main className='flex flex-1 flex-col justify-between px-6 py-8'>
+      <main className='flex flex-1 flex-col justify-between px-6 py-8 pt-[calc(56px+32px)]'>
         <section className='space-y-3'>
           <h1 className='text-heading-xl font-semibold text-grey-900'>
             탈퇴 시 할 일과 모음을 포함한
