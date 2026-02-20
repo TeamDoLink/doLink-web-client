@@ -82,11 +82,9 @@ const HomeBeforeLogin = () => {
   return (
     <div className='relative flex min-h-screen flex-col'>
       <Background.GradientBackground className='flex min-h-0 flex-1 flex-col'>
-        <header className='sticky top-0 z-20'>
-          <HomeAppBar onClickSearch={handleClickSearch} />
-        </header>
+        <HomeAppBar onClickSearch={handleClickSearch} />
 
-        <main className='relative grow'>
+        <main className='relative grow pt-14'>
           <div className='mx-auto flex flex-col px-5 py-2'>
             <section className='flex items-center justify-between'>
               <div className='flex flex-col gap-1'>

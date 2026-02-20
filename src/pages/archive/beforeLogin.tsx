@@ -100,9 +100,9 @@ const ArchiveBeforeLogin = () => {
         onClickSearch={handleClickSearch}
       />
 
-      {/* 메인 컨텐츠 - 헤더 높이만큼 패딩 */}
-      <main className='flex-1 pb-20 pt-14'>
-        <section className='bg-white'>
+      {/* 메인 컨텐츠 - 바텀탭바 높이만큼만 패딩 */}
+      <main className='flex-1 pb-20'>
+        <section className='bg-white pt-14'>
           {/* 스크롤바 없애기 */}
           <div
             className='overflow-x-auto px-5'
