@@ -305,7 +305,7 @@ const SearchPage = () => {
   return (
     <div className='flex min-h-screen flex-col bg-white'>
       {/* Header */}
-      <header className='fixed left-0 right-0 top-0 z-50 flex h-14 w-full items-center gap-2 bg-white px-3'>
+      <header className='fixed left-0 right-0 top-0 z-50 flex h-14 w-full items-center gap-2 bg-white py-1.5 pl-3 pr-5'>
         <button
           type='button'
           onClick={() => window.history.back()}
