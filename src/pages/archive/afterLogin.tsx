@@ -222,7 +222,15 @@ const ArchiveAfterLogin = () => {
       {/* 메인 컨텐츠 - 바텀탭바 높이만큼만 패딩 */}
       <main className='flex-1 pb-20'>
         <section className='bg-white pt-14'>
-          <div className='overflow-x-auto px-5'>
+          {/* 스크롤바 없애기 */}
+          <div
+            className='overflow-x-auto px-5'
+            style={{
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
             <div className='flex gap-3 pb-4 pt-2'>
               {ARCHIVE_CATEGORIES.map(({ key, label }) => (
                 <CategoryFilterButton

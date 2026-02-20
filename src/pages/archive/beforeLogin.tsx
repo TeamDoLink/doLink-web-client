@@ -103,7 +103,15 @@ const ArchiveBeforeLogin = () => {
       {/* 메인 컨텐츠 - 헤더 높이만큼 패딩 */}
       <main className='flex-1 pb-20 pt-14'>
         <section className='bg-white'>
-          <div className='overflow-x-auto px-5'>
+          {/* 스크롤바 없애기 */}
+          <div
+            className='overflow-x-auto px-5'
+            style={{
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
             <div className='flex gap-3 pb-4 pt-2'>
               {ARCHIVE_CATEGORIES.map(({ key, label }) => (
                 <CategoryFilterButton
