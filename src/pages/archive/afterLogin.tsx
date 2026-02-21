@@ -218,9 +218,19 @@ const ArchiveAfterLogin = () => {
         }
         onClickSearch={handleClickSearch}
       />
-      <main className='flex-1'>
-        <section className='bg-white'>
-          <div className='overflow-x-auto px-5'>
+
+      {/* 메인 컨텐츠 - 바텀탭바 높이만큼만 패딩 */}
+      <main className='flex-1 pb-20'>
+        <section className='bg-white pt-14'>
+          {/* 스크롤바 없애기 */}
+          <div
+            className='overflow-x-auto px-5'
+            style={{
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
             <div className='flex gap-3 pb-4 pt-2'>
               {ARCHIVE_CATEGORIES.map(({ key, label }) => (
                 <CategoryFilterButton
@@ -234,6 +244,8 @@ const ArchiveAfterLogin = () => {
                   }}
                 />
               ))}
+              {/* 마지막 여백 */}
+              <div className='w-2 shrink-0' />
             </div>
           </div>
           <ArchiveSummaryBar
@@ -281,18 +293,15 @@ const ArchiveAfterLogin = () => {
           />
         </section>
       </main>
-      <footer className='sticky bottom-0 bg-white shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
-        <div className='relative w-full'>
-          <div className='pointer-events-none absolute -top-[76px] right-6 z-10 flex h-[52px] w-[52px] items-center justify-center'>
-            <FloatingButton
-              aria-label='새 할 일 추가'
-              className='pointer-events-auto'
-              onClick={() => navigate(ROUTES.taskCreate)}
-            />
-          </div>
-          <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
-        </div>
-      </footer>
+
+      {/* 하단 고정 버튼 */}
+      <FloatingButton
+        onClick={() => navigate(ROUTES.taskCreate)}
+        className='fixed bottom-[104px] right-6 z-40'
+      />
+
+      {/* 바탭탭바 */}
+      <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
 
       <FeedBack.ModalLayout
         open={pendingDeleteArchiveId !== null}

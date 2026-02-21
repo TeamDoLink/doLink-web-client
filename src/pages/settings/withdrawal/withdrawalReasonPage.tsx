@@ -58,7 +58,7 @@ const WithdrawalReasonPage = () => {
         onClickBack={() => navigate(-1)}
       />
 
-      <main className='flex flex-1 flex-col p-6'>
+      <main className='flex flex-1 flex-col p-6 pt-[calc(56px+24px)]'>
         <div>
           <h1 className='text-heading-xl font-semibold text-grey-900'>
             두링크를 사용해 주셔서 감사합니다.

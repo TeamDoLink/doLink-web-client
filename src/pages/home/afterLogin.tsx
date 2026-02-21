@@ -234,11 +234,10 @@ const HomeAfterLogin = () => {
   return (
     <div className='relative flex min-h-screen flex-col'>
       <Background.GradientBackground>
-        <header className='sticky top-0 z-20'>
-          <HomeAppBar onClickSearch={handleClickSearch} />
-        </header>
+        <HomeAppBar onClickSearch={handleClickSearch} />
 
-        <main className='relative grow'>
+        {/* 메인 컨텐츠 - 헤더와 바탭탭바 높이만큼 패딩 */}
+        <main className='relative grow pb-20 pt-14'>
           <div className='mx-auto flex flex-col px-5 py-2'>
             <GreetingSection memberName={memberName} greeting={greeting} />
             <TodoSection
@@ -256,18 +255,15 @@ const HomeAfterLogin = () => {
         </main>
       </Background.GradientBackground>
 
-      <footer className='sticky bottom-0 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
-        <div className='relative w-full'>
-          <div className='pointer-events-none absolute -top-[76px] right-6 z-10 flex h-[52px] w-[52px] items-center justify-center'>
-            <FloatingButton
-              aria-label='새 할 일 추가'
-              className='pointer-events-auto'
-              onClick={handleCreateTodo}
-            />
-          </div>
-          <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
-        </div>
-      </footer>
+      {/* 하단 고정 버튼 */}
+      <FloatingButton
+        aria-label='새 할 일 추가'
+        className='fixed bottom-[104px] right-6 z-40'
+        onClick={handleCreateTodo}
+      />
+
+      {/* 바탭탭바 */}
+      <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
 
       <FeedBack.ModalLayout open={isModalOpen} onClose={handleModalClose}>
         {modalType === 'alert' && alertConfig && (

@@ -13,9 +13,7 @@ interface HomeAppBarProps {
  */
 export const HomeAppBar = ({ onClickSearch }: HomeAppBarProps) => {
   return (
-    <header
-      className={`flex w-full items-center justify-between bg-white px-[20px] py-[10px]`}
-    >
+    <header className='fixed left-0 right-0 top-0 z-50 flex w-full items-center justify-between bg-white px-[20px] py-[10px]'>
       <img src={logoSvg} alt='DoLink 로고' className='h-[20px] w-[65.23px]' />
 
       <button

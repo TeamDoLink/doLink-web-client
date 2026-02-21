@@ -39,7 +39,7 @@ export default function AlertDialog({
         {/* Secondary Text Button with Underline */}
         <button
           onClick={onSecondary}
-          className='w-full text-center text-body-lg text-grey-800 underline'
+          className='w-full text-center text-body-lg text-grey-600 underline'
         >
           {secondaryLabel}
         </button>

@@ -303,9 +303,9 @@ const SearchPage = () => {
   const hasResults = tasks.length > 0 || archives.length > 0;
 
   return (
-    <div className='flex min-h-screen flex-col bg-white'>
+    <div className='flex min-h-screen flex-col'>
       {/* Header */}
-      <header className='flex h-14 w-full items-center gap-2 bg-white px-3'>
+      <header className='fixed left-0 right-0 top-0 z-50 flex h-14 w-full items-center gap-2 bg-white py-1.5 pl-3 pr-5'>
         <button
           type='button'
           onClick={() => window.history.back()}
@@ -328,43 +328,45 @@ const SearchPage = () => {
         />
       </header>
 
-      {/* Content */}
-      {/* 임시 로딩 화면 */}
-      {isLoading && (
-        <div className='flex flex-1 items-center justify-center'>
-          <p className='text-body-lg text-grey-600'>검색 중...</p>
-        </div>
-      )}
-      {error && (
-        <div className='flex flex-1 flex-col items-center justify-center'>
-          <EmptyNotice
-            title='오류가 발생했습니다.'
-            subtitle='검색 결과를 불러오는 중 문제가 발생했습니다.'
+      {/* Content - 헤더 높이만큼 패딩 추가 */}
+      <div className='flex flex-1 flex-col pt-14'>
+        {/* 임시 로딩 화면 */}
+        {isLoading && (
+          <div className='flex flex-1 items-center justify-center'>
+            <p className='text-body-lg text-grey-600'>검색 중...</p>
+          </div>
+        )}
+        {error && (
+          <div className='flex flex-1 flex-col items-center pt-[180px]'>
+            <EmptyNotice
+              title='오류가 발생했습니다.'
+              subtitle='검색 결과를 불러오는 중 문제가 발생했습니다.'
+            />
+          </div>
+        )}
+
+        {!isLoading && !error && debouncedQuery.trim() && hasResults && (
+          <SearchResults
+            tasks={tasks}
+            archives={archives}
+            searchQuery={searchQuery}
+            onLoadMoreTasks={handleLoadMoreTasks}
+            onLoadMoreArchives={handleLoadMoreArchives}
+            hasMoreTasks={hasMoreTasks}
+            hasMoreArchives={hasMoreArchives}
+            isFetchingMoreTasks={isFetchingMoreTasks}
+            isFetchingMoreArchives={isFetchingMoreArchives}
+            onTaskClick={handleTaskClick}
+            onArchiveClick={handleArchiveClick}
           />
-        </div>
-      )}
+        )}
 
-      {!isLoading && !error && debouncedQuery.trim() && hasResults && (
-        <SearchResults
-          tasks={tasks}
-          archives={archives}
-          searchQuery={searchQuery}
-          onLoadMoreTasks={handleLoadMoreTasks}
-          onLoadMoreArchives={handleLoadMoreArchives}
-          hasMoreTasks={hasMoreTasks}
-          hasMoreArchives={hasMoreArchives}
-          isFetchingMoreTasks={isFetchingMoreTasks}
-          isFetchingMoreArchives={isFetchingMoreArchives}
-          onTaskClick={handleTaskClick}
-          onArchiveClick={handleArchiveClick}
-        />
-      )}
-
-      {!isLoading && !error && (!debouncedQuery.trim() || !hasResults) && (
-        <div className='flex flex-1 flex-col items-center justify-center'>
-          <EmptyNotice title={'검색 결과가 없어요.'} subtitle='' />
-        </div>
-      )}
+        {!isLoading && !error && (!debouncedQuery.trim() || !hasResults) && (
+          <div className='flex flex-1 flex-col items-center pt-[180px]'>
+            <EmptyNotice title={'검색 결과가 없어요.'} subtitle='' />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -12,6 +12,8 @@ export type ClearableSearchInputFieldProps = {
   disabled?: boolean;
   /** 컴포넌트 너비 (Tailwind 클래스) 기본: w-full */
   width?: string;
+  /** 컴포넌트 높이 (Tailwind 클래스) 기본: h-11 (44px) */
+  height?: string;
   /** 왼쪽에 표시할 아이콘(예: 검색 아이콘) */
   leadingIcon?: React.ReactNode;
   /** 접근성 레이블(필요 시) */
@@ -33,6 +35,7 @@ export default function ClearableSearchInputField({
   placeholder = '검색어를 입력해주세요',
   disabled = false,
   width = 'w-full',
+  height = 'h-11',
   leadingIcon,
   ariaLabel,
   onKeyDown,
@@ -57,7 +60,7 @@ export default function ClearableSearchInputField({
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-[12px] bg-white px-4 py-3 ${width} ${
+      className={`flex items-center gap-3 rounded-[12px] bg-white px-4 ${height} ${width} ${
         isFocused ? 'border-[1px] border-grey-800' : 'border border-grey-200'
       }`}
     >
