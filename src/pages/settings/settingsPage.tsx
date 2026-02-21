@@ -187,16 +187,15 @@ const SettingsPage = () => {
         )}
       </main>
 
+      {/* 하단 고정 버튼 */}
+      <FloatingButton
+        aria-label='새 할 일 추가'
+        className='fixed bottom-[104px] right-6 z-40'
+        onClick={() => navigate(ROUTES.taskCreate)}
+      />
+
       {/* 바탭탭바 */}
-      <div className='relative w-full'>
-        <div className='pointer-events-none absolute -top-[76px] right-6 z-10 flex h-[52px] w-[52px] items-center justify-center'>
-          <FloatingButton
-            aria-label='새 할 일 추가'
-            className='pointer-events-auto'
-          />
-        </div>
-        <TabBar.BottomTabBar value='setting' onChange={handleTabChange} />
-      </div>
+      <TabBar.BottomTabBar value='setting' onChange={handleTabChange} />
 
       <FeedBack.ModalLayout
         open={isAuthenticated && isLogoutConfirmOpen}

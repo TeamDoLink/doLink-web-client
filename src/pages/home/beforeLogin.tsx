@@ -167,17 +167,15 @@ const HomeBeforeLogin = () => {
           </div>
         )}
 
+        {/* 하단 고정 버튼 */}
+        <FloatingButton
+          aria-label='새 할 일 추가'
+          className='fixed bottom-[104px] right-6 z-40'
+          onClick={handleCreateTodo}
+        />
+
         <footer className='sticky bottom-0 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
-          <div className='relative w-full'>
-            <div className='pointer-events-none absolute -top-[76px] right-6 z-10 flex h-[52px] w-[52px] items-center justify-center'>
-              <FloatingButton
-                aria-label='새 할 일 추가'
-                className='pointer-events-auto'
-                onClick={handleCreateTodo}
-              />
-            </div>
-            <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
-          </div>
+          <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
         </footer>
       </Background.GradientBackground>
     </div>

@@ -165,7 +165,7 @@ const ArchiveBeforeLogin = () => {
       {/* 하단 고정 버튼 */}
       <FloatingButton
         aria-label='새 할 일 추가'
-        className='fixed bottom-[88px] right-5 z-40'
+        className='fixed bottom-[104px] right-6 z-40'
         onClick={handleFloatingButtonClick}
       />
 

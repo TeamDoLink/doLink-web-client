@@ -738,7 +738,7 @@ const ArchiveDetailPage = () => {
       {/* 플로팅 버튼 */}
       <FloatingButton
         onClick={handleFloatingButtonClick}
-        className='fixed bottom-[120px] right-5'
+        className='fixed bottom-[104px] right-6 z-40'
       />
 
       {/* 하단 탭바 */}
