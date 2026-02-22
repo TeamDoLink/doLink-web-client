@@ -21,16 +21,16 @@ export const ArchiveSummaryBar = ({
   return (
     <div className={`w-full ${className}`} {...divProps}>
       <div className='flex h-[43px] w-full items-center justify-between px-5'>
-        <p className='text-body-md text-grey-900'>
+        <p className='text-body-md text-black'>
           총 <span className='text-point'>{totalCount}</span>개
         </p>
         <button
           type='button'
           onClick={onClickAdd}
-          className='flex items-center gap-1 text-body-md text-grey-700'
+          className='flex items-center gap-1 text-grey-700'
         >
           <img src={plusIcon} alt='' aria-hidden='true' className='h-4 w-4' />
-          <span>모음 추가</span>
+          <span className='text-caption-md text-gray-700'>모음 추가</span>
         </button>
       </div>
       <GreyLine />
