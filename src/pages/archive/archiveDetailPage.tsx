@@ -631,7 +631,7 @@ const ArchiveDetailPage = () => {
         </div>
 
         {/* 카테고리 및 할일 정보 */}
-        <div className='flex items-center gap-2 px-5'>
+        <div className='mt-1 flex items-center gap-2 px-5'>
           <div className='flex items-center gap-1'>
             <img
               src={archiveMeta.categoryIcon}
