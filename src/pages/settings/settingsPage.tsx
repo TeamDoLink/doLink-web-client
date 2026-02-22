@@ -110,12 +110,12 @@ const SettingsPage = () => {
 
       {/* 메인 컨텐츠 - 헤더와 바텀탭바 높이만큼 패딩 */}
       <main className='grow space-y-4 pb-20 pt-14'>
-        <div className='rounded-[16px] p-6'>
+        <div className='rounded-[16px] px-5 py-[18px]'>
           <div className='flex items-center gap-3'>
             <img
               src={profileImage ?? (isAuthenticated ? kakaoIcon : logoutIcon)}
               alt='프로필'
-              className='h-12 w-12 rounded-full object-cover'
+              className='h-6 w-6 rounded-full object-cover'
             />
             <div className='flex flex-col gap-1 text-heading-lg text-grey-900'>
               {isAuthenticated ? (
@@ -135,7 +135,7 @@ const SettingsPage = () => {
             </div>
           </div>
 
-          <div className='mt-6 overflow-hidden rounded-[16px] bg-white py-2 shadow-[0_4px_12px_rgba(0,0,0,0.03)]'>
+          <div className='mt-[16px] overflow-hidden rounded-[16px] bg-white py-3 shadow-[0_4px_12px_rgba(0,0,0,0.03)]'>
             <SettingMenuItem
               leftText='공지사항'
               onClick={() =>
@@ -146,7 +146,7 @@ const SettingsPage = () => {
               rightText='노션(Notion)'
             />
             <SettingMenuItem leftText='고객문의' rightText='카카오 채널' />
-            <GreyLine className='my-1' />
+            <GreyLine width='mx-5' className='my-3' />
             <SettingMenuItem
               leftText='개인정보 처리 방침'
               onClick={() =>

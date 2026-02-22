@@ -33,7 +33,7 @@ export const ArchiveSummaryBar = ({
           <span className='text-caption-md text-gray-700'>모음 추가</span>
         </button>
       </div>
-      <GreyLine />
+      <GreyLine width='w-full' />
     </div>
   );
 };
