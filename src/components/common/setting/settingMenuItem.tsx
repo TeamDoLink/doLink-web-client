@@ -30,10 +30,10 @@ export const SettingMenuItem = ({
   return (
     <button
       type='button'
-      className={`flex h-14 w-full items-center justify-between bg-white px-[20px] py-[10px] text-left ${className}`}
+      className={`flex h-[44px] w-full items-center justify-between bg-white px-[20px] text-left ${className}`}
       {...props}
     >
-      <span className='text-heading-md text-grey-900'>{leftText ?? ''}</span>
+      <span className='text-body-lg text-grey-900'>{leftText ?? ''}</span>
       <div className='flex items-center gap-1'>
         {renderRight}
         {showArrow && <img src={rightIcon} alt='다음' className='h-4 w-4' />}
