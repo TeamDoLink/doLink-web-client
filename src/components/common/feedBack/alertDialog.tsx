@@ -17,7 +17,7 @@ export default function AlertDialog({
 }: AlertDialogProps) {
   return (
     // TODO 근사값으로 맞춰놓음 디자이너분들과 논의 후 수정 예정
-    <div className='flex w-96 flex-col gap-7 rounded-2xl bg-white px-5 py-6 shadow-xl'>
+    <div className='flex w-[295px] flex-col gap-7 rounded-2xl bg-white px-5 py-6 shadow-xl'>
       {/* Text Section */}
       <div className='flex w-full flex-col gap-2'>
         <p className='w-full text-heading-lg text-black'>{title}</p>
@@ -39,7 +39,7 @@ export default function AlertDialog({
         {/* Secondary Text Button with Underline */}
         <button
           onClick={onSecondary}
-          className='w-full text-center text-body-lg text-grey-600 underline'
+          className='w-full text-center text-caption-sm text-grey-600 underline'
         >
           {secondaryLabel}
         </button>
