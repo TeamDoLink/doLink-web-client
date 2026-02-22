@@ -30,7 +30,7 @@ export const ArchiveSummaryBar = ({
           className='flex items-center gap-1 text-grey-700'
         >
           <img src={plusIcon} alt='' aria-hidden='true' className='h-4 w-4' />
-          <span className='text-caption-md text-gray-700'>모음 추가</span>
+          <span className='text-caption-md text-grey-700'>모음 추가</span>
         </button>
       </div>
       <GreyLine width='w-full' />
