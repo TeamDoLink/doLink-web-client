@@ -92,39 +92,36 @@ const ArchiveBeforeLogin = () => {
 
   return (
     <div className='flex min-h-screen flex-col bg-grey-50'>
-      <SearchAppBar
-        title={
-          ARCHIVE_CATEGORIES.find(({ key }) => key === selectedCategory)
-            ?.label ?? '전체'
-        }
-        onClickSearch={handleClickSearch}
-      />
+      <SearchAppBar title='모음' onClickSearch={handleClickSearch} />
 
       {/* 메인 컨텐츠 - 바텀탭바 높이만큼만 패딩 */}
       <main className='flex-1 pb-20'>
         <section className='bg-white pt-14'>
-          {/* 스크롤바 없애기 */}
-          <div
-            className='overflow-x-auto px-5'
-            style={{
-              msOverflowStyle: 'none',
-              scrollbarWidth: 'none',
-              WebkitOverflowScrolling: 'touch',
-            }}
-          >
-            <div className='flex gap-3 pb-4 pt-2'>
-              {ARCHIVE_CATEGORIES.map(({ key, label }) => (
-                <CategoryFilterButton
-                  key={key}
-                  category={key}
-                  label={label}
-                  selected={selectedCategory === key}
-                  onClick={() => setSelectedCategory(key)}
-                />
-              ))}
-              {/* 마지막 여백 */}
-              <div className='w-2 shrink-0' />
+          <div className='relative'>
+            <div
+              className='overflow-x-auto px-5'
+              style={{
+                msOverflowStyle: 'none',
+                scrollbarWidth: 'none',
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
+              <div className='flex gap-3 pb-4 pt-2'>
+                {ARCHIVE_CATEGORIES.map(({ key, label }) => (
+                  <CategoryFilterButton
+                    key={key}
+                    category={key}
+                    label={label}
+                    selected={selectedCategory === key}
+                    onClick={() => setSelectedCategory(key)}
+                  />
+                ))}
+                {/* 마지막 여백 */}
+                <div className='w-2 shrink-0' />
+              </div>
             </div>
+            {/* White gradient overlay on right */}
+            <div className='pointer-events-none absolute right-0 top-0 h-[74px] w-[40px] bg-gradient-to-l from-white to-transparent' />
           </div>
           <ArchiveSummaryBar
             totalCount={filteredArchives.length}
