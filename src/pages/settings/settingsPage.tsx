@@ -146,7 +146,8 @@ const SettingsPage = () => {
               rightText='노션(Notion)'
             />
             <SettingMenuItem leftText='고객문의' rightText='카카오 채널' />
-            <GreyLine width='mx-5' className='my-3' />
+            {/* <GreyLine width='mx-5' className='my-3' /> */}
+            <GreyLine width='w-auto' className='mx-5 my-3' />
             <SettingMenuItem
               leftText='개인정보 처리 방침'
               onClick={() =>
