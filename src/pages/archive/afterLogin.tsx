@@ -214,7 +214,7 @@ const ArchiveAfterLogin = () => {
       <SearchAppBar title='모음' onClickSearch={handleClickSearch} />
 
       {/* 메인 컨텐츠 - 바텀탭바 높이만큼만 패딩 */}
-      <main className='flex-1 pb-20'>
+      <main className='flex-1 pb-[86px]'>
         <section className='bg-white pt-14'>
           {/* 스크롤바 없애기 */}
           <div className='relative'>
@@ -226,7 +226,7 @@ const ArchiveAfterLogin = () => {
                 WebkitOverflowScrolling: 'touch',
               }}
             >
-              <div className='flex gap-3 pt-[10px]'>
+              <div className='flex gap-3 pt-2'>
                 {ARCHIVE_CATEGORIES.map(({ key, label }) => (
                   <CategoryFilterButton
                     key={key}

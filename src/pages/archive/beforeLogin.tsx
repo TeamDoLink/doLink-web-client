@@ -95,7 +95,7 @@ const ArchiveBeforeLogin = () => {
       <SearchAppBar title='모음' onClickSearch={handleClickSearch} />
 
       {/* 메인 컨텐츠 - 바텀탭바 높이만큼만 패딩 */}
-      <main className='flex-1 pb-20'>
+      <main className='flex-1 pb-[86px]'>
         <section className='bg-white pt-14'>
           <div className='relative'>
             <div
