@@ -276,7 +276,7 @@ export const SwipeableDeleteCard = ({
       {/* 메인 카드 (스와이프 가능) */}
       <div
         ref={cardRef}
-        className='flex flex-col gap-3 rounded-[12px] bg-white px-5 pb-5 pt-4 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.03)] transition-transform'
+        className='flex flex-col rounded-[12px] bg-white shadow-[0px_4px_12px_0px_rgba(0,0,0,0.03)] transition-transform'
         style={{
           transform: `translateX(${swipeOffset}px)`,
           transition: isDragging ? 'none' : 'transform 0.3s ease-out',
@@ -295,7 +295,7 @@ export const SwipeableDeleteCard = ({
         }}
       >
         {/* 상단 헤더: 생성 날짜 및 편집 버튼 */}
-        <div className='flex w-full items-start justify-between text-caption-md'>
+        <div className='flex w-full items-center justify-between px-5 pb-2 pt-4 text-caption-md'>
           <p className='text-grey-800'>{formatRelativeTime(createdAt)}</p>
           <Button.TextButton
             onClick={handleEditClick}
@@ -307,7 +307,7 @@ export const SwipeableDeleteCard = ({
         </div>
 
         {/* 링크 아이템 리스트: 같은 날짜의 모든 링크를 List.LinkItem으로 렌더링 */}
-        <div className='flex flex-col gap-5'>
+        <div className='flex flex-col gap-5 px-5 pb-5'>
           {links.map((link) => (
             <List.LinkItem
               key={link.id}

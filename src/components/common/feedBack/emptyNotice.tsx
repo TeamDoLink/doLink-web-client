@@ -28,7 +28,7 @@ export default function EmptyNotice({
       </div>
 
       <div className='flex w-full flex-col items-center gap-[1px] text-center'>
-        <p className='text-heading-md text-grey-600'>{title}</p>
+        <p className='text-heading-md text-grey-500'>{title}</p>
         <p className='text-body-lg text-grey-400'>{subtitle}</p>
       </div>
     </div>

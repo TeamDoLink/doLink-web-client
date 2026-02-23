@@ -631,7 +631,7 @@ const ArchiveDetailPage = () => {
         </div>
 
         {/* 카테고리 및 할일 정보 */}
-        <div className='flex items-center gap-2 px-5'>
+        <div className='mt-1 flex items-center gap-2 px-5'>
           <div className='flex items-center gap-1'>
             <img
               src={archiveMeta.categoryIcon}
@@ -660,7 +660,7 @@ const ArchiveDetailPage = () => {
       />
 
       {/* 메인 콘텐츠 */}
-      <main className='grow px-5 py-8'>
+      <main className='flex-1 px-5 pb-[86px] pt-6'>
         {isInitialLoading ? (
           <div className='flex min-h-[400px] items-center justify-center'>
             <p className='text-body-md text-grey-500'>불러오는 중...</p>

@@ -102,7 +102,7 @@ export const CategoryFilterButton = ({
   return (
     <button
       type='button'
-      className={`flex h-[100px] w-14 shrink-0 flex-col items-center justify-start gap-2 bg-transparent pb-2 pt-3${
+      className={`mb-4 flex w-14 shrink-0 flex-col items-center justify-start gap-2 bg-transparent ${
         className ? ` ${className}` : ''
       }`}
       {...buttonProps}

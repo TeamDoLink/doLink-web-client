@@ -300,7 +300,7 @@ const TaskDetailPage = () => {
             {collectionData?.name ?? '모음 없음'}
           </p>
 
-          <GreyLine />
+          <GreyLine width='w-full' />
 
           {/* 카테고리 */}
           <div className='flex items-center gap-2'>

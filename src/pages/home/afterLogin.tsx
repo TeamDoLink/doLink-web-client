@@ -237,8 +237,8 @@ const HomeAfterLogin = () => {
         <HomeAppBar onClickSearch={handleClickSearch} />
 
         {/* 메인 컨텐츠 - 헤더와 바탭탭바 높이만큼 패딩 */}
-        <main className='relative grow pb-20 pt-14'>
-          <div className='mx-auto flex flex-col px-5 py-2'>
+        <main className='relative grow pb-[86px] pt-14'>
+          <div className='mx-auto flex flex-col px-5 pb-[60px]'>
             <GreetingSection memberName={memberName} greeting={greeting} />
             <TodoSection
               items={latestTodos}
