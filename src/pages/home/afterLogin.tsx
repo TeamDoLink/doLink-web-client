@@ -122,7 +122,7 @@ const HomeAfterLogin = () => {
       id: String(a.collectionId ?? 0),
       title: a.name ?? '',
       category: CATEGORY_LABEL_TO_KEY[a.category ?? ''] ?? 'etc',
-      itemCount: 0,
+      itemCount: a.taskCount ?? 0,
       previewImages: Array.isArray(a.thumbnails)
         ? a.thumbnails.slice(0, 4)
         : [],
