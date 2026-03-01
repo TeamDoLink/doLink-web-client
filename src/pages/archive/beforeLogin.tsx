@@ -46,17 +46,18 @@ const ArchiveBeforeLogin = () => {
     (state) => state.setSelectedCategory
   );
 
-  const [showToast, setShowToast] = useState(false);
+  const [showTutorialToast, setShowTutorialToast] = useState(false);
+
   const [toastToken, setToastToken] = useState(0);
 
   useEffect(() => {
-    if (!showToast) {
+    if (!showTutorialToast) {
       return;
     }
 
-    const timer = setTimeout(() => setShowToast(false), 3000);
+    const timer = setTimeout(() => setShowTutorialToast(false), 3000);
     return () => clearTimeout(timer);
-  }, [showToast, toastToken]);
+  }, [showTutorialToast, toastToken]);
 
   const archives = BEFORE_LOGIN_ARCHIVE();
 
@@ -66,7 +67,7 @@ const ArchiveBeforeLogin = () => {
       : archives.filter((archive) => archive.category === selectedCategory);
 
   const triggerLoginToast = () => {
-    setShowToast(true);
+    setShowTutorialToast(true);
     setToastToken((prev) => prev + 1);
   };
 
@@ -80,7 +81,7 @@ const ArchiveBeforeLogin = () => {
 
   const handleArchiveMoreClick = () => {
     // 튜토리얼 모음은 삭제할 수 없다는 토스트 표시
-    setShowToast(true);
+    setShowTutorialToast(true);
     setToastToken((prev) => prev + 1);
   };
 
@@ -168,12 +169,12 @@ const ArchiveBeforeLogin = () => {
       {/* 바탭탭바 */}
       <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
 
-      {showToast && (
+      {/* 튜토리얼 토스트 */}
+      {showTutorialToast && (
         <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
           <FeedBack.Toast
-            message='로그인 후 간편하게 DoLink를 이용해보세요.'
-            actionLabel='로그인'
-            onAction={() => navigate(ROUTES.login)}
+            message='기본 제공 모음은 삭제할 수 없어요'
+            actionLabel='확인'
           />
         </div>
       )}
