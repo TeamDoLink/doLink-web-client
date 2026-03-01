@@ -66,6 +66,8 @@ const HomeAfterLogin = () => {
   const [todoOverrides, setTodoOverrides] = useState<Record<string, boolean>>(
     {}
   );
+  const [showTutorialToast, setShowTutorialToast] = useState(false);
+  const [tutorialToastMessage, setTutorialToastMessage] = useState('');
 
   // API: 사용자 프로필
   const { data: userData } = useGetUser();
@@ -116,6 +118,11 @@ const HomeAfterLogin = () => {
     }));
   }, [recentTasks, todoOverrides]);
 
+  // 튜토리얼 여부 배열
+  const todoIsTutorials = useMemo(() => {
+    return recentTasks.map((t) => t.isTutorial ?? false);
+  }, [recentTasks]);
+
   // API 응답 → ArchiveSectionItem[] 매핑
   const latestArchives = useMemo(() => {
     return archiveContent.map((a) => ({
@@ -127,6 +134,7 @@ const HomeAfterLogin = () => {
         ? a.thumbnails.slice(0, 4)
         : [],
       createdAt: '',
+      isTutorial: a.isTutorial ?? false,
     }));
   }, [archiveContent]);
 
@@ -176,6 +184,15 @@ const HomeAfterLogin = () => {
   };
 
   const handleRequestDeleteArchive = (id: string) => {
+    // 튜토리얼 모음이면 토스트만 표시
+    const archive = archiveContent.find((a) => String(a.collectionId) === id);
+    if (archive?.isTutorial) {
+      setTutorialToastMessage('기본 제공 모음은 삭제할 수 없어요');
+      setShowTutorialToast(true);
+      setTimeout(() => setShowTutorialToast(false), 3000);
+      return;
+    }
+
     openConfirm({
       title: '모음을 삭제할까요?',
       subtitle: '모음 내 할 일도 함께 삭제돼요.',
@@ -205,6 +222,14 @@ const HomeAfterLogin = () => {
   };
 
   const handleRequestEditArchive = (id: string) => {
+    // 튜토리얼 모음이면 토스트만 표시
+    const archive = archiveContent.find((a) => String(a.collectionId) === id);
+    if (archive?.isTutorial) {
+      setTutorialToastMessage('기본 제공 모음은 삭제할 수 없어요');
+      setShowTutorialToast(true);
+      setTimeout(() => setShowTutorialToast(false), 3000);
+      return;
+    }
     navigate(`${ROUTES.archiveEdit}/${id}`);
   };
 
@@ -231,6 +256,13 @@ const HomeAfterLogin = () => {
     navigate(`${ROUTES.taskDetail}/${id}`);
   };
 
+  const handleDisabledTodoClick = (_id: string) => {
+    // 튜토리얼 할 일 체크박스 클릭 시 토스트 표시
+    setTutorialToastMessage('기본 제공 할 일은 삭제할 수 없어요');
+    setShowTutorialToast(true);
+    setTimeout(() => setShowTutorialToast(false), 3000);
+  };
+
   return (
     <div className='relative flex min-h-screen flex-col'>
       <Background.GradientBackground>
@@ -242,8 +274,10 @@ const HomeAfterLogin = () => {
             <GreetingSection memberName={memberName} greeting={greeting} />
             <TodoSection
               items={latestTodos}
+              isTutorials={todoIsTutorials}
               onToggle={handleToggleTodo}
               onTaskClick={handleTaskClick}
+              onDisabledClick={handleDisabledTodoClick}
             />
             <ArchiveSection
               items={latestArchives}
@@ -264,6 +298,17 @@ const HomeAfterLogin = () => {
 
       {/* 바탭탭바 */}
       <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
+
+      {/* 튜토리얼 토스트 */}
+      {showTutorialToast && (
+        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+          <FeedBack.Toast
+            message={tutorialToastMessage}
+            actionLabel='확인'
+            onClose={() => setShowTutorialToast(false)}
+          />
+        </div>
+      )}
 
       <FeedBack.ModalLayout open={isModalOpen} onClose={handleModalClose}>
         {modalType === 'alert' && alertConfig && (

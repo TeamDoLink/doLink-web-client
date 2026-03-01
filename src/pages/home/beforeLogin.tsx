@@ -23,9 +23,9 @@ const HomeBeforeLogin = () => {
   const navigate = useNavigate();
   const { handleTabChange } = useBottomTabNavigation();
   const [showToast, setShowToast] = useState(false);
-  const [toastType, setToastType] = useState<'login' | 'defaultArchive' | null>(
-    null
-  );
+  const [toastType, setToastType] = useState<
+    'login' | 'defaultArchive' | 'tutorialTask' | null
+  >(null);
   const toastTimerRef = useRef<number | null>(null);
   const todoItems = BEFORE_LOGIN_TODO();
   const archiveItems = BEFORE_LOGIN_ARCHIVE();
@@ -43,7 +43,9 @@ const HomeBeforeLogin = () => {
     navigate(ROUTES.login);
   };
 
-  const showToastWithType = (type: 'login' | 'defaultArchive') => {
+  const showToastWithType = (
+    type: 'login' | 'defaultArchive' | 'tutorialTask'
+  ) => {
     setToastType(type);
     setShowToast(true);
     if (toastTimerRef.current !== null) {
@@ -64,11 +66,15 @@ const HomeBeforeLogin = () => {
   };
 
   const handleTodoCheckbox = () => {
-    triggerLoginToast();
+    showToastWithType('tutorialTask');
   };
 
   const handleCreateTodo = () => {
     triggerLoginToast();
+  };
+
+  const handleTodoClick = () => {
+    navigate(ROUTES.taskDetail + '/tutorial');
   };
 
   const handleOpenTutorialArchive = () => {
@@ -118,6 +124,7 @@ const HomeBeforeLogin = () => {
                       subtitle={`${formatRelativeDateLabel(createdAt)} · ${platform}`}
                       checked={checked}
                       onChange={handleTodoCheckbox}
+                      onClick={handleTodoClick}
                     />
                   )
                 )}
@@ -155,14 +162,17 @@ const HomeBeforeLogin = () => {
               message={
                 toastType === 'defaultArchive'
                   ? '기본 제공 모음은 삭제할 수 없어요.'
-                  : '로그인 후 간편하게 DoLink를 이용해보세요.'
+                  : toastType === 'tutorialTask'
+                    ? '기본 제공 할 일은 삭제할 수 없어요'
+                    : '로그인 후 간편하게 DoLink를 이용해보세요.'
               }
-              actionLabel={toastType === 'defaultArchive' ? '확인' : '로그인'}
-              onAction={
-                toastType === 'defaultArchive'
-                  ? () => setShowToast(false)
-                  : handleLoginClick
+              actionLabel={
+                toastType === 'defaultArchive' || toastType === 'tutorialTask'
+                  ? '확인'
+                  : '로그인'
               }
+              onAction={toastType === 'login' ? handleLoginClick : undefined}
+              onClose={() => setShowToast(false)}
             />
           </div>
         )}

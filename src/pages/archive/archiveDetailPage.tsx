@@ -86,6 +86,7 @@ const BEFORE_LOGIN_TASKS: Task[] = [
     memo: '',
     status: false,
     inout: false,
+    isTutorial: true,
     createdAt: '오늘',
     modifiedAt: '오늘',
   },
@@ -111,6 +112,7 @@ const mapTaskResponseToTask = (task: TaskResponse): Task => {
     memo: task.memo ?? null,
     status: task.status ?? false,
     inout: task.inout ?? false,
+    isTutorial: task.isTutorial ?? false,
     createdAt: task.createdAt ?? new Date().toISOString(),
     modifiedAt: task.createdAt ?? new Date().toISOString(),
   };
@@ -202,6 +204,7 @@ const ArchiveDetailPage = () => {
   const [isTitleVisible, setIsTitleVisible] = useState(true);
   const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [showLoginToast, setShowLoginToast] = useState(false);
   const [toastToken, setToastToken] = useState(0);
   const [pendingDeleteTaskIds, setPendingDeleteTaskIds] = useState<number[]>(
     []
@@ -246,6 +249,13 @@ const ArchiveDetailPage = () => {
 
   // 실제 화면에서 사용할 task 리스트
   const taskList = isBeforeLoginArchive ? tutorialTasks : apiTaskList;
+
+  // 튜토리얼 모음인지 확인 (첫 번째 할 일이 isTutorial이면 튜토리얼 모음)
+  const isTutorialCollection = useMemo(() => {
+    return (
+      isBeforeLoginArchive || (taskList.length > 0 && taskList[0].isTutorial)
+    );
+  }, [isBeforeLoginArchive, taskList]);
 
   // 전체 todo 데이터 기준으로 개수 계산
   const { totalCount, incompleteCount, completeCount } = useMemo(() => {
@@ -340,6 +350,12 @@ const ArchiveDetailPage = () => {
   }, [apiTaskList, isBeforeLoginArchive]);
 
   const handleLinkCheck = (taskId: number, checked: boolean) => {
+    // 튜토리얼 할 일이면 보여지기만 하고 API 호출 X
+    const task = taskList.find((t) => t.taskId === taskId);
+    if (task?.isTutorial) {
+      return;
+    }
+
     setLinkStates((prev) => ({ ...prev, [taskId]: checked }));
 
     if (isBeforeLoginArchive) return; // 튜토리얼 모음일 때는 API 호출 X
@@ -376,7 +392,11 @@ const ArchiveDetailPage = () => {
   };
 
   const handleTaskClick = (taskId: number) => {
-    navigate(`${ROUTES.taskDetail}/${taskId}`);
+    if (isBeforeLoginArchive) {
+      navigate(ROUTES.taskDetail + '/tutorial');
+    } else {
+      navigate(`${ROUTES.taskDetail}/${taskId}`);
+    }
   };
 
   // 그룹 단위 삭제 핸들러 (같은 날짜의 모든 할 일을 삭제)
@@ -386,7 +406,7 @@ const ArchiveDetailPage = () => {
   };
 
   const handleOption = () => {
-    if (isBeforeLoginArchive) {
+    if (isTutorialCollection) {
       // 튜토리얼 모음: 옵션 메뉴 대신 토스트 노출
       setShowToast(true);
       setToastToken((prev) => prev + 1);
@@ -501,6 +521,11 @@ const ArchiveDetailPage = () => {
   };
 
   const handleFloatingButtonClick = () => {
+    if (isBeforeLoginArchive) {
+      setShowLoginToast(true);
+      setTimeout(() => setShowLoginToast(false), 3000);
+      return;
+    }
     navigate(ROUTES.taskCreate);
   };
 
@@ -781,12 +806,23 @@ const ArchiveDetailPage = () => {
       </FeedBack.ModalLayout>
 
       {/* 튜토리얼 모음용 토스트 */}
-      {isBeforeLoginArchive && showToast && (
+      {showToast && (
         <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
           <FeedBack.Toast
             message='기본 제공 모음은 삭제할 수 없어요.'
             actionLabel='확인'
-            onAction={() => setShowToast(false)}
+            onClose={() => setShowToast(false)}
+          />
+        </div>
+      )}
+
+      {/* 로그인 토스트 */}
+      {showLoginToast && (
+        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+          <FeedBack.Toast
+            message='로그인 후 간편하게 DoLink를 이용해보세요.'
+            actionLabel='로그인'
+            onAction={() => navigate(ROUTES.login)}
           />
         </div>
       )}

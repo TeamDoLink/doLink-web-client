@@ -70,10 +70,6 @@ const ArchiveBeforeLogin = () => {
     setToastToken((prev) => prev + 1);
   };
 
-  const handleLoginAction = () => {
-    navigate(ROUTES.login);
-  };
-
   const handleAddArchive = () => {
     triggerLoginToast();
   };
@@ -83,7 +79,9 @@ const ArchiveBeforeLogin = () => {
   };
 
   const handleArchiveMoreClick = () => {
-    triggerLoginToast();
+    // 튜토리얼 모음은 삭제할 수 없다는 토스트 표시
+    setShowToast(true);
+    setToastToken((prev) => prev + 1);
   };
 
   const handleOpenTutorialArchive = () => {
@@ -145,6 +143,7 @@ const ArchiveBeforeLogin = () => {
                 images={previewImages}
                 width='w-full'
                 disableActionMenu
+                isTutorial
                 onClick={handleOpenTutorialArchive}
                 onMoreClick={handleArchiveMoreClick}
               />
@@ -174,7 +173,7 @@ const ArchiveBeforeLogin = () => {
           <FeedBack.Toast
             message='로그인 후 간편하게 DoLink를 이용해보세요.'
             actionLabel='로그인'
-            onAction={handleLoginAction}
+            onAction={() => navigate(ROUTES.login)}
           />
         </div>
       )}

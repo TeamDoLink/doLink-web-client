@@ -67,6 +67,7 @@ const ArchiveAfterLogin = () => {
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
     number | null
   >(null);
+  const [showTutorialToast, setShowTutorialToast] = useState(false);
 
   const isAll = selectedCategory === 'all';
 
@@ -182,6 +183,13 @@ const ArchiveAfterLogin = () => {
   const { mutate: deleteCollect } = useDeleteCollect();
 
   const handleRequestDelete = (id: number) => {
+    // 튜토리얼 모음이면 토스트만 표시
+    const archive = archives.find((a) => a.collectionId === id);
+    if (archive?.isTutorial) {
+      setShowTutorialToast(true);
+      setTimeout(() => setShowTutorialToast(false), 3000);
+      return;
+    }
     setPendingDeleteArchiveId(id);
   };
 
@@ -216,6 +224,13 @@ const ArchiveAfterLogin = () => {
   };
 
   const handleEdit = (id: number) => {
+    // 튜토리얼 모음이면 토스트만 표시
+    const archive = archives.find((a) => a.collectionId === id);
+    if (archive?.isTutorial) {
+      setShowTutorialToast(true);
+      setTimeout(() => setShowTutorialToast(false), 3000);
+      return;
+    }
     navigate(`${ROUTES.archiveEdit}/${id}`);
   };
 
@@ -285,6 +300,12 @@ const ArchiveAfterLogin = () => {
                   images={previewImages}
                   itemCount={taskCountMap[archive.collectionId!] ?? 0}
                   width='w-full'
+                  isTutorial={archive.isTutorial}
+                  onMoreClick={
+                    archive.isTutorial
+                      ? () => handleRequestDelete(archive.collectionId!)
+                      : undefined
+                  }
                   onClick={() =>
                     navigate(`${ROUTES.archiveDetail}/${archive.collectionId}`)
                   }
@@ -316,6 +337,16 @@ const ArchiveAfterLogin = () => {
 
       {/* 바탭탭바 */}
       <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
+
+      {/* 튜토리얼 토스트 */}
+      {showTutorialToast && (
+        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+          <FeedBack.Toast
+            message='기본 제공 모음은 삭제할 수 없어요'
+            actionLabel='확인'
+          />
+        </div>
+      )}
 
       <FeedBack.ModalLayout
         open={pendingDeleteArchiveId !== null}
