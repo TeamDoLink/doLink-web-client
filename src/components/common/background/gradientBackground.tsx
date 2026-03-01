@@ -11,7 +11,7 @@ export const GradientBackground = ({
   children,
 }: GradientBackgroundProps) => {
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative flex min-h-screen flex-col ${className}`}>
       <div
         className='pointer-events-none absolute inset-0 -z-10'
         aria-hidden
