@@ -39,6 +39,7 @@ export interface Task {
   memo: string | null;
   status: boolean;
   inout: boolean;
+  isTutorial?: boolean;
   createdAt: string;
   modifiedAt: string;
 }
@@ -173,6 +174,11 @@ export const SwipeableDeleteCard = ({
     if (capsuleDisabled) {
       return;
     }
+    // 튜토리얼 할 일이면 편집 모드 진입 차단
+    const hasTutorialTask = tasks.some((task) => task.isTutorial);
+    if (hasTutorialTask) {
+      return;
+    }
     onEditModeChange(true);
   };
 
@@ -300,7 +306,7 @@ export const SwipeableDeleteCard = ({
           <p className='text-grey-800'>{formatRelativeTime(createdAt)}</p>
           <Button.TextButton
             onClick={handleEditClick}
-            disabled={capsuleDisabled}
+            disabled={capsuleDisabled || tasks.some((task) => task.isTutorial)}
             className='text-caption-md'
           >
             편집
