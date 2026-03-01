@@ -187,6 +187,7 @@ const ArchiveDetailPage = () => {
     collectionData as unknown as ApiResponseCollectionDetailResponse;
   const apiTitle = apiCollectionData?.result?.name;
   const apiCategory = apiCollectionData?.result?.category;
+  const apiTaskCount = apiCollectionData?.result?.taskCount ?? 0;
 
   const archiveMeta = isBeforeLoginArchive
     ? BEFORE_LOGIN_ARCHIVE_META
@@ -266,9 +267,12 @@ const ArchiveDetailPage = () => {
   }, [linkStates, taskList]);
 
   // 탭에 따라 보여줄 개수 선택
+  // 전체 탭에서는 API의 taskCount 사용, 나머지는 로컬 계산값 사용
   const todoCount =
     selectedTab === 'all'
-      ? totalCount
+      ? isBeforeLoginArchive
+        ? totalCount
+        : apiTaskCount
       : selectedTab === 'incomplete'
         ? incompleteCount
         : completeCount;
