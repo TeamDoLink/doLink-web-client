@@ -18,6 +18,7 @@ import { ROUTES } from '@/constants/routes';
 import { fetchAppVersionInfo } from '@/api/appVersion';
 import { isLatestVersion } from '@/utils/versionCompare';
 import { openExternalLink } from '@/utils/openExternalLink';
+import { sendAuthLogout } from '@/utils/nativeBridge';
 
 const SettingsPage = () => {
   const { handleTabChange } = useBottomTabNavigation();
@@ -97,6 +98,7 @@ const SettingsPage = () => {
       // 서버 로그아웃 실패해도 클라이언트 상태는 정리
     } finally {
       clearAuth();
+      sendAuthLogout();
       queryClient.clear();
       setIsLogoutConfirmOpen(false);
       navigate(ROUTES.home, { replace: true });

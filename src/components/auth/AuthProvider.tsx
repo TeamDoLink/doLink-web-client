@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { AXIOS_INSTANCE } from '@/api/axios-instance';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { sendAuthLogin } from '@/utils/nativeBridge';
 
 type AuthProviderProps = {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
         if (token) {
           setAccessToken(token);
+          sendAuthLogin();
         } else {
           clearAuth();
         }

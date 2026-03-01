@@ -7,6 +7,7 @@ import { ROUTES } from '@/constants/routes';
 import { useModalStore } from '@/stores/useModalStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useWithdraw, logout } from '@/api/generated/endpoints/user/user';
+import { sendAuthLogout } from '@/utils/nativeBridge';
 
 const WithdrawalConfirmPage = () => {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ const WithdrawalConfirmPage = () => {
           // 탈퇴 후 로그아웃 실패해도 무시
         }
         clearAuth();
+        sendAuthLogout();
         queryClient.clear();
         openConfirm({
           title: '회원 탈퇴가 완료되었습니다.',
