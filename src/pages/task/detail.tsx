@@ -87,6 +87,7 @@ const TaskDetailPage = () => {
   const isCompleted = taskData?.status ?? false;
   const categoryLabel = collectionData?.category ?? '';
   const categoryIcon = CATEGORY_ICON_MAP[categoryLabel] ?? etcIcon;
+  const isInout = taskData?.inout ?? false; // inout 필드: true면 외부에서 등록, false면 앱 내부에서 등록
 
   // 앱바 및 하단 버튼 영역 높이 동적 계산
   useEffect(() => {
@@ -146,6 +147,11 @@ const TaskDetailPage = () => {
   };
 
   const handleLinkClick = () => {
+    // inout이 false면 링크 이동 불가
+    if (!isInout) {
+      return;
+    }
+
     if (taskData?.link) {
       // React Native 환경에서는 네이티브 브릿지 사용
       if (isReactNativeWebView()) {
@@ -345,7 +351,11 @@ const TaskDetailPage = () => {
           ref={bottomBarRef}
           className='fixed bottom-0 left-0 right-0 z-20 flex items-center gap-4 bg-white px-5 pb-[8px] pt-3'
         >
-          <CtaButton onClick={handleLinkClick} className='flex-1'>
+          <CtaButton
+            onClick={handleLinkClick}
+            className='flex-1'
+            disabled={!isInout}
+          >
             링크 바로가기
           </CtaButton>
 

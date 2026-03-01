@@ -700,7 +700,7 @@ const ArchiveDetailPage = () => {
                 }}
                 onOriginalClick={(taskId) => {
                   const task = tasks.find((t) => t.taskId === taskId);
-                  if (task && task.link) {
+                  if (task && task.link && task.inout) {
                     console.log('원본 클릭:', task.title);
                     window.open(task.link, '_blank', 'noopener,noreferrer');
                   }
