@@ -20,6 +20,7 @@ import {
   useDeleteCollect,
   useGetTotalCollectionCount,
   useGetCategoryCounts,
+  useGetTaskCountsForCollections,
 } from '@/api/generated/endpoints/collection/collection';
 import type {
   ApiResponseSliceCollectionResponse,
@@ -131,6 +132,20 @@ const ArchiveAfterLogin = () => {
     () => data?.pages.flatMap((page) => page.content ?? []) ?? [],
     [data]
   );
+
+  const { data: taskCountsData } = useGetTaskCountsForCollections();
+
+  const taskCountMap = useMemo(() => {
+    const list =
+      (
+        taskCountsData as {
+          result?: { collectionId: number; taskCount: number }[];
+        }
+      )?.result ?? [];
+    return Object.fromEntries(
+      list.map((item) => [item.collectionId, item.taskCount])
+    );
+  }, [taskCountsData]);
 
   // 전체 모음 개수 조회
   const { data: totalCountData } = useGetTotalCollectionCount({
@@ -268,6 +283,7 @@ const ArchiveAfterLogin = () => {
                   title={archive.name}
                   category={archive.category}
                   images={previewImages}
+                  itemCount={taskCountMap[archive.collectionId!] ?? 0}
                   width='w-full'
                   onClick={() =>
                     navigate(`${ROUTES.archiveDetail}/${archive.collectionId}`)
