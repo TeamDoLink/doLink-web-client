@@ -193,6 +193,24 @@ const setupLinkResponseListener = (() => {
   };
 })();
 
+// ============================================
+// Auth-specific utilities
+// ============================================
+
+/**
+ * 로그인 성공 시 Native에 알림 (auth:login)
+ */
+export const sendAuthLogin = (): void => {
+  sendMessageToRN({ type: 'auth:login', payload: {} });
+};
+
+/**
+ * 로그아웃/탈퇴 시 Native에 알림 (auth:logout)
+ */
+export const sendAuthLogout = (): void => {
+  sendMessageToRN({ type: 'auth:logout', payload: {} });
+};
+
 /**
  * Native에 URL 열기 요청을 보냄 (Fire-and-Forget)
  * @param url 열 URL
