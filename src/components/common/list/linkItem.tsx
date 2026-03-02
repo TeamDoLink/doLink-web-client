@@ -76,7 +76,7 @@ export default function LinkItem({
       <div className='flex min-h-0 min-w-0 flex-1 items-start gap-3'>
         {/* Thumbnail */}
         <div className='relative h-10 w-10 shrink-0 overflow-hidden rounded-lg'>
-          {thumbnail ? (
+          {thumbnail && thumbnail.length > 0 ? (
             <img
               alt='thumbnail'
               className='absolute inset-0 h-full w-full object-cover'

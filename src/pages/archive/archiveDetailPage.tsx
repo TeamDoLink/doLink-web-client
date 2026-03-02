@@ -118,6 +118,7 @@ const mapTaskResponseToTask = (task: TaskResponse): Task => {
     isTutorial: task.isTutorial ?? false,
     createdAt: task.createdAt ?? new Date().toISOString(),
     modifiedAt: task.createdAt ?? new Date().toISOString(),
+    thumbnailUrl: task.thumbnailUrl ?? null,
   };
 };
 
