@@ -151,6 +151,7 @@ export default function TextInputField({
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
+          readOnly={readOnly}
           className='min-w-0 flex-1 border-none bg-transparent text-body-md text-black outline-none placeholder:text-grey-400'
         />
       </div>
@@ -171,6 +172,7 @@ export default function TextInputField({
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={placeholder}
+        readOnly={readOnly}
         className='min-w-0 flex-1 border-none bg-transparent text-body-md text-grey-900 outline-none placeholder:text-grey-400'
       />
     </div>

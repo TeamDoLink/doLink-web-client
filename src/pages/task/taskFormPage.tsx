@@ -451,6 +451,7 @@ function TaskFormPage() {
               hasClipboardLink ? handlePasteFromClipboard : undefined
             }
             width='w-full'
+            readOnly={isEditMode && task?.inout === false}
           />
         </div>
 
