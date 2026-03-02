@@ -130,6 +130,9 @@ const TaskDetailPage = () => {
   const isCompleted = displayData?.status ?? false;
   const categoryLabel = displayCollection?.category ?? '';
   const categoryIcon = CATEGORY_ICON_MAP[categoryLabel] ?? etcIcon;
+
+  // 현재 inout :false - 내부, inout : true - 외부 판단
+  // TODO : 백엔드 문의 후 수정 필요
   const isInout = shouldUseMockData ? true : (taskData?.inout ?? false);
   // 튜토리얼 여부: mock 데이터이거나 API 응답의 isTutorial이 true인 경우
   const isTutorial = shouldUseMockData || (taskData?.isTutorial ?? false);
@@ -216,8 +219,9 @@ const TaskDetailPage = () => {
   };
 
   const handleLinkClick = () => {
-    // inout이 false면 링크 이동 불가
-    if (!isInout) {
+    // inout이 true면 내부 추가 링크이므로 이동 불가
+    console.log('isInout:', isInout);
+    if (isInout) {
       return;
     }
 
@@ -431,7 +435,7 @@ const TaskDetailPage = () => {
           <CtaButton
             onClick={handleLinkClick}
             className='flex-1'
-            disabled={!isInout}
+            disabled={isInout}
           >
             링크 바로가기
           </CtaButton>
