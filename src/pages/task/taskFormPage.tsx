@@ -78,6 +78,16 @@ function TaskFormPage() {
   const [titleFocused, setTitleFocused] = useState(false);
   const [linkFocused, setLinkFocused] = useState(false);
 
+  const titleRef = useRef<HTMLDivElement>(null);
+  const linkRef = useRef<HTMLDivElement>(null);
+  const memoRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
+    setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
+
   const isPending = isCreating || isUpdating;
   const linkToast = useToast();
 
@@ -156,6 +166,7 @@ function TaskFormPage() {
    */
   const handleTitleFocus = () => {
     setTitleFocused(true);
+    scrollToSection(titleRef);
   };
 
   /**
@@ -171,6 +182,7 @@ function TaskFormPage() {
   const handleLinkFocus = () => {
     setLinkFocused(true);
     requestClipboard();
+    scrollToSection(linkRef);
   };
 
   /**
@@ -434,7 +446,7 @@ function TaskFormPage() {
         />
 
         {/* 제목 섹션 */}
-        <div className='flex flex-col gap-2'>
+        <div ref={titleRef} className='flex flex-col gap-2'>
           <div className='flex items-center justify-between'>
             <label
               htmlFor='task-title'
@@ -464,7 +476,7 @@ function TaskFormPage() {
         </div>
 
         {/* 링크(선택) 섹션 */}
-        <div className='flex flex-col gap-2'>
+        <div ref={linkRef} className='flex flex-col gap-2'>
           <label
             htmlFor='task-link'
             className='text-body-lg font-semibold text-black'
@@ -496,7 +508,7 @@ function TaskFormPage() {
         </div>
 
         {/* 메모(선택) 섹션 */}
-        <div className='flex flex-col gap-2'>
+        <div ref={memoRef} className='flex flex-col gap-2'>
           <div className='flex items-center justify-between'>
             <label
               htmlFor='task-memo'
@@ -518,6 +530,7 @@ function TaskFormPage() {
             placeholder='메모를 입력해주세요.'
             value={memo}
             onChange={(e) => handleMemoChange(e.target.value)}
+            onFocus={() => scrollToSection(memoRef)}
             className='h-[132px] w-full resize-none rounded-[10px] border border-grey-200 bg-white px-4 py-4 text-body-md text-grey-900 outline-none placeholder:text-grey-400 focus:border-grey-800'
           />
         </div>
