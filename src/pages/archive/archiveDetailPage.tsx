@@ -12,6 +12,7 @@ import {
 } from '@/components/archive/swipeableDeleteCard';
 import type { TabKey } from '@/components/common/tabBar/bottomTabBar';
 import { ROUTES } from '@/constants/routes';
+import { osShareTask } from '@/utils/nativeBridge';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
 import {
   listByCollection,
@@ -744,11 +745,7 @@ const ArchiveDetailPage = () => {
                   }
                 }}
                 onShareClick={(taskId) => {
-                  const task = tasks.find((t) => t.taskId === taskId);
-                  if (task) {
-                    console.log('공유 클릭:', task.title);
-                    alert(`${task.title} 공유하기`);
-                  }
+                  osShareTask(taskId);
                 }}
                 onEditClick={() => {
                   // 할 일 편집 버튼(연필 아이콘) 클릭 시

@@ -40,6 +40,17 @@ export interface LinkCanOpenPayload {
 }
 
 // ============================================
+// OS Share Message Types
+// ============================================
+
+/**
+ * OS Share Intent payload - triggers native system share sheet
+ */
+export interface OsSharePayload {
+  url: string;
+}
+
+// ============================================
 // Message Type Union
 // ============================================
 
@@ -48,7 +59,8 @@ export interface LinkCanOpenPayload {
  */
 export type WebToNativeMessage =
   | { type: 'link:open'; payload: LinkPayload }
-  | { type: 'link:canOpen'; payload: LinkCanOpenPayload };
+  | { type: 'link:canOpen'; payload: LinkCanOpenPayload }
+  | { type: 'os:share'; payload: OsSharePayload };
 
 /**
  * All possible messages from Native to Web

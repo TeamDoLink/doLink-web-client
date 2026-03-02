@@ -4,12 +4,14 @@
  * React Native WebView와 통신하기 위한 브릿지 유틸리티
  */
 
+import { ROUTES } from '@/constants/routes';
 import type {
   LinkPayload,
   LinkResponse,
   LinkError,
   LinkCanOpenPayload,
   NativeToWebMessage,
+  OsSharePayload,
 } from '@/types/native';
 
 // WebView 메시지 타입 정의
@@ -246,5 +248,22 @@ export const canOpenLink = (
       type: 'link:canOpen',
       payload,
     });
+  });
+};
+
+// ============================================
+// OS Share utilities
+// ============================================
+
+/**
+ * OS 네이티브 Share Sheet를 통해 dolink:// 딥링크 공유
+ * @param taskId 공유할 태스크 ID
+ */
+export const osShareTask = (taskId: number): void => {
+  const url = `dolink://task/detail/${taskId}`;
+  const payload: OsSharePayload = { url };
+  sendMessageToRN({
+    type: 'os:share',
+    payload,
   });
 };
