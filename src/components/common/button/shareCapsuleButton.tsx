@@ -14,7 +14,7 @@ const baseClass =
 const resolveVariant = (disabled: boolean) =>
   disabled
     ? 'bg-grey-50 text-grey-300 cursor-not-allowed'
-    : 'bg-white text-grey-700 hover:bg-grey-50 cursor-pointer';
+    : 'bg-white text-grey-700 [@media(hover:hover)]:hover:bg-grey-50 active:bg-grey-100 cursor-pointer';
 
 export const ShareCapsuleButton = ({
   className = '',
