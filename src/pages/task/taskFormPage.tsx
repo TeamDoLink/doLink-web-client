@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { InputField, Button, AppBar, FeedBack } from '@/components/common';
-import Toast from '@/components/common/feedBack/toast';
 import { useToast } from '@/hooks/useToast';
 import { CollectionChipSelector, type CollectionChip } from '@/components/task';
 import { useClipboardBridge } from '@/hooks/useClipboardBridge';
@@ -395,18 +394,7 @@ function TaskFormPage() {
   };
 
   return (
-    <div>
-      {linkToast.isVisible && (
-        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
-          <Toast
-            message={linkToast.message}
-            actionLabel='확인'
-            onClose={linkToast.hideToast}
-          />
-        </div>
-      )}
-      {/* TODO 팀 컨벤션에 맞게 전역 state? 내부 state? 결정해 수정  */}
-      {/* TODO 임시저장 조건 충족화면 */}
+    <div className='flex h-[100dvh] flex-col'>
       <ModalLayout
         open={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}
@@ -433,7 +421,10 @@ function TaskFormPage() {
         onClickBack={handleBackClick}
       />
 
-      <div className='flex h-full flex-col gap-6 overflow-y-auto bg-white px-5 py-4 pt-[calc(56px+16px)]'>
+      {/* fixed AppBar(h-14) 높이만큼 공간 확보 */}
+      <div className='h-14 shrink-0' />
+
+      <div className='flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto bg-white px-5 pb-[30px] pt-4'>
         {/* 담을 모음 선택 섹션 */}
         <CollectionChipSelector
           items={collections}
@@ -530,8 +521,10 @@ function TaskFormPage() {
             className='h-[132px] w-full resize-none rounded-[10px] border border-grey-200 bg-white px-4 py-4 text-body-md text-grey-900 outline-none placeholder:text-grey-400 focus:border-grey-800'
           />
         </div>
+      </div>
 
-        {/* 추가하기 버튼 */}
+      {/* 추가하기 버튼 */}
+      <div className='shrink-0 bg-white px-5 pb-4 pt-2'>
         <Button.CtaButton
           disabled={!isAddButtonEnabled || isPending}
           onClick={handleAddClick}
