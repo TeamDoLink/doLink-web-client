@@ -466,7 +466,11 @@ const TaskDetailPage = () => {
       {/* 튜토리얼 토스트 */}
       {tutorialToast.isVisible && (
         <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
-          <Toast message={tutorialToast.message} actionLabel='확인' />
+          <Toast
+            message={tutorialToast.message}
+            actionLabel='확인'
+            onClose={tutorialToast.hideToast}
+          />
         </div>
       )}
     </div>
