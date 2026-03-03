@@ -7,6 +7,7 @@ import { FloatingButton } from '@/components/common/button';
 import { SettingMenuItem } from '@/components/common/setting/settingMenuItem';
 import { GreyLine } from '@/components/common/line/greyLine';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
+import { useToast } from '@/hooks/useToast';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
 import logoutIcon from '@/assets/icons/auth/logout.svg';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -25,7 +26,7 @@ const SettingsPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-  const [showLoginToast, setShowLoginToast] = useState(false);
+  const loginToast = useToast();
 
   // API: 사용자 프로필
   const { data: userData } = useGetUser();
@@ -104,8 +105,7 @@ const SettingsPage = () => {
 
   const handleFloatingButtonClick = () => {
     if (!isAuthenticated) {
-      setShowLoginToast(true);
-      setTimeout(() => setShowLoginToast(false), 3000);
+      loginToast.showToast('로그인 후 이용해 주세요');
       return;
     }
     navigate(ROUTES.taskCreate);
@@ -221,13 +221,9 @@ const SettingsPage = () => {
         />
       </FeedBack.ModalLayout>
 
-      {showLoginToast && (
+      {loginToast.isVisible && (
         <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
-          <FeedBack.Toast
-            message='로그인 후 간편하게 DoLink를 이용해보세요.'
-            actionLabel='로그인'
-            onAction={() => navigate(ROUTES.login)}
-          />
+          <FeedBack.Toast message={loginToast.message} actionLabel='확인' />
         </div>
       )}
     </div>

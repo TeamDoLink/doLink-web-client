@@ -8,10 +8,13 @@ import { CheckIcon } from '@/components/common/icons/checkIcon';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
 import EmptyNotice from '@/components/common/feedBack/emptyNotice';
 import { FeedBack } from '@/components/common';
+import Toast from '@/components/common/feedBack/toast';
 import ModalLayout from '@/components/common/feedBack/modalLayout';
 import { openLink, isReactNativeWebView } from '@/utils/nativeBridge';
 import { ROUTES } from '@/constants/routes';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useTutorialTaskStore } from '@/stores/useTutorialTaskStore';
+import { useToast } from '@/hooks/useToast';
 import {
   useGetTask,
   useCompleteTask,
@@ -61,6 +64,7 @@ const TaskDetailPage = () => {
   const queryClient = useQueryClient();
   const taskId = Number(id);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { isTaskCompleted, toggleTask } = useTutorialTaskStore();
 
   // 미로그인 사용자를 위한 특별 경로인지 확인 (mock 데이터 사용)
   const isTutorialPath = location.pathname.includes('/tutorial');
@@ -92,6 +96,8 @@ const TaskDetailPage = () => {
   const [bottomHeight, setBottomHeight] = useState(104);
   const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const tutorialToast = useToast();
+  const loginToast = useToast();
   const appBarRef = useRef<HTMLDivElement>(null);
   const bottomBarRef = useRef<HTMLDivElement>(null);
 
@@ -111,7 +117,9 @@ const TaskDetailPage = () => {
   };
 
   // 표시할 데이터 결정
-  const displayData = shouldUseMockData ? tutorialMockData : taskData;
+  const displayData = shouldUseMockData
+    ? { ...tutorialMockData, status: isTaskCompleted('1') }
+    : taskData;
   const displayCollection = shouldUseMockData
     ? {
         name: tutorialMockData.collectionName,
@@ -119,7 +127,7 @@ const TaskDetailPage = () => {
       }
     : collectionData;
 
-  const isCompleted = shouldUseMockData ? false : (taskData?.status ?? false);
+  const isCompleted = displayData?.status ?? false;
   const categoryLabel = displayCollection?.category ?? '';
   const categoryIcon = CATEGORY_ICON_MAP[categoryLabel] ?? etcIcon;
   const isInout = shouldUseMockData ? true : (taskData?.inout ?? false);
@@ -143,23 +151,21 @@ const TaskDetailPage = () => {
   };
 
   const handleOption = () => {
-    if (isTutorial) {
-      // 튜토리얼 할 일은 옵션 메뉴 표시 안 함
-      return;
-    }
     setIsOptionMenuOpen((prev) => !prev);
   };
 
   const handleOptionSelect = (key: string) => {
     if (key === 'edit') {
       if (isTutorial) {
-        // 튜토리얼 할 일은 수정 불가
+        tutorialToast.showToast('기본 제공 할 일은 수정할 수 없어요');
+        setIsOptionMenuOpen(false);
         return;
       }
       navigate(`${ROUTES.taskEdit}/${taskId}`);
     } else if (key === 'delete') {
       if (isTutorial) {
-        // 튜토리얼 할 일은 삭제 불가
+        tutorialToast.showToast('기본 제공 할 일은 삭제할 수 없어요');
+        setIsOptionMenuOpen(false);
         return;
       }
       setIsDeleteModalOpen(true);
@@ -214,10 +220,12 @@ const TaskDetailPage = () => {
   };
 
   const handleComplete = () => {
-    // 튜토리얼 할 일은 완료 불가
-    if (isTutorial) {
+    // 미로그인 상태: 전역 스토어에 저장
+    if (shouldUseMockData) {
+      toggleTask('1');
       return;
     }
+    // 로그인 상태: 튜토리얼 할 일도 완료 가능
     completeTask(
       { taskId },
       {
@@ -417,19 +425,38 @@ const TaskDetailPage = () => {
           <button
             onClick={handleComplete}
             className='flex w-[49px] shrink-0 flex-col items-center'
-            disabled={isTutorial}
           >
             <CheckIcon
-              className={`h-8 w-8 ${isCompleted ? 'text-point' : isTutorial ? 'text-grey-300' : 'text-grey-400'}`}
+              className={`h-8 w-8 ${isCompleted ? 'text-point' : 'text-grey-400'}`}
             />
             <span
-              className={`text-body-lg ${isCompleted ? 'text-point' : isTutorial ? 'text-grey-300' : 'text-grey-400'}`}
+              className={`text-body-lg ${isCompleted ? 'text-point' : 'text-grey-400'}`}
             >
               완료하기
             </span>
           </button>
         </div>
       </main>
+
+      {/* 로그인 토스트 */}
+      {loginToast.isVisible && (
+        <Toast
+          message={loginToast.message}
+          actionLabel='로그인'
+          onAction={() => {
+            navigate(ROUTES.login);
+          }}
+          onClose={loginToast.hideToast}
+        />
+      )}
+
+      {/* 튜토리얼 토스트 */}
+      {tutorialToast.isVisible && (
+        <Toast
+          message={tutorialToast.message}
+          onClose={tutorialToast.hideToast}
+        />
+      )}
     </div>
   );
 };

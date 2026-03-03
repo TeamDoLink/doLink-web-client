@@ -59,9 +59,6 @@ export const ArchiveSection = ({
                 width='w-full'
                 isTutorial={isTutorial}
                 onClick={() => handleClick(id)}
-                onMoreClick={
-                  isTutorial ? () => handleDeleteClick(id) : undefined
-                }
                 onEditClick={() => handleEditClick(id)}
                 onDeleteClick={() => handleDeleteClick(id)}
               />

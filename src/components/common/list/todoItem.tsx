@@ -7,8 +7,6 @@ export type TodoItemProps = {
   onChange?: (checked: boolean) => void;
   onClick?: () => void;
   width?: string;
-  disabled?: boolean;
-  onDisabledClick?: () => void;
 };
 
 export default function TodoItem({
@@ -18,15 +16,9 @@ export default function TodoItem({
   onChange,
   onClick,
   width = 'w-full',
-  disabled = false,
-  onDisabledClick,
 }: TodoItemProps) {
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (disabled) {
-      onDisabledClick?.();
-      return;
-    }
     onChange?.(!checked);
   };
 

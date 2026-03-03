@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TabBar, List, FeedBack } from '@/components/common';
 import { FloatingButton } from '@/components/common/button';
@@ -13,6 +12,7 @@ import { ROUTES } from '@/constants/routes';
 import { BEFORE_LOGIN_ARCHIVE } from '@/constants/beforeLoginData';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
+import { useToast } from '@/hooks/useToast';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveCategoryKey[] = [
   'all',
@@ -46,18 +46,7 @@ const ArchiveBeforeLogin = () => {
     (state) => state.setSelectedCategory
   );
 
-  const [showTutorialToast, setShowTutorialToast] = useState(false);
-
-  const [toastToken, setToastToken] = useState(0);
-
-  useEffect(() => {
-    if (!showTutorialToast) {
-      return;
-    }
-
-    const timer = setTimeout(() => setShowTutorialToast(false), 3000);
-    return () => clearTimeout(timer);
-  }, [showTutorialToast, toastToken]);
+  const loginToast = useToast();
 
   const archives = BEFORE_LOGIN_ARCHIVE();
 
@@ -67,8 +56,7 @@ const ArchiveBeforeLogin = () => {
       : archives.filter((archive) => archive.category === selectedCategory);
 
   const triggerLoginToast = () => {
-    setShowTutorialToast(true);
-    setToastToken((prev) => prev + 1);
+    loginToast.showToast('로그인 후 이용해 주세요');
   };
 
   const handleAddArchive = () => {
@@ -79,10 +67,12 @@ const ArchiveBeforeLogin = () => {
     triggerLoginToast();
   };
 
-  const handleArchiveMoreClick = () => {
-    // 튜토리얼 모음은 삭제할 수 없다는 토스트 표시
-    setShowTutorialToast(true);
-    setToastToken((prev) => prev + 1);
+  const handleEditClick = () => {
+    loginToast.showToast('로그인 후 이용해 주세요');
+  };
+
+  const handleDeleteClick = () => {
+    loginToast.showToast('로그인 후 이용해 주세요');
   };
 
   const handleOpenTutorialArchive = () => {
@@ -143,10 +133,10 @@ const ArchiveBeforeLogin = () => {
                 itemCount={archive.itemCount}
                 images={previewImages}
                 width='w-full'
-                disableActionMenu
                 isTutorial
                 onClick={handleOpenTutorialArchive}
-                onMoreClick={handleArchiveMoreClick}
+                onEditClick={handleEditClick}
+                onDeleteClick={handleDeleteClick}
               />
             );
           })}
@@ -170,12 +160,9 @@ const ArchiveBeforeLogin = () => {
       <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
 
       {/* 튜토리얼 토스트 */}
-      {showTutorialToast && (
+      {loginToast.isVisible && (
         <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
-          <FeedBack.Toast
-            message='기본 제공 모음은 삭제할 수 없어요'
-            actionLabel='확인'
-          />
+          <FeedBack.Toast message={loginToast.message} actionLabel='확인' />
         </div>
       )}
     </div>

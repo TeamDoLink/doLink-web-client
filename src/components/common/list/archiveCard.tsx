@@ -34,7 +34,7 @@ export default function ArchiveCard({
   onDeleteClick,
   disableActionMenu = false,
   onClick,
-  isTutorial = false,
+  isTutorial: _isTutorial = false,
 }: ArchiveCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -82,10 +82,11 @@ export default function ArchiveCard({
   }, [isOpen, onTypeChange]);
 
   const handleMoreClick = () => {
-    if (disableActionMenu || isTutorial) {
+    if (disableActionMenu) {
       onMoreClick?.();
       return;
     }
+    // isTutorial이어도 메뉴는 열림
     setIsOpen(true);
     onTypeChange?.('edit');
     onMoreClick?.();
