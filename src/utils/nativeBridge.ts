@@ -4,7 +4,6 @@
  * React Native WebView와 통신하기 위한 브릿지 유틸리티
  */
 
-import { ROUTES } from '@/constants/routes';
 import type {
   LinkPayload,
   LinkResponse,

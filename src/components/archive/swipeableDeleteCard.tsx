@@ -134,7 +134,7 @@ export const SwipeableDeleteCard = ({
     title: task.title,
     subtitle: task.link || '직접 추가',
     inout: task.inout, // inout 필드 추가
-    thumbnail: task.thumbnailUrl,
+    thumbnail: task.thumbnailUrl ?? undefined,
   }));
 
   // 스와이프 상태 관리
