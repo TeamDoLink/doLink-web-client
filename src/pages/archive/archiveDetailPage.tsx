@@ -415,7 +415,7 @@ const ArchiveDetailPage = () => {
         // 튜토리얼 모음: 토스트 표시
         if (isBeforeLoginArchive) {
           // 미로그인: 로그인 토스트
-          loginToast.showToast('로그인 후 이용해 주세요');
+          loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
         } else {
           // 로그인: 튜토리얼 토스트
           tutorialToast.showToast('기본 제공 모음은 수정할 수 없어요');
@@ -428,7 +428,7 @@ const ArchiveDetailPage = () => {
         // 튜토리얼 모음: 토스트 표시
         if (isBeforeLoginArchive) {
           // 미로그인: 로그인 토스트
-          loginToast.showToast('로그인 후 이용해 주세요');
+          loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
         } else {
           // 로그인: 튜토리얼 토스트
           tutorialToast.showToast('기본 제공 모음은 삭제할 수 없어요');
@@ -536,7 +536,7 @@ const ArchiveDetailPage = () => {
 
   const handleFloatingButtonClick = () => {
     if (isBeforeLoginArchive) {
-      loginToast.showToast('로그인 후 이용해 주세요');
+      loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
       return;
     }
     navigate(ROUTES.taskCreate);
@@ -754,7 +754,9 @@ const ArchiveDetailPage = () => {
                   // 할 일 편집 버튼(연필 아이콘) 클릭 시
                   if (isBeforeLoginArchive) {
                     // 미로그인: 로그인 토스트
-                    loginToast.showToast('로그인 후 이용해 주세요');
+                    loginToast.showToast(
+                      '로그인 후 간편하게 DoLink를 이용해보세요'
+                    );
                   } else if (isTutorialCollection) {
                     // 로그인 + 튜토리얼: 튜토리얼 토스트
                     tutorialToast.showToast(
@@ -767,7 +769,9 @@ const ArchiveDetailPage = () => {
                 onDeleteClick={(taskId) => {
                   if (isBeforeLoginArchive) {
                     // 미로그인: 로그인 토스트
-                    loginToast.showToast('로그인 후 이용해 주세요');
+                    loginToast.showToast(
+                      '로그인 후 간편하게 DoLink를 이용해보세요'
+                    );
                   } else if (isTutorialCollection) {
                     // 로그인 + 튜토리얼: 튜토리얼 토스트
                     tutorialToast.showToast(
@@ -846,7 +850,11 @@ const ArchiveDetailPage = () => {
       {/* 로그인 토스트 */}
       {loginToast.isVisible && (
         <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
-          <FeedBack.Toast message={loginToast.message} actionLabel='확인' />
+          <FeedBack.Toast
+            message={loginToast.message}
+            actionLabel='로그인'
+            onAction={() => navigate(ROUTES.login)}
+          />
         </div>
       )}
     </div>

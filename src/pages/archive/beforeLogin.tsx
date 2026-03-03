@@ -56,7 +56,7 @@ const ArchiveBeforeLogin = () => {
       : archives.filter((archive) => archive.category === selectedCategory);
 
   const triggerLoginToast = () => {
-    loginToast.showToast('로그인 후 이용해 주세요');
+    loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
   };
 
   const handleAddArchive = () => {
@@ -68,11 +68,11 @@ const ArchiveBeforeLogin = () => {
   };
 
   const handleEditClick = () => {
-    loginToast.showToast('로그인 후 이용해 주세요');
+    loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
   };
 
   const handleDeleteClick = () => {
-    loginToast.showToast('로그인 후 이용해 주세요');
+    loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
   };
 
   const handleOpenTutorialArchive = () => {
@@ -162,7 +162,11 @@ const ArchiveBeforeLogin = () => {
       {/* 튜토리얼 토스트 */}
       {loginToast.isVisible && (
         <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
-          <FeedBack.Toast message={loginToast.message} actionLabel='확인' />
+          <FeedBack.Toast
+            message={loginToast.message}
+            actionLabel='로그인'
+            onAction={() => navigate(ROUTES.login)}
+          />
         </div>
       )}
     </div>

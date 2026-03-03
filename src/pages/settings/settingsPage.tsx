@@ -105,7 +105,7 @@ const SettingsPage = () => {
 
   const handleFloatingButtonClick = () => {
     if (!isAuthenticated) {
-      loginToast.showToast('로그인 후 이용해 주세요');
+      loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
       return;
     }
     navigate(ROUTES.taskCreate);
@@ -223,7 +223,11 @@ const SettingsPage = () => {
 
       {loginToast.isVisible && (
         <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
-          <FeedBack.Toast message={loginToast.message} actionLabel='확인' />
+          <FeedBack.Toast
+            message={loginToast.message}
+            actionLabel='로그인'
+            onAction={() => navigate(ROUTES.login)}
+          />
         </div>
       )}
     </div>

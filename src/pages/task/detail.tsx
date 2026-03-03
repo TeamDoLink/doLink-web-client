@@ -157,14 +157,28 @@ const TaskDetailPage = () => {
   const handleOptionSelect = (key: string) => {
     if (key === 'edit') {
       if (isTutorial) {
-        tutorialToast.showToast('기본 제공 할 일은 수정할 수 없어요');
+        // 튜토리얼 할 일: 로그인 상태에 따라 다른 토스트 표시
+        if (shouldUseMockData) {
+          // 미로그인: 로그인 안내 토스트
+          loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
+        } else {
+          // 로그인: 튜토리얼 토스트
+          tutorialToast.showToast('기본 제공 할 일은 수정할 수 없어요');
+        }
         setIsOptionMenuOpen(false);
         return;
       }
       navigate(`${ROUTES.taskEdit}/${taskId}`);
     } else if (key === 'delete') {
       if (isTutorial) {
-        tutorialToast.showToast('기본 제공 할 일은 삭제할 수 없어요');
+        // 튜토리얼 할 일: 로그인 상태에 따라 다른 토스트 표시
+        if (shouldUseMockData) {
+          // 미로그인: 로그인 안내 토스트
+          loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
+        } else {
+          // 로그인: 튜토리얼 토스트
+          tutorialToast.showToast('기본 제공 할 일은 삭제할 수 없어요');
+        }
         setIsOptionMenuOpen(false);
         return;
       }
@@ -440,22 +454,20 @@ const TaskDetailPage = () => {
 
       {/* 로그인 토스트 */}
       {loginToast.isVisible && (
-        <Toast
-          message={loginToast.message}
-          actionLabel='로그인'
-          onAction={() => {
-            navigate(ROUTES.login);
-          }}
-          onClose={loginToast.hideToast}
-        />
+        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+          <Toast
+            message={loginToast.message}
+            actionLabel='로그인'
+            onAction={() => navigate(ROUTES.login)}
+          />
+        </div>
       )}
 
       {/* 튜토리얼 토스트 */}
       {tutorialToast.isVisible && (
-        <Toast
-          message={tutorialToast.message}
-          onClose={tutorialToast.hideToast}
-        />
+        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+          <Toast message={tutorialToast.message} actionLabel='확인' />
+        </div>
       )}
     </div>
   );
