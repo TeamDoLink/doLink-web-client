@@ -31,6 +31,8 @@ import type {
   ListByCollectionParams,
   TaskResponse,
 } from '@/api/generated/models';
+import { useTutorialTaskStore } from '@/stores/useTutorialTaskStore';
+import { useToast } from '@/hooks/useToast';
 
 // 카테고리 아이콘 임포트
 import restaurantIcon from '@/assets/icons/category/detail/restaurant.svg';
@@ -86,6 +88,7 @@ const BEFORE_LOGIN_TASKS: Task[] = [
     memo: '',
     status: false,
     inout: false,
+    isTutorial: true,
     createdAt: '오늘',
     modifiedAt: '오늘',
   },
@@ -111,6 +114,7 @@ const mapTaskResponseToTask = (task: TaskResponse): Task => {
     memo: task.memo ?? null,
     status: task.status ?? false,
     inout: task.inout ?? false,
+    isTutorial: task.isTutorial ?? false,
     createdAt: task.createdAt ?? new Date().toISOString(),
     modifiedAt: task.createdAt ?? new Date().toISOString(),
   };
@@ -166,6 +170,7 @@ const ArchiveDetailPage = () => {
 
   const queryClient = useQueryClient();
   const collectionId = id ? Number(id) : 0;
+  const { isTaskCompleted, toggleTask } = useTutorialTaskStore();
 
   // API 연결 시 사용: 페이지네이션 파라미터를 전달해야 함
   // const { data: taskData } = useListByCollection(
@@ -187,6 +192,7 @@ const ArchiveDetailPage = () => {
     collectionData as unknown as ApiResponseCollectionDetailResponse;
   const apiTitle = apiCollectionData?.result?.name;
   const apiCategory = apiCollectionData?.result?.category;
+  const apiTaskCount = apiCollectionData?.result?.taskCount ?? 0;
 
   const archiveMeta = isBeforeLoginArchive
     ? BEFORE_LOGIN_ARCHIVE_META
@@ -200,8 +206,8 @@ const ArchiveDetailPage = () => {
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [isTitleVisible, setIsTitleVisible] = useState(true);
   const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastToken, setToastToken] = useState(0);
+  const tutorialToast = useToast();
+  const loginToast = useToast();
   const [pendingDeleteTaskIds, setPendingDeleteTaskIds] = useState<number[]>(
     []
   );
@@ -246,6 +252,13 @@ const ArchiveDetailPage = () => {
   // 실제 화면에서 사용할 task 리스트
   const taskList = isBeforeLoginArchive ? tutorialTasks : apiTaskList;
 
+  // 튜토리얼 모음인지 확인 (첫 번째 할 일이 isTutorial이면 튜토리얼 모음)
+  const isTutorialCollection = useMemo(() => {
+    return (
+      isBeforeLoginArchive || (taskList.length > 0 && taskList[0].isTutorial)
+    );
+  }, [isBeforeLoginArchive, taskList]);
+
   // 전체 todo 데이터 기준으로 개수 계산
   const { totalCount, incompleteCount, completeCount } = useMemo(() => {
     const allTasks = taskList;
@@ -266,22 +279,15 @@ const ArchiveDetailPage = () => {
   }, [linkStates, taskList]);
 
   // 탭에 따라 보여줄 개수 선택
+  // 전체 탭에서는 API의 taskCount 사용, 나머지는 로컬 계산값 사용
   const todoCount =
     selectedTab === 'all'
-      ? totalCount
+      ? isBeforeLoginArchive
+        ? totalCount
+        : apiTaskCount
       : selectedTab === 'incomplete'
         ? incompleteCount
         : completeCount;
-
-  // 토스트 자동 숨김 처리
-  useEffect(() => {
-    if (!showToast) {
-      return;
-    }
-
-    const timer = setTimeout(() => setShowToast(false), 3000);
-    return () => clearTimeout(timer);
-  }, [showToast, toastToken]);
 
   // 튜토리얼 초기화
   useEffect(() => {
@@ -289,7 +295,10 @@ const ArchiveDetailPage = () => {
       setTutorialTasks(BEFORE_LOGIN_TASKS);
       setLinkStates(
         BEFORE_LOGIN_TASKS.reduce(
-          (acc, task) => ({ ...acc, [task.taskId]: task.status }),
+          (acc, task) => ({
+            ...acc,
+            [task.taskId]: isTaskCompleted(task.taskId.toString()),
+          }),
           {}
         )
       );
@@ -300,7 +309,7 @@ const ArchiveDetailPage = () => {
         )
       );
     }
-  }, [isBeforeLoginArchive]);
+  }, [isBeforeLoginArchive, isTaskCompleted]);
 
   // API 데이터로 linkStates / linkEditModes 초기화
   useEffect(() => {
@@ -338,7 +347,17 @@ const ArchiveDetailPage = () => {
   const handleLinkCheck = (taskId: number, checked: boolean) => {
     setLinkStates((prev) => ({ ...prev, [taskId]: checked }));
 
-    if (isBeforeLoginArchive) return; // 튜토리얼 모음일 때는 API 호출 X
+    if (isBeforeLoginArchive) {
+      // 미로그인: 전역 스토어에 저장
+      toggleTask(taskId.toString());
+      return;
+    }
+
+    // 튜토리얼 할 일이면 API 호출 X
+    const task = taskList.find((t) => t.taskId === taskId);
+    if (task?.isTutorial) {
+      return;
+    }
 
     completeTask(
       { taskId },
@@ -372,7 +391,11 @@ const ArchiveDetailPage = () => {
   };
 
   const handleTaskClick = (taskId: number) => {
-    navigate(`${ROUTES.taskDetail}/${taskId}`);
+    if (isBeforeLoginArchive) {
+      navigate(ROUTES.taskDetail + '/tutorial');
+    } else {
+      navigate(`${ROUTES.taskDetail}/${taskId}`);
+    }
   };
 
   // 그룹 단위 삭제 핸들러 (같은 날짜의 모든 할 일을 삭제)
@@ -382,21 +405,36 @@ const ArchiveDetailPage = () => {
   };
 
   const handleOption = () => {
-    if (isBeforeLoginArchive) {
-      // 튜토리얼 모음: 옵션 메뉴 대신 토스트 노출
-      setShowToast(true);
-      setToastToken((prev) => prev + 1);
-      return;
-    }
-
     setIsOptionMenuOpen((prev) => !prev);
   };
 
   const handleOptionSelect = (key: string) => {
     setIsOptionMenuOpen(false);
     if (key === 'edit') {
+      if (isTutorialCollection) {
+        // 튜토리얼 모음: 토스트 표시
+        if (isBeforeLoginArchive) {
+          // 미로그인: 로그인 토스트
+          loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
+        } else {
+          // 로그인: 튜토리얼 토스트
+          tutorialToast.showToast('기본 제공 모음은 수정할 수 없어요');
+        }
+        return;
+      }
       navigate(`${ROUTES.archiveEdit}/${collectionId}`);
     } else if (key === 'delete') {
+      if (isTutorialCollection) {
+        // 튜토리얼 모음: 토스트 표시
+        if (isBeforeLoginArchive) {
+          // 미로그인: 로그인 토스트
+          loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
+        } else {
+          // 로그인: 튜토리얼 토스트
+          tutorialToast.showToast('기본 제공 모음은 삭제할 수 없어요');
+        }
+        return;
+      }
       setIsCollectionDeleteOpen(true);
     }
   };
@@ -497,6 +535,10 @@ const ArchiveDetailPage = () => {
   };
 
   const handleFloatingButtonClick = () => {
+    if (isBeforeLoginArchive) {
+      loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
+      return;
+    }
     navigate(ROUTES.taskCreate);
   };
 
@@ -609,7 +651,7 @@ const ArchiveDetailPage = () => {
       </div>
 
       {/* 옵션 메뉴 */}
-      {isOptionMenuOpen && !isBeforeLoginArchive && (
+      {isOptionMenuOpen && (
         <>
           <div
             className='fixed inset-0 z-modal-overlay'
@@ -696,7 +738,7 @@ const ArchiveDetailPage = () => {
                 }}
                 onOriginalClick={(taskId) => {
                   const task = tasks.find((t) => t.taskId === taskId);
-                  if (task && task.link) {
+                  if (task && task.link && task.inout) {
                     console.log('원본 클릭:', task.title);
                     window.open(task.link, '_blank', 'noopener,noreferrer');
                   }
@@ -709,15 +751,37 @@ const ArchiveDetailPage = () => {
                   }
                 }}
                 onEditClick={() => {
-                  // 할 일 편집 버튼(연필 아이콘) 클릭 시 모음 편집 페이지로 이동
-                  if (!isBeforeLoginArchive && collectionId) {
+                  // 할 일 편집 버튼(연필 아이콘) 클릭 시
+                  if (isBeforeLoginArchive) {
+                    // 미로그인: 로그인 토스트
+                    loginToast.showToast(
+                      '로그인 후 간편하게 DoLink를 이용해보세요'
+                    );
+                  } else if (isTutorialCollection) {
+                    // 로그인 + 튜토리얼: 튜토리얼 토스트
+                    tutorialToast.showToast(
+                      '기본 제공 할 일은 수정할 수 없어요'
+                    );
+                  } else {
                     navigate(`${ROUTES.archiveEdit}/${collectionId}`);
                   }
                 }}
                 onDeleteClick={(taskId) => {
-                  setPendingDeleteTaskIds([taskId]);
+                  if (isBeforeLoginArchive) {
+                    // 미로그인: 로그인 토스트
+                    loginToast.showToast(
+                      '로그인 후 간편하게 DoLink를 이용해보세요'
+                    );
+                  } else if (isTutorialCollection) {
+                    // 로그인 + 튜토리얼: 튜토리얼 토스트
+                    tutorialToast.showToast(
+                      '기본 제공 할 일은 삭제할 수 없어요'
+                    );
+                  } else {
+                    setPendingDeleteTaskIds([taskId]);
+                  }
                 }}
-                capsuleDisabled={isBeforeLoginArchive}
+                capsuleDisabled={false}
               />
             )}
             onLoadMore={() => {
@@ -777,12 +841,19 @@ const ArchiveDetailPage = () => {
       </FeedBack.ModalLayout>
 
       {/* 튜토리얼 모음용 토스트 */}
-      {isBeforeLoginArchive && showToast && (
+      {tutorialToast.isVisible && (
+        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+          <FeedBack.Toast message={tutorialToast.message} actionLabel='확인' />
+        </div>
+      )}
+
+      {/* 로그인 토스트 */}
+      {loginToast.isVisible && (
         <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
           <FeedBack.Toast
-            message='기본 제공 모음은 삭제할 수 없어요.'
-            actionLabel='확인'
-            onAction={() => setShowToast(false)}
+            message={loginToast.message}
+            actionLabel='로그인'
+            onAction={() => navigate(ROUTES.login)}
           />
         </div>
       )}

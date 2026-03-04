@@ -12,6 +12,7 @@ import {
 } from '@/components/archive';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
+import { useToast } from '@/hooks/useToast';
 import { ROUTES } from '@/constants/routes';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import {
@@ -20,6 +21,7 @@ import {
   useDeleteCollect,
   useGetTotalCollectionCount,
   useGetCategoryCounts,
+  useGetTaskCountsForCollections,
 } from '@/api/generated/endpoints/collection/collection';
 import type {
   ApiResponseSliceCollectionResponse,
@@ -66,6 +68,7 @@ const ArchiveAfterLogin = () => {
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
     number | null
   >(null);
+  const tutorialToast = useToast();
 
   const isAll = selectedCategory === 'all';
 
@@ -132,6 +135,20 @@ const ArchiveAfterLogin = () => {
     [data]
   );
 
+  const { data: taskCountsData } = useGetTaskCountsForCollections();
+
+  const taskCountMap = useMemo(() => {
+    const list =
+      (
+        taskCountsData as {
+          result?: { collectionId: number; taskCount: number }[];
+        }
+      )?.result ?? [];
+    return Object.fromEntries(
+      list.map((item) => [item.collectionId, item.taskCount])
+    );
+  }, [taskCountsData]);
+
   // 전체 모음 개수 조회
   const { data: totalCountData } = useGetTotalCollectionCount({
     query: {
@@ -167,6 +184,12 @@ const ArchiveAfterLogin = () => {
   const { mutate: deleteCollect } = useDeleteCollect();
 
   const handleRequestDelete = (id: number) => {
+    // 튜토리얼 모음이면 토스트만 표시
+    const archive = archives.find((a) => a.collectionId === id);
+    if (archive?.isTutorial) {
+      tutorialToast.showToast('기본 제공 모음은 삭제할 수 없어요');
+      return;
+    }
     setPendingDeleteArchiveId(id);
   };
 
@@ -201,6 +224,12 @@ const ArchiveAfterLogin = () => {
   };
 
   const handleEdit = (id: number) => {
+    // 튜토리얼 모음이면 토스트만 표시
+    const archive = archives.find((a) => a.collectionId === id);
+    if (archive?.isTutorial) {
+      tutorialToast.showToast('기본 제공 모음은 수정할 수 없어요');
+      return;
+    }
     navigate(`${ROUTES.archiveEdit}/${id}`);
   };
 
@@ -268,7 +297,9 @@ const ArchiveAfterLogin = () => {
                   title={archive.name}
                   category={archive.category}
                   images={previewImages}
+                  itemCount={taskCountMap[archive.collectionId!] ?? 0}
                   width='w-full'
+                  isTutorial={archive.isTutorial}
                   onClick={() =>
                     navigate(`${ROUTES.archiveDetail}/${archive.collectionId}`)
                   }
@@ -300,6 +331,17 @@ const ArchiveAfterLogin = () => {
 
       {/* 바탭탭바 */}
       <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
+
+      {/* 튜토리얼 토스트 */}
+      {tutorialToast.isVisible && (
+        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+          <FeedBack.Toast
+            message={tutorialToast.message}
+            actionLabel='확인'
+            onClose={tutorialToast.hideToast}
+          />
+        </div>
+      )}
 
       <FeedBack.ModalLayout
         open={pendingDeleteArchiveId !== null}

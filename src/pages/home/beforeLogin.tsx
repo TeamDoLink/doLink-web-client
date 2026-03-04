@@ -18,6 +18,7 @@ import {
 import { ROUTES } from '@/constants/routes';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import { formatRelativeDateLabel } from '@/utils/date';
+import { useTutorialTaskStore } from '@/stores/useTutorialTaskStore';
 
 const HomeBeforeLogin = () => {
   const navigate = useNavigate();
@@ -26,6 +27,9 @@ const HomeBeforeLogin = () => {
   const [toastType, setToastType] = useState<'login' | 'defaultArchive' | null>(
     null
   );
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
+  const { isTaskCompleted, toggleTask } = useTutorialTaskStore();
   const toastTimerRef = useRef<number | null>(null);
   const todoItems = BEFORE_LOGIN_TODO();
   const archiveItems = BEFORE_LOGIN_ARCHIVE();
@@ -59,16 +63,19 @@ const HomeBeforeLogin = () => {
     showToastWithType('login');
   };
 
-  const triggerDefaultArchiveToast = () => {
-    showToastWithType('defaultArchive');
-  };
-
-  const handleTodoCheckbox = () => {
-    triggerLoginToast();
+  const handleTodoCheckbox = (id: string, checked: boolean) => {
+    toggleTask(id);
+    if (checked && !suppressCompleteModal) {
+      setShowCompleteModal(true);
+    }
   };
 
   const handleCreateTodo = () => {
     triggerLoginToast();
+  };
+
+  const handleTodoClick = () => {
+    navigate(ROUTES.taskDetail + '/tutorial');
   };
 
   const handleOpenTutorialArchive = () => {
@@ -110,17 +117,18 @@ const HomeBeforeLogin = () => {
             <section className='mt-5 space-y-4'>
               <h2 className='text-heading-sm text-black'>할 일</h2>
               <div className='space-y-4 rounded-2xl bg-white py-5 shadow-[0_4px_12px_rgba(0,0,0,0.03)]'>
-                {todoItems.map(
-                  ({ id, title, platform, checked, createdAt }) => (
-                    <List.TodoItem
-                      key={id}
-                      title={title}
-                      subtitle={`${formatRelativeDateLabel(createdAt)} · ${platform}`}
-                      checked={checked}
-                      onChange={handleTodoCheckbox}
-                    />
-                  )
-                )}
+                {todoItems.map(({ id, title, platform, createdAt }) => (
+                  <List.TodoItem
+                    key={id}
+                    title={title}
+                    subtitle={`${formatRelativeDateLabel(createdAt)} · ${platform}`}
+                    checked={isTaskCompleted(id)}
+                    onChange={(newChecked) =>
+                      handleTodoCheckbox(id, newChecked)
+                    }
+                    onClick={handleTodoClick}
+                  />
+                ))}
               </div>
             </section>
 
@@ -136,9 +144,7 @@ const HomeBeforeLogin = () => {
                       itemCount={itemCount}
                       images={images.slice(0, 4)}
                       width='w-full'
-                      disableActionMenu
                       onClick={handleOpenTutorialArchive}
-                      onMoreClick={triggerDefaultArchiveToast}
                       onEditClick={triggerLoginToast}
                       onDeleteClick={triggerLoginToast}
                     />
@@ -157,14 +163,31 @@ const HomeBeforeLogin = () => {
                   ? '기본 제공 모음은 삭제할 수 없어요.'
                   : '로그인 후 간편하게 DoLink를 이용해보세요.'
               }
-              actionLabel={toastType === 'defaultArchive' ? '확인' : '로그인'}
-              onAction={
-                toastType === 'defaultArchive'
-                  ? () => setShowToast(false)
-                  : handleLoginClick
-              }
+              actionLabel={toastType === 'login' ? '로그인' : '확인'}
+              onAction={toastType === 'login' ? handleLoginClick : undefined}
+              onClose={() => setShowToast(false)}
             />
           </div>
+        )}
+
+        {/* 완료 모달 */}
+        {showCompleteModal && (
+          <FeedBack.ModalLayout
+            open={showCompleteModal}
+            onClose={() => setShowCompleteModal(false)}
+          >
+            <FeedBack.AlertDialog
+              title='할 일을 완료했어요'
+              subtitle='완료한 일들은 해당 모음에서 확인할 수 있어요.'
+              primaryLabel='확인'
+              secondaryLabel='다시 보지 않기'
+              onPrimary={() => setShowCompleteModal(false)}
+              onSecondary={() => {
+                setSuppressCompleteModal(true);
+                setShowCompleteModal(false);
+              }}
+            />
+          </FeedBack.ModalLayout>
         )}
 
         {/* 하단 고정 버튼 */}

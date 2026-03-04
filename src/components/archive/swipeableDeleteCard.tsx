@@ -39,6 +39,7 @@ export interface Task {
   memo: string | null;
   status: boolean;
   inout: boolean;
+  isTutorial?: boolean;
   createdAt: string;
   modifiedAt: string;
 }
@@ -132,6 +133,7 @@ export const SwipeableDeleteCard = ({
     title: task.title,
     subtitle: task.link || '직접 추가',
     thumbnail: '', // TODO: 실제 썸네일 데이터 연동 필요
+    inout: task.inout, // inout 필드 추가
   }));
 
   // 스와이프 상태 관리
@@ -308,7 +310,7 @@ export const SwipeableDeleteCard = ({
 
         {/* 링크 아이템 리스트: 같은 날짜의 모든 링크를 List.LinkItem으로 렌더링 */}
         <div className='flex flex-col gap-5 px-5 pb-5'>
-          {links.map((link) => (
+          {links.map((link, index) => (
             <List.LinkItem
               key={link.id}
               title={link.title} // 링크 제목
@@ -324,6 +326,7 @@ export const SwipeableDeleteCard = ({
               onDeleteClick={() => onDeleteClick(link.id)} // 삭제 클릭 핸들러
               width='w-full' // 전체 너비 사용
               actionDisabled={capsuleDisabled}
+              originalDisabled={!tasks[index].inout} // inout이 false면 원본 버튼 비활성화
             />
           ))}
         </div>

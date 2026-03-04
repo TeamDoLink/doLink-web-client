@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { BackDetailBar } from '@/components/common/appBar/backDetailAppBar';
 import { GreyLine } from '@/components/common/line/greyLine';
@@ -8,9 +8,13 @@ import { CheckIcon } from '@/components/common/icons/checkIcon';
 import { OptionMenu } from '@/components/common/menu/optionMenu';
 import EmptyNotice from '@/components/common/feedBack/emptyNotice';
 import { FeedBack } from '@/components/common';
+import Toast from '@/components/common/feedBack/toast';
 import ModalLayout from '@/components/common/feedBack/modalLayout';
 import { openLink, isReactNativeWebView } from '@/utils/nativeBridge';
 import { ROUTES } from '@/constants/routes';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useTutorialTaskStore } from '@/stores/useTutorialTaskStore';
+import { useToast } from '@/hooks/useToast';
 import {
   useGetTask,
   useCompleteTask,
@@ -56,22 +60,33 @@ const CATEGORY_ICON_MAP: Record<string, string> = {
 const TaskDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const taskId = Number(id);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { isTaskCompleted, toggleTask } = useTutorialTaskStore();
 
-  // API 호출
-  const { data: taskResponse, isLoading: isLoadingTask } = useGetTask(taskId);
+  // 미로그인 사용자를 위한 특별 경로인지 확인 (mock 데이터 사용)
+  const isTutorialPath = location.pathname.includes('/tutorial');
+  const shouldUseMockData = !isAuthenticated && isTutorialPath;
+
+  // API 호출 (로그인 상태일 때는 항상 호출)
+  const { data: taskResponse, isLoading: isLoadingTask } = useGetTask(taskId, {
+    query: { enabled: isAuthenticated },
+  });
   const apiTaskResponse = taskResponse as unknown as ApiResponseTaskResponse;
-  const taskData = apiTaskResponse?.result;
+  const taskData = shouldUseMockData ? null : apiTaskResponse?.result;
   const collectionId = taskData?.collectionId;
 
   const { data: collectionResponse, isLoading: isLoadingCollection } =
     useGetCollectDetail(collectionId ?? 0, {
-      query: { enabled: !!collectionId },
+      query: { enabled: !!collectionId && isAuthenticated },
     });
   const apiCollectionResponse =
     collectionResponse as unknown as ApiResponseCollectionDetailResponse;
-  const collectionData = apiCollectionResponse?.result;
+  const collectionData = shouldUseMockData
+    ? null
+    : apiCollectionResponse?.result;
 
   const { mutate: completeTask } = useCompleteTask();
   const { mutate: deleteTask } = useDeleteTask();
@@ -81,12 +96,43 @@ const TaskDetailPage = () => {
   const [bottomHeight, setBottomHeight] = useState(104);
   const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const tutorialToast = useToast();
+  const loginToast = useToast();
   const appBarRef = useRef<HTMLDivElement>(null);
   const bottomBarRef = useRef<HTMLDivElement>(null);
 
-  const isCompleted = taskData?.status ?? false;
-  const categoryLabel = collectionData?.category ?? '';
+  // 미로그인 사용자를 위한 튜토리얼 목 데이터
+  const tutorialMockData = {
+    taskId: 1,
+    title: '두링크(DoLink) 안내서📚',
+    link: 'https://www.notion.so/DoLink-30347f96a7fc8039ae52e566e4c26087',
+    memo: '',
+    thumbnailUrl: undefined,
+    status: false,
+    createdAt: new Date().toISOString(),
+    collectionName: '두링크(DoLink) 튜토리얼',
+    category: '기타',
+    inout: true,
+    isTutorial: true,
+  };
+
+  // 표시할 데이터 결정
+  const displayData = shouldUseMockData
+    ? { ...tutorialMockData, status: isTaskCompleted('1') }
+    : taskData;
+  const displayCollection = shouldUseMockData
+    ? {
+        name: tutorialMockData.collectionName,
+        category: tutorialMockData.category,
+      }
+    : collectionData;
+
+  const isCompleted = displayData?.status ?? false;
+  const categoryLabel = displayCollection?.category ?? '';
   const categoryIcon = CATEGORY_ICON_MAP[categoryLabel] ?? etcIcon;
+  const isInout = shouldUseMockData ? true : (taskData?.inout ?? false);
+  // 튜토리얼 여부: mock 데이터이거나 API 응답의 isTutorial이 true인 경우
+  const isTutorial = shouldUseMockData || (taskData?.isTutorial ?? false);
 
   // 앱바 및 하단 버튼 영역 높이 동적 계산
   useEffect(() => {
@@ -110,8 +156,32 @@ const TaskDetailPage = () => {
 
   const handleOptionSelect = (key: string) => {
     if (key === 'edit') {
+      if (isTutorial) {
+        // 튜토리얼 할 일: 로그인 상태에 따라 다른 토스트 표시
+        if (shouldUseMockData) {
+          // 미로그인: 로그인 안내 토스트
+          loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
+        } else {
+          // 로그인: 튜토리얼 토스트
+          tutorialToast.showToast('기본 제공 할 일은 수정할 수 없어요');
+        }
+        setIsOptionMenuOpen(false);
+        return;
+      }
       navigate(`${ROUTES.taskEdit}/${taskId}`);
     } else if (key === 'delete') {
+      if (isTutorial) {
+        // 튜토리얼 할 일: 로그인 상태에 따라 다른 토스트 표시
+        if (shouldUseMockData) {
+          // 미로그인: 로그인 안내 토스트
+          loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
+        } else {
+          // 로그인: 튜토리얼 토스트
+          tutorialToast.showToast('기본 제공 할 일은 삭제할 수 없어요');
+        }
+        setIsOptionMenuOpen(false);
+        return;
+      }
       setIsDeleteModalOpen(true);
     }
     setIsOptionMenuOpen(false);
@@ -146,18 +216,30 @@ const TaskDetailPage = () => {
   };
 
   const handleLinkClick = () => {
-    if (taskData?.link) {
+    // inout이 false면 링크 이동 불가
+    if (!isInout) {
+      return;
+    }
+
+    const linkUrl = displayData?.link;
+    if (linkUrl) {
       // React Native 환경에서는 네이티브 브릿지 사용
       if (isReactNativeWebView()) {
-        openLink(taskData.link);
+        openLink(linkUrl);
       } else {
         // 웹 브라우저 환경에서는 새 탭으로 열기
-        window.open(taskData.link, '_blank');
+        window.open(linkUrl, '_blank');
       }
     }
   };
 
   const handleComplete = () => {
+    // 미로그인 상태: 전역 스토어에 저장
+    if (shouldUseMockData) {
+      toggleTask('1');
+      return;
+    }
+    // 로그인 상태: 튜토리얼 할 일도 완료 가능
     completeTask(
       { taskId },
       {
@@ -193,7 +275,8 @@ const TaskDetailPage = () => {
     );
   };
 
-  if (isLoadingTask || isLoadingCollection) {
+  // 로그인 사용자일 때만 로딩/에러 체크
+  if (isAuthenticated && (isLoadingTask || isLoadingCollection)) {
     return (
       <div className='flex min-h-screen items-center justify-center'>
         <p className='text-body-lg text-grey-600'>로딩 중...</p>
@@ -201,7 +284,7 @@ const TaskDetailPage = () => {
     );
   }
 
-  if (!taskData) {
+  if (isAuthenticated && !taskData) {
     return (
       <div className='flex min-h-screen flex-col items-center justify-center'>
         <EmptyNotice
@@ -268,9 +351,9 @@ const TaskDetailPage = () => {
           className='sticky z-0 h-40 w-full shrink-0 overflow-hidden bg-grey-200'
           style={{ top: `${appBarHeight}px` }}
         >
-          {taskData.thumbnailUrl && !imageError ? (
+          {!shouldUseMockData && displayData?.thumbnailUrl && !imageError ? (
             <img
-              src={taskData.thumbnailUrl}
+              src={displayData.thumbnailUrl}
               alt='task thumbnail'
               className='h-full w-full object-cover'
               onError={() => {
@@ -293,11 +376,11 @@ const TaskDetailPage = () => {
           }}
         >
           {/* 제목 */}
-          <h1 className='text-heading-xl text-black'>{taskData.title}</h1>
+          <h1 className='text-heading-xl text-black'>{displayData?.title}</h1>
 
           {/* 모음 제목 */}
           <p className='text-body-xl text-black'>
-            {collectionData?.name ?? '모음 없음'}
+            {displayCollection?.name ?? '모음 없음'}
           </p>
 
           <GreyLine width='w-full' />
@@ -314,19 +397,19 @@ const TaskDetailPage = () => {
           <div className='flex items-center gap-2'>
             <img src={calendarIcon} alt='' className='h-4 w-4 shrink-0' />
             <span className='text-body-md text-grey-700'>
-              {taskData.createdAt
-                ? formatRelativeDateLabel(taskData.createdAt)
+              {displayData?.createdAt
+                ? formatRelativeDateLabel(displayData.createdAt)
                 : '날짜 없음'}
             </span>
           </div>
 
           {/* 메모 */}
-          {taskData.memo && (
+          {displayData?.memo && (
             <div className='flex items-start gap-2'>
               <img src={memoIcon} alt='' className='mt-0.5 h-4 w-4 shrink-0' />
               <p className='truncate whitespace-pre-wrap text-body-md text-grey-700'>
                 <span>메모가이드: </span>
-                {taskData.memo}
+                {displayData.memo}
               </p>
             </div>
           )}
@@ -345,7 +428,11 @@ const TaskDetailPage = () => {
           ref={bottomBarRef}
           className='fixed bottom-0 left-0 right-0 z-20 flex items-center gap-4 bg-white px-5 pb-[8px] pt-3'
         >
-          <CtaButton onClick={handleLinkClick} className='flex-1'>
+          <CtaButton
+            onClick={handleLinkClick}
+            className='flex-1'
+            disabled={!isInout}
+          >
             링크 바로가기
           </CtaButton>
 
@@ -364,6 +451,28 @@ const TaskDetailPage = () => {
           </button>
         </div>
       </main>
+
+      {/* 로그인 토스트 */}
+      {loginToast.isVisible && (
+        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+          <Toast
+            message={loginToast.message}
+            actionLabel='로그인'
+            onAction={() => navigate(ROUTES.login)}
+          />
+        </div>
+      )}
+
+      {/* 튜토리얼 토스트 */}
+      {tutorialToast.isVisible && (
+        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+          <Toast
+            message={tutorialToast.message}
+            actionLabel='확인'
+            onClose={tutorialToast.hideToast}
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -16,6 +16,7 @@ export type ArchiveCardProps = {
   onDeleteClick?: () => void;
   disableActionMenu?: boolean;
   onClick?: () => void;
+  isTutorial?: boolean;
 };
 
 // TODO category type 지정 - mapping 함수 만들어서 자동 매칭해 관리 예정
@@ -33,6 +34,7 @@ export default function ArchiveCard({
   onDeleteClick,
   disableActionMenu = false,
   onClick,
+  isTutorial: _isTutorial = false,
 }: ArchiveCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -84,6 +86,7 @@ export default function ArchiveCard({
       onMoreClick?.();
       return;
     }
+    // isTutorial이어도 메뉴는 열림
     setIsOpen(true);
     onTypeChange?.('edit');
     onMoreClick?.();

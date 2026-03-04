@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TabBar, List, FeedBack } from '@/components/common';
 import { FloatingButton } from '@/components/common/button';
@@ -13,6 +12,7 @@ import { ROUTES } from '@/constants/routes';
 import { BEFORE_LOGIN_ARCHIVE } from '@/constants/beforeLoginData';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
+import { useToast } from '@/hooks/useToast';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveCategoryKey[] = [
   'all',
@@ -46,17 +46,7 @@ const ArchiveBeforeLogin = () => {
     (state) => state.setSelectedCategory
   );
 
-  const [showToast, setShowToast] = useState(false);
-  const [toastToken, setToastToken] = useState(0);
-
-  useEffect(() => {
-    if (!showToast) {
-      return;
-    }
-
-    const timer = setTimeout(() => setShowToast(false), 3000);
-    return () => clearTimeout(timer);
-  }, [showToast, toastToken]);
+  const loginToast = useToast();
 
   const archives = BEFORE_LOGIN_ARCHIVE();
 
@@ -66,12 +56,7 @@ const ArchiveBeforeLogin = () => {
       : archives.filter((archive) => archive.category === selectedCategory);
 
   const triggerLoginToast = () => {
-    setShowToast(true);
-    setToastToken((prev) => prev + 1);
-  };
-
-  const handleLoginAction = () => {
-    navigate(ROUTES.login);
+    loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
   };
 
   const handleAddArchive = () => {
@@ -82,8 +67,12 @@ const ArchiveBeforeLogin = () => {
     triggerLoginToast();
   };
 
-  const handleArchiveMoreClick = () => {
-    triggerLoginToast();
+  const handleEditClick = () => {
+    loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
+  };
+
+  const handleDeleteClick = () => {
+    loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
   };
 
   const handleOpenTutorialArchive = () => {
@@ -144,9 +133,10 @@ const ArchiveBeforeLogin = () => {
                 itemCount={archive.itemCount}
                 images={previewImages}
                 width='w-full'
-                disableActionMenu
+                isTutorial
                 onClick={handleOpenTutorialArchive}
-                onMoreClick={handleArchiveMoreClick}
+                onEditClick={handleEditClick}
+                onDeleteClick={handleDeleteClick}
               />
             );
           })}
@@ -169,12 +159,13 @@ const ArchiveBeforeLogin = () => {
       {/* 바탭탭바 */}
       <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />
 
-      {showToast && (
+      {/* 튜토리얼 토스트 */}
+      {loginToast.isVisible && (
         <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
           <FeedBack.Toast
-            message='로그인 후 간편하게 DoLink를 이용해보세요.'
+            message={loginToast.message}
             actionLabel='로그인'
-            onAction={handleLoginAction}
+            onAction={() => navigate(ROUTES.login)}
           />
         </div>
       )}

@@ -8,6 +8,7 @@ import { GreetingSection } from '@/components/home/greetingSection';
 import { TodoSection } from '@/components/home/todoSection';
 import { ArchiveSection } from '@/components/home/archiveSection';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
+import { useToast } from '@/hooks/useToast';
 import { useModalStore } from '@/stores/useModalStore';
 import { ROUTES } from '@/constants/routes';
 import {
@@ -66,6 +67,7 @@ const HomeAfterLogin = () => {
   const [todoOverrides, setTodoOverrides] = useState<Record<string, boolean>>(
     {}
   );
+  const tutorialToast = useToast();
 
   // API: 사용자 프로필
   const { data: userData } = useGetUser();
@@ -122,11 +124,12 @@ const HomeAfterLogin = () => {
       id: String(a.collectionId ?? 0),
       title: a.name ?? '',
       category: CATEGORY_LABEL_TO_KEY[a.category ?? ''] ?? 'etc',
-      itemCount: 0,
+      itemCount: a.taskCount ?? 0,
       previewImages: Array.isArray(a.thumbnails)
         ? a.thumbnails.slice(0, 4)
         : [],
       createdAt: '',
+      isTutorial: a.isTutorial ?? false,
     }));
   }, [archiveContent]);
 
@@ -158,6 +161,7 @@ const HomeAfterLogin = () => {
           ]);
 
           setTodoOverrides({});
+          // 튜토리얼 할 일도 모달 표시
           if (nextChecked && !suppressCompleteModal) {
             openAlert({
               title: '할 일을 완료했어요',
@@ -176,6 +180,13 @@ const HomeAfterLogin = () => {
   };
 
   const handleRequestDeleteArchive = (id: string) => {
+    // 튜토리얼 모음이면 토스트만 표시
+    const archive = archiveContent.find((a) => String(a.collectionId) === id);
+    if (archive?.isTutorial) {
+      tutorialToast.showToast('기본 제공 모음은 삭제할 수 없어요');
+      return;
+    }
+
     openConfirm({
       title: '모음을 삭제할까요?',
       subtitle: '모음 내 할 일도 함께 삭제돼요.',
@@ -205,6 +216,12 @@ const HomeAfterLogin = () => {
   };
 
   const handleRequestEditArchive = (id: string) => {
+    // 튜토리얼 모음이면 토스트만 표시
+    const archive = archiveContent.find((a) => String(a.collectionId) === id);
+    if (archive?.isTutorial) {
+      tutorialToast.showToast('기본 제공 모음은 수정할 수 없어요');
+      return;
+    }
     navigate(`${ROUTES.archiveEdit}/${id}`);
   };
 
@@ -264,6 +281,17 @@ const HomeAfterLogin = () => {
 
       {/* 바탭탭바 */}
       <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
+
+      {/* 튜토리얼 토스트 */}
+      {tutorialToast.isVisible && (
+        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+          <FeedBack.Toast
+            message={tutorialToast.message}
+            actionLabel='확인'
+            onClose={tutorialToast.hideToast}
+          />
+        </div>
+      )}
 
       <FeedBack.ModalLayout open={isModalOpen} onClose={handleModalClose}>
         {modalType === 'alert' && alertConfig && (

@@ -23,6 +23,7 @@ export type LinkItemProps = {
   onDeleteClick?: () => void;
   width?: string;
   actionDisabled?: boolean;
+  originalDisabled?: boolean; // inout이 false일 때 원본 버튼 비활성화
 };
 
 /**
@@ -49,6 +50,7 @@ export default function LinkItem({
   onDeleteClick,
   width = 'w-full',
   actionDisabled = false,
+  originalDisabled = false,
 }: LinkItemProps) {
   const itemRef = useRef<HTMLDivElement>(null);
 
@@ -110,7 +112,7 @@ export default function LinkItem({
             <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
               <LinkCapsuleButton
                 onClick={onOriginalClick}
-                disabled={actionDisabled}
+                disabled={actionDisabled || originalDisabled}
               />
             </div>
             <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>

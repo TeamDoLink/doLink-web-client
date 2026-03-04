@@ -12,4 +12,5 @@ export type ArchiveItem = {
   category: string;
   itemCount: number;
   createdAt: string;
+  isTutorial?: boolean;
 };
