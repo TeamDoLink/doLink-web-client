@@ -8,7 +8,7 @@ import {
   TabBar,
 } from '@/components/common';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
-import heroIllustration from '@/assets/icons/home/home1.svg';
+import heroIllustration from '@/assets/icons/home/beforelogin.svg';
 import { FloatingButton } from '@/components/common/button';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import {
@@ -92,25 +92,22 @@ const HomeBeforeLogin = () => {
         <HomeAppBar onClickSearch={handleClickSearch} />
 
         <main className='relative grow pt-14'>
-          <div className='mx-auto flex flex-col px-5 py-2'>
+          <div className='mx-auto flex flex-col px-5'>
             <section className='flex items-center justify-between'>
-              <div className='flex flex-col gap-1'>
-                <p className='text-heading-sm text-grey-500'>
-                  만나서 반가워요 😊
-                </p>
-                <h1 className='text-display-2xl text-black'>
+              <div className='flex flex-col'>
+                <h1 className='text-heading-xl text-black'>
                   두링크가 처음이라면
                 </h1>
                 <Button.IconButton
                   label='로그인하기'
-                  className='mt-3 text-body-md'
+                  className='mt-2 h-[26px] w-[86px] text-body-md'
                   onClick={handleLoginClick}
                 />
               </div>
               <img
                 src={heroIllustration}
                 alt='홈 일러스트'
-                className='h-[120px] w-[130px] flex-shrink-0 object-contain'
+                className='h-[90px] w-[90px] flex-shrink-0 object-contain'
               />
             </section>
 

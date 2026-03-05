@@ -40,8 +40,8 @@ export const ArchiveSection = ({
   };
 
   return (
-    <section className={`mt-7 space-y-4 ${className}`}>
-      <h2 className='text-heading-sm text-black'>모음</h2>
+    <section className={`${className}`}>
+      <h2 className='mb-2 py-2 text-heading-sm text-black'>모음</h2>
       <div className='space-y-3'>
         {items.map(
           ({ id, title, category, itemCount, previewImages, isTutorial }) => {
