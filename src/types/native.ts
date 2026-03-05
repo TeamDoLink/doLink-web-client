@@ -79,7 +79,6 @@ export type WebToNativeMessage =
   | { type: 'link:open'; payload: LinkPayload }
   | { type: 'link:canOpen'; payload: LinkCanOpenPayload }
   | { type: 'os:share'; payload: OsSharePayload }
-  | { type: 'auth:login'; payload: Record<string, never> }
   | { type: 'auth:logout'; payload: Record<string, never> };
 
 /**
@@ -90,6 +89,7 @@ export type NativeToWebMessage =
   | LinkResponse
   | LinkError
   | { type: 'auth:token'; payload: AuthTokenPayload }
+  | { type: 'auth:login'; payload: AuthTokenPayload }
   | { type: 'auth:error'; payload: AuthErrorPayload };
 
 export interface ReactNativeWebView {

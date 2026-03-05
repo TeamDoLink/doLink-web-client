@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { requestAuthLogin } from '@/utils/nativeBridge';
+import { addTypedMessageListener } from '@/utils/nativeBridge';
+import type { AuthTokenPayload, AuthErrorPayload } from '@/types/native';
 
 type AuthProviderProps = {
   children: React.ReactNode;
 };
+
+const AUTH_TIMEOUT = 10000;
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
   const isAuthInitialized = useAuthStore((s) => s.isAuthInitialized);
@@ -13,18 +16,35 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   const clearAuth = useAuthStore((s) => s.clearAuth);
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const token = await requestAuthLogin();
-        setAccessToken(token);
-      } catch {
-        clearAuth();
-      } finally {
-        setAuthInitialized();
-      }
+    let cleanup: (() => void)[] = [];
+
+    const handleToken = (payload: AuthTokenPayload) => {
+      setAccessToken(payload.accessToken);
+      setAuthInitialized();
+      cleanup.forEach((fn) => fn());
     };
 
-    initializeAuth();
+    const handleError = (_payload: AuthErrorPayload) => {
+      clearAuth();
+      setAuthInitialized();
+      cleanup.forEach((fn) => fn());
+    };
+
+    const timeoutId = window.setTimeout(() => {
+      clearAuth();
+      setAuthInitialized();
+    }, AUTH_TIMEOUT);
+
+    cleanup = [
+      addTypedMessageListener<AuthTokenPayload>('auth:token', handleToken),
+      addTypedMessageListener<AuthTokenPayload>('auth:login', handleToken),
+      addTypedMessageListener<AuthErrorPayload>('auth:error', handleError),
+      () => clearTimeout(timeoutId),
+    ];
+
+    return () => {
+      cleanup.forEach((fn) => fn());
+    };
   }, [setAccessToken, setAuthInitialized, clearAuth]);
 
   if (!isAuthInitialized) {
