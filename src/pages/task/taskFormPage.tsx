@@ -351,7 +351,7 @@ function TaskFormPage() {
     | 'Link' => {
     if (error) return 'Error';
     if (linkValue) return 'Activated';
-    if (hasClipboardLink) return 'Link'; // 클립보드에 링크 있으면 버튼 표시
+    if (hasClipboardLink && linkFocused) return 'Link'; // 포커스 상태이고 클립보드에 링크 있으면 버튼 표시
     if (linkFocused) return 'Focused'; // 포커스했지만 클립보드에 링크 없음
     return 'Enabled'; // 기본 상태
   };
@@ -463,13 +463,17 @@ function TaskFormPage() {
             state={getLinkState()}
             placeholder='링크를 입력해주세요.'
             errorMessage={getErrorMessage()}
-            buttonLabel={hasClipboardLink ? '붙여넣기' : undefined}
+            buttonLabel={
+              hasClipboardLink && linkFocused ? '붙여넣기' : undefined
+            }
             value={linkValue}
             onChange={handleLinkChange}
             onFocus={handleLinkFocus}
             onBlur={handleLinkBlur}
             onButtonClick={
-              hasClipboardLink ? handlePasteFromClipboard : undefined
+              hasClipboardLink && linkFocused
+                ? handlePasteFromClipboard
+                : undefined
             }
             width='w-full'
             readOnly={isEditMode && task?.inout === false}
