@@ -58,11 +58,6 @@ AXIOS_INSTANCE.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // reissue 엔드포인트 자체의 401은 인터셉터에서 제외 (무한 루프 방지)
-    if (originalRequest.url === '/v1/auth/reissue') {
-      return Promise.reject(error);
-    }
-
     // 이미 refresh 진행 중이면 큐에 저장
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
@@ -82,17 +77,8 @@ AXIOS_INSTANCE.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const response = await AXIOS_INSTANCE.post('/v1/auth/reissue');
-      const newToken: string = response.data?.result;
-
-      if (newToken) {
-        useAuthStore.getState().setAccessToken(newToken);
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        processQueue(null, newToken);
-        return AXIOS_INSTANCE(originalRequest);
-      } else {
-        throw new Error('토큰 갱신 응답이 올바르지 않습니다');
-      }
+      // TODO: 401 발생 시 토큰 갱신 로직 미구현 (accessToken 6개월, 앱에서 reissue 담당)
+      throw new Error('Token reissue not implemented');
     } catch (refreshError) {
       useAuthStore.getState().clearAuth();
       processQueue(refreshError, null);

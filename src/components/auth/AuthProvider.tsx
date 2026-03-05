@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
-import { AXIOS_INSTANCE } from '@/api/axios-instance';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { sendAuthLogin } from '@/utils/nativeBridge';
+import { requestAuthLogin } from '@/utils/nativeBridge';
 
 type AuthProviderProps = {
   children: React.ReactNode;
@@ -16,15 +15,8 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const response = await AXIOS_INSTANCE.post('/v1/auth/reissue');
-        const token: string | undefined = response.data?.result;
-
-        if (token) {
-          setAccessToken(token);
-          sendAuthLogin();
-        } else {
-          clearAuth();
-        }
+        const token = await requestAuthLogin();
+        setAccessToken(token);
       } catch {
         clearAuth();
       } finally {
