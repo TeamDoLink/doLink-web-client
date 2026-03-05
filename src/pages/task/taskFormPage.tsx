@@ -18,6 +18,7 @@ import type {
   ApiResponseListCollectionSimpleResponse,
   ApiResponseTaskResponse,
 } from '@/api/generated/models';
+import { isValidUrl } from '@/utils/validation';
 
 // 임시저장 키
 const DRAFT_KEY = 'task-create-draft';
@@ -197,10 +198,27 @@ function TaskFormPage() {
   };
 
   /**
-   * 클립보드에서 붙여넣기
+   * 클립보드에서 붙여넣기 (버튼)
    */
   const handlePasteFromClipboard = () => {
     checkLinkInputFieldLength(clipboardLinkValue);
+  };
+
+  /**
+   * OS 붙여넣기 감지 (beforeinput 이벤트)
+   * insertFromPaste: 컨텍스트 메뉴 / 키보드 단축키 붙여넣기 모두 감지
+   */
+  const handleLinkBeforeInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const inputEvent = e.nativeEvent as InputEvent;
+
+    console.log('[beforeinput] 붙여넣기 감지, 값:', inputEvent.data);
+    const text = inputEvent.data ?? '';
+
+    if (!isValidUrl(text)) {
+      e.preventDefault();
+      // test 용
+      // linkToast.showToast('http 또는 https URL만 붙여넣기 가능합니다');
+    }
   };
 
   /**
@@ -470,6 +488,7 @@ function TaskFormPage() {
             onChange={handleLinkChange}
             onFocus={handleLinkFocus}
             onBlur={handleLinkBlur}
+            onBeforeInput={handleLinkBeforeInput}
             onButtonClick={
               hasClipboardLink && linkFocused
                 ? handlePasteFromClipboard
