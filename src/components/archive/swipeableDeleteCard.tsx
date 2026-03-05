@@ -42,6 +42,7 @@ export interface Task {
   isTutorial?: boolean;
   createdAt: string;
   modifiedAt: string;
+  thumbnailUrl?: string | null;
 }
 
 /**
@@ -132,8 +133,8 @@ export const SwipeableDeleteCard = ({
     id: task.taskId,
     title: task.title,
     subtitle: task.link || '직접 추가',
-    thumbnail: '', // TODO: 실제 썸네일 데이터 연동 필요
     inout: task.inout, // inout 필드 추가
+    thumbnail: task.thumbnailUrl ?? undefined,
   }));
 
   // 스와이프 상태 관리
