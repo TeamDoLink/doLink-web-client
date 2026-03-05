@@ -9,7 +9,6 @@ import type {
   LinkResponse,
   LinkError,
   LinkCanOpenPayload,
-  NativeToWebMessage,
   OsSharePayload,
   AuthTokenPayload,
   AuthErrorPayload,
@@ -164,7 +163,7 @@ const setupLinkResponseListener = (() => {
           typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 
         if (data.type === 'link:response' || data.type === 'link:error') {
-          const message = data as NativeToWebMessage;
+          const message = data as LinkResponse | LinkError;
           const url =
             message.type === 'link:response' ? message.url : message.url || '';
 
