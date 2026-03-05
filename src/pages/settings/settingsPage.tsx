@@ -8,6 +8,7 @@ import { SettingMenuItem } from '@/components/common/setting/settingMenuItem';
 import { GreyLine } from '@/components/common/line/greyLine';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useToast } from '@/hooks/useToast';
+import { useTaskCreateAction } from '@/hooks/useTaskCreateAction';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
 import logoutIcon from '@/assets/icons/auth/logout.svg';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -27,6 +28,8 @@ const SettingsPage = () => {
   const queryClient = useQueryClient();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const loginToast = useToast();
+  const { handleFloatingButtonClick: handleTaskCreateClick, portalNode } =
+    useTaskCreateAction();
 
   // API: 사용자 프로필
   const { data: userData } = useGetUser();
@@ -101,14 +104,6 @@ const SettingsPage = () => {
       setIsLogoutConfirmOpen(false);
       navigate(ROUTES.home, { replace: true });
     }
-  };
-
-  const handleFloatingButtonClick = () => {
-    if (!isAuthenticated) {
-      loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
-      return;
-    }
-    navigate(ROUTES.taskCreate);
   };
 
   return (
@@ -202,8 +197,9 @@ const SettingsPage = () => {
       <FloatingButton
         aria-label='새 할 일 추가'
         className='fixed bottom-[104px] right-6 z-40'
-        onClick={handleFloatingButtonClick}
+        onClick={handleTaskCreateClick}
       />
+      {portalNode}
 
       {/* 바탭탭바 */}
       <TabBar.BottomTabBar value='setting' onChange={handleTabChange} />

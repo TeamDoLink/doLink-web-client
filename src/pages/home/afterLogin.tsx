@@ -8,6 +8,7 @@ import { GreetingSection } from '@/components/home/greetingSection';
 import { TodoSection } from '@/components/home/todoSection';
 import { ArchiveSection } from '@/components/home/archiveSection';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
+import { useTaskCreateAction } from '@/hooks/useTaskCreateAction';
 import { useToast } from '@/hooks/useToast';
 import { useModalStore } from '@/stores/useModalStore';
 import { ROUTES } from '@/constants/routes';
@@ -68,6 +69,7 @@ const HomeAfterLogin = () => {
     {}
   );
   const tutorialToast = useToast();
+  const { handleFloatingButtonClick, portalNode } = useTaskCreateAction();
 
   // API: 사용자 프로필
   const { data: userData } = useGetUser();
@@ -236,10 +238,6 @@ const HomeAfterLogin = () => {
     closeModal();
   };
 
-  const handleCreateTodo = () => {
-    navigate(ROUTES.taskCreate);
-  };
-
   const handleClickSearch = () => {
     navigate(ROUTES.search);
   };
@@ -276,8 +274,9 @@ const HomeAfterLogin = () => {
       <FloatingButton
         aria-label='새 할 일 추가'
         className='fixed bottom-[104px] right-6 z-40'
-        onClick={handleCreateTodo}
+        onClick={handleFloatingButtonClick}
       />
+      {portalNode}
 
       {/* 바탭탭바 */}
       <TabBar.BottomTabBar value='home' onChange={handleTabChange} />

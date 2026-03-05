@@ -34,6 +34,7 @@ import type {
 } from '@/api/generated/models';
 import { useTutorialTaskStore } from '@/stores/useTutorialTaskStore';
 import { useToast } from '@/hooks/useToast';
+import { useTaskCreateAction } from '@/hooks/useTaskCreateAction';
 
 // 카테고리 아이콘 임포트
 import restaurantIcon from '@/assets/icons/category/detail/restaurant.svg';
@@ -210,6 +211,8 @@ const ArchiveDetailPage = () => {
   const [isOptionMenuOpen, setIsOptionMenuOpen] = useState(false);
   const tutorialToast = useToast();
   const loginToast = useToast();
+  const { handleFloatingButtonClick: handleTaskCreateClick, portalNode } =
+    useTaskCreateAction();
   const [pendingDeleteTaskIds, setPendingDeleteTaskIds] = useState<number[]>(
     []
   );
@@ -536,14 +539,6 @@ const ArchiveDetailPage = () => {
       });
   };
 
-  const handleFloatingButtonClick = () => {
-    if (isBeforeLoginArchive) {
-      loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
-      return;
-    }
-    navigate(ROUTES.taskCreate);
-  };
-
   const handleSortChange = (newSort: SortOption) => {
     setSortOption(newSort);
   };
@@ -799,9 +794,10 @@ const ArchiveDetailPage = () => {
       {/* TODO  플로팅 전역으로 수정*/}
       {/* 플로팅 버튼 */}
       <FloatingButton
-        onClick={handleFloatingButtonClick}
+        onClick={handleTaskCreateClick}
         className='fixed bottom-[104px] right-6 z-40'
       />
+      {portalNode}
 
       {/* 하단 탭바 */}
       {/* TODO  탭바 Approuter로 분리 */}
