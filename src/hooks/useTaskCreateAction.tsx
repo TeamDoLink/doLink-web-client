@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { FeedBack } from '@/components/common';
 import { useDraftBridge } from '@/hooks/useDraftBridge';
+import { useToast } from '@/hooks/useToast';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { TaskDraft } from '@/types/draft';
 import { ROUTES } from '@/constants/routes';
@@ -25,12 +26,11 @@ export const useTaskCreateAction = () => {
   const { loadDraft } = useDraftBridge<TaskDraft>();
 
   const [showDraftDialog, setShowDraftDialog] = useState(false);
-  const [showLoginToast, setShowLoginToast] = useState(false);
+  const loginToast = useToast();
 
   const handleFloatingButtonClick = async () => {
     if (!isAuthenticated) {
-      setShowLoginToast(true);
-      setTimeout(() => setShowLoginToast(false), 3000);
+      loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
       return;
     }
 
@@ -71,9 +71,13 @@ export const useTaskCreateAction = () => {
         />
       </FeedBack.ModalLayout>
 
-      {showLoginToast && (
+      {loginToast.isVisible && (
         <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
-          <FeedBack.Toast message='로그인이 필요해요.' />
+          <FeedBack.Toast
+            message={loginToast.message}
+            actionLabel='로그인'
+            onAction={() => navigate(ROUTES.login)}
+          />
         </div>
       )}
     </>,
