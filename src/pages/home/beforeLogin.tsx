@@ -1,14 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Background,
-  Button,
-  FeedBack,
-  List,
-  TabBar,
-} from '@/components/common';
+import { Background, FeedBack, List, TabBar } from '@/components/common';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
 import heroIllustration from '@/assets/icons/home/beforelogin.svg';
+import moreBlueIcon from '@/assets/icons/common/more-blue.svg';
 import { FloatingButton } from '@/components/common/button';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import {
@@ -19,6 +14,23 @@ import { ROUTES } from '@/constants/routes';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import { formatRelativeDateLabel } from '@/utils/date';
 import { useTutorialTaskStore } from '@/stores/useTutorialTaskStore';
+
+/**
+ * 미로그인 홈화면 전용 로그인 버튼
+ * 86x26 크기의 커스텀 버튼
+ */
+const LoginButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <button
+      type='button'
+      onClick={onClick}
+      className='mt-[10px] inline-flex h-[26px] w-[86px] items-center rounded-[20px] bg-[#394CFF26] pl-2 text-body-sm text-point transition active:bg-[#394CFF4C]'
+    >
+      <span>로그인하기</span>
+      <img src={moreBlueIcon} alt='더보기' className='h-4 w-4' />
+    </button>
+  );
+};
 
 const HomeBeforeLogin = () => {
   const navigate = useNavigate();
@@ -98,11 +110,7 @@ const HomeBeforeLogin = () => {
                 <h1 className='text-heading-xl text-black'>
                   두링크가 처음이라면
                 </h1>
-                <Button.IconButton
-                  label='로그인하기'
-                  className='mt-2 h-[26px] w-[86px] text-body-md'
-                  onClick={handleLoginClick}
-                />
+                <LoginButton onClick={handleLoginClick} />
               </div>
               <img
                 src={heroIllustration}
