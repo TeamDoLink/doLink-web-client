@@ -51,20 +51,11 @@ interface PagedArchiveResult {
 }
 const PAGE_SIZE = 10;
 
-const extractDomain = (url: string | undefined | null): string => {
-  if (!url) return '';
-  try {
-    return new URL(url).hostname.replace('www.', '');
-  } catch {
-    return '';
-  }
-};
-
 const mapTaskResponseToTask = (task: TaskResponse): Task => {
   const relative = task.createdAt
     ? formatRelativeDateLabel(task.createdAt)
     : '';
-  const domain = extractDomain(task.link);
+  const domain = task.domain ?? '';
   const subtitleParts = [] as string[];
 
   if (relative) subtitleParts.push(relative);

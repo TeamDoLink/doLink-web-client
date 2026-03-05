@@ -55,16 +55,6 @@ const CATEGORY_LABEL_TO_KEY = Object.fromEntries(
     .map(([key, label]) => [label, key])
 ) as Record<string, ArchiveCategoryKey>;
 
-// URL에서 도메인 추출
-const extractDomain = (url: string | undefined | null): string => {
-  if (!url) return '';
-  try {
-    return new URL(url).hostname.replace('www.', '');
-  } catch {
-    return url;
-  }
-};
-
 // 카테고리별 문구 매핑
 const getCategoryGreeting = (categoryKorean: string | null | undefined) => {
   if (!categoryKorean) {
@@ -177,7 +167,7 @@ const HomeAfterLogin = () => {
     return recentTasks.map((t) => ({
       id: String(t.taskId ?? 0),
       title: t.title ?? '',
-      platform: extractDomain(t.link),
+      platform: t.domain ?? '',
       checked: todoOverrides[String(t.taskId ?? 0)] ?? t.status ?? false,
       createdAt: t.createdAt ?? new Date().toISOString(),
     }));

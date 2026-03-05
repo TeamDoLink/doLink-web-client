@@ -119,6 +119,7 @@ const mapTaskResponseToTask = (task: TaskResponse): Task => {
     createdAt: task.createdAt ?? new Date().toISOString(),
     modifiedAt: task.createdAt ?? new Date().toISOString(),
     thumbnailUrl: task.thumbnailUrl ?? null,
+    domain: task.domain ?? null,
   };
 };
 
