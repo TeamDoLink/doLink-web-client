@@ -92,6 +92,7 @@ const BEFORE_LOGIN_TASKS: Task[] = [
     isTutorial: true,
     createdAt: '오늘',
     modifiedAt: '오늘',
+    domain: '노션 (Notion)',
   },
 ];
 
