@@ -13,8 +13,6 @@ export const GreetingSection = ({
   subGreeting,
   categoryIcon = heroIllustration,
 }: GreetingSectionProps) => {
-  const displayName = subGreeting ? `${subGreeting} ${memberName}` : memberName;
-
   return (
     <section className='flex items-center justify-between'>
       {/* 문구 */}
@@ -22,7 +20,15 @@ export const GreetingSection = ({
         <h1 className='text-body-lg text-grey-600'>
           {mainGreeting}
           <br />
-          <h2 className='text-heading-xl text-black'>{displayName}님</h2>
+          <h2 className='text-heading-xl text-black'>
+            {subGreeting && (
+              <>
+                <span className='text-black'>{subGreeting} </span>
+                <span className='text-point'>{memberName}님</span>
+              </>
+            )}
+            {!subGreeting && <span className='text-black'>{memberName}님</span>}
+          </h2>
         </h1>
       </div>
       {/* 일러스트 */}
