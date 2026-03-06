@@ -1,14 +1,18 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform } from '@/utils/webview';
-import { isReactNativeWebView } from '@/utils/nativeBridge';
+import { isReactNativeWebView, sendMessageToRN } from '@/utils/nativeBridge';
 
-type NavigateMessage = {
-  type: 'navigate:deeplink';
-  payload?: {
-    path?: unknown;
-  };
-};
+type NativeToWebMessage =
+  | {
+      type: 'navigate:deeplink';
+      payload?: {
+        path?: unknown;
+      };
+    }
+  | {
+      type: 'navigate:back';
+    };
 
 function normalizeNavigatePath(input: string): string | null {
   const trimmed = input.trim();
@@ -39,14 +43,21 @@ function safeParseMessage(data: unknown): unknown {
   return data;
 }
 
-function isNavigateMessage(message: unknown): message is NavigateMessage {
+function isNativeToWebMessage(message: unknown): message is NativeToWebMessage {
   if (!message || typeof message !== 'object') return false;
   const maybe = message as { type?: unknown };
-  return maybe.type === 'navigate:deeplink';
+  return maybe.type === 'navigate:deeplink' || maybe.type === 'navigate:back';
+}
+
+function canGoBackInBrowserHistory(): boolean {
+  const state = window.history.state as unknown;
+  const idx = (state as { idx?: unknown } | null)?.idx;
+  if (typeof idx === 'number') return idx > 0;
+  return window.history.length > 1;
 }
 
 /**
- * RN WebView → Web 메시지(navigate:deeplink)를 수신해 react-router navigate로 라우팅합니다.
+ * RN WebView → Web 메시지(navigate:deeplink / navigate:back)를 수신해 react-router navigate로 라우팅합니다.
  * iOS(window) / Android(document) 모두 지원합니다.
  */
 export function useNativeNavigate(): void {
@@ -68,17 +79,27 @@ export function useNativeNavigate(): void {
       }
 
       const parsed = safeParseMessage((event as MessageEvent<unknown>).data);
-      if (!isNavigateMessage(parsed)) return;
+      if (!isNativeToWebMessage(parsed)) return;
 
-      const rawPath = parsed.payload?.path;
-      if (typeof rawPath !== 'string') return;
+      if (parsed.type === 'navigate:deeplink') {
+        const rawPath = parsed.payload?.path;
+        if (typeof rawPath !== 'string') return;
 
-      const path = normalizeNavigatePath(rawPath);
-      if (!path || path === '/') return;
+        const path = normalizeNavigatePath(rawPath);
+        if (!path || path === '/') return;
 
-      alert(`navigate:deeplink: ${path}`);
+        navigate(path);
+        return;
+      }
 
-      navigate(path);
+      if (parsed.type === 'navigate:back') {
+        if (canGoBackInBrowserHistory()) {
+          navigate(-1);
+          return;
+        }
+
+        sendMessageToRN({ type: 'navigate:back:exit' });
+      }
     };
 
     receiver.addEventListener('message', handleMessage);

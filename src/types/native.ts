@@ -63,6 +63,14 @@ export interface NavigateMessage {
   payload: NavigatePayload;
 }
 
+export interface NavigateBackMessage {
+  type: 'navigate:back';
+}
+
+export interface NavigateBackExitMessage {
+  type: 'navigate:back:exit';
+}
+
 // ============================================
 // Message Type Union
 // ============================================
@@ -73,13 +81,18 @@ export interface NavigateMessage {
 export type WebToNativeMessage =
   | { type: 'link:open'; payload: LinkPayload }
   | { type: 'link:canOpen'; payload: LinkCanOpenPayload }
-  | { type: 'os:share'; payload: OsSharePayload };
+  | { type: 'os:share'; payload: OsSharePayload }
+  | NavigateBackExitMessage;
 
 /**
  * All possible messages from Native to Web
  */
 
-export type NativeToWebMessage = LinkResponse | LinkError | NavigateMessage;
+export type NativeToWebMessage =
+  | LinkResponse
+  | LinkError
+  | NavigateMessage
+  | NavigateBackMessage;
 
 export interface ReactNativeWebView {
   postMessage: (message: string) => void;
