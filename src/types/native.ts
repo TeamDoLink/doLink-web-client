@@ -51,6 +51,19 @@ export interface OsSharePayload {
 }
 
 // ============================================
+// Navigation Message Types
+// ============================================
+
+export interface NavigatePayload {
+  path: string;
+}
+
+export interface NavigateMessage {
+  type: 'navigate:deeplink';
+  payload: NavigatePayload;
+}
+
+// ============================================
 // Message Type Union
 // ============================================
 
@@ -66,7 +79,7 @@ export type WebToNativeMessage =
  * All possible messages from Native to Web
  */
 
-export type NativeToWebMessage = LinkResponse | LinkError;
+export type NativeToWebMessage = LinkResponse | LinkError | NavigateMessage;
 
 export interface ReactNativeWebView {
   postMessage: (message: string) => void;
