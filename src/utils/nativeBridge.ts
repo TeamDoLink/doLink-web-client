@@ -186,6 +186,8 @@ const setupLinkResponseListener = (() => {
           typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 
         if (data.type === 'link:response' || data.type === 'link:error') {
+          // NativeToWebMessage에 NAVIGATE가 추가되어도,
+          // 이 블록에서는 link 응답만 처리하므로 타입을 좁혀준다.
           const message = data as LinkResponse | LinkError;
           const url =
             message.type === 'link:response' ? message.url : message.url || '';
