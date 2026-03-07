@@ -43,6 +43,7 @@ export interface Task {
   createdAt: string;
   modifiedAt: string;
   thumbnailUrl?: string | null;
+  domain?: string | null;
 }
 
 /**
@@ -132,7 +133,7 @@ export const SwipeableDeleteCard = ({
   const links = tasks.map((task) => ({
     id: task.taskId,
     title: task.title,
-    subtitle: task.link || '직접 추가',
+    subtitle: task.domain || '직접 추가',
     inout: task.inout, // inout 필드 추가
     thumbnail: task.thumbnailUrl ?? undefined,
   }));
