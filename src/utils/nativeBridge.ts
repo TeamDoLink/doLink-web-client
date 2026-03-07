@@ -51,6 +51,33 @@ export const sendMessageToRN = (message: WebViewMessage): void => {
 };
 
 /**
+ * RN에서 오는 메시지를 수신하는 리스너 등록 (document.addEventListener('message') 대신 사용)
+ * @param callback 메시지 이벤트 핸들러
+ * @returns cleanup 함수 (리스너 제거용)
+ * @example
+ * const cleanup = addReceiveReactNativeMessageListener((event) => {
+ *   console.log('Received from Native:', event.data);
+ * });
+ * return cleanup;
+ */
+export const addReceiveReactNativeMessageListener = (
+  callback: (message: MessageEvent) => void
+) => {
+  const documentListener = (event: any) => {
+    callback(event as MessageEvent);
+  };
+  const windowListener = (event: MessageEvent) => {
+    callback(event);
+  };
+  document.addEventListener('message', documentListener);
+  window.addEventListener('message', windowListener);
+  return () => {
+    document.removeEventListener('message', documentListener);
+    window.removeEventListener('message', windowListener);
+  };
+};
+
+/**
  * RN에서 오는 메시지를 수신하는 리스너 등록
  * @param handler 메시지 이벤트 핸들러
  * @returns cleanup 함수 (리스너 제거용)
@@ -70,11 +97,7 @@ export const addMessageListener = (
   handler: (event: MessageEvent<any>) => void
 ): (() => void) => {
   if (typeof window !== 'undefined') {
-    window.addEventListener('message', handler);
-    // 리스너 제거를 위한 cleanup 함수 반환
-    return () => {
-      window.removeEventListener('message', handler);
-    };
+    return addReceiveReactNativeMessageListener(handler);
   }
   return () => {};
 };
@@ -197,6 +220,13 @@ const setupLinkResponseListener = (() => {
 // ============================================
 // Auth-specific utilities
 // ============================================
+
+/**
+ * 처음 실행 시 Native에 auth:login 요청 (저장된 세션이 있으면 reissue 후 access token을 auth:login으로 응답)
+ */
+export const sendAuthLoginRequest = (): void => {
+  sendMessageToRN({ type: 'auth:login', payload: {} });
+};
 
 /**
  * 로그아웃/탈퇴 시 Native에 알림 (auth:logout)

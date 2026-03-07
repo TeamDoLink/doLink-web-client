@@ -79,6 +79,7 @@ export type WebToNativeMessage =
   | { type: 'link:open'; payload: LinkPayload }
   | { type: 'link:canOpen'; payload: LinkCanOpenPayload }
   | { type: 'os:share'; payload: OsSharePayload }
+  | { type: 'auth:login'; payload: Record<string, never> }
   | { type: 'auth:logout'; payload: Record<string, never> };
 
 /**
