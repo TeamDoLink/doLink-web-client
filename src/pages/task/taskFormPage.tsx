@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { InputField, Button, AppBar, FeedBack } from '@/components/common';
-import Toast from '@/components/common/feedBack/toast';
 import { useToast } from '@/hooks/useToast';
 import { CollectionChipSelector, type CollectionChip } from '@/components/task';
 import { useClipboardBridge } from '@/hooks/useClipboardBridge';
@@ -78,6 +77,16 @@ function TaskFormPage() {
   } | null>(null);
   const [titleFocused, setTitleFocused] = useState(false);
   const [linkFocused, setLinkFocused] = useState(false);
+
+  const titleRef = useRef<HTMLDivElement>(null);
+  const linkRef = useRef<HTMLDivElement>(null);
+  const memoRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
+    setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
 
   const isPending = isCreating || isUpdating;
   const linkToast = useToast();
@@ -157,6 +166,7 @@ function TaskFormPage() {
    */
   const handleTitleFocus = () => {
     setTitleFocused(true);
+    scrollToSection(titleRef);
   };
 
   /**
@@ -172,6 +182,7 @@ function TaskFormPage() {
   const handleLinkFocus = () => {
     setLinkFocused(true);
     requestClipboard();
+    scrollToSection(linkRef);
   };
 
   /**
@@ -395,18 +406,7 @@ function TaskFormPage() {
   };
 
   return (
-    <div>
-      {linkToast.isVisible && (
-        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
-          <Toast
-            message={linkToast.message}
-            actionLabel='확인'
-            onClose={linkToast.hideToast}
-          />
-        </div>
-      )}
-      {/* TODO 팀 컨벤션에 맞게 전역 state? 내부 state? 결정해 수정  */}
-      {/* TODO 임시저장 조건 충족화면 */}
+    <div className='flex h-[100dvh] flex-col'>
       <ModalLayout
         open={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}
@@ -433,7 +433,10 @@ function TaskFormPage() {
         onClickBack={handleBackClick}
       />
 
-      <div className='flex h-full flex-col gap-6 overflow-y-auto bg-white px-5 py-4 pt-[calc(56px+16px)]'>
+      {/* fixed AppBar(h-14) 높이만큼 공간 확보 */}
+      <div className='h-14 shrink-0' />
+
+      <div className='flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto bg-white px-5 pb-[30px] pt-4'>
         {/* 담을 모음 선택 섹션 */}
         <CollectionChipSelector
           items={collections}
@@ -443,7 +446,7 @@ function TaskFormPage() {
         />
 
         {/* 제목 섹션 */}
-        <div className='flex flex-col gap-2'>
+        <div ref={titleRef} className='flex flex-col gap-2'>
           <div className='flex items-center justify-between'>
             <label
               htmlFor='task-title'
@@ -473,7 +476,7 @@ function TaskFormPage() {
         </div>
 
         {/* 링크(선택) 섹션 */}
-        <div className='flex flex-col gap-2'>
+        <div ref={linkRef} className='flex flex-col gap-2'>
           <label
             htmlFor='task-link'
             className='text-body-lg font-semibold text-black'
@@ -505,7 +508,7 @@ function TaskFormPage() {
         </div>
 
         {/* 메모(선택) 섹션 */}
-        <div className='flex flex-col gap-2'>
+        <div ref={memoRef} className='flex flex-col gap-2'>
           <div className='flex items-center justify-between'>
             <label
               htmlFor='task-memo'
@@ -527,11 +530,14 @@ function TaskFormPage() {
             placeholder='메모를 입력해주세요.'
             value={memo}
             onChange={(e) => handleMemoChange(e.target.value)}
+            onFocus={() => scrollToSection(memoRef)}
             className='h-[132px] w-full resize-none rounded-[10px] border border-grey-200 bg-white px-4 py-4 text-body-md text-grey-900 outline-none placeholder:text-grey-400 focus:border-grey-800'
           />
         </div>
+      </div>
 
-        {/* 추가하기 버튼 */}
+      {/* 추가하기 버튼 */}
+      <div className='shrink-0 bg-white px-5 pb-4 pt-2'>
         <Button.CtaButton
           disabled={!isAddButtonEnabled || isPending}
           onClick={handleAddClick}
