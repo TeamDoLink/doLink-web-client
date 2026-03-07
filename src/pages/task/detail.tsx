@@ -369,7 +369,7 @@ const TaskDetailPage = () => {
 
         {/* 할 일 정보 섹션 */}
         <div
-          className='relative z-10 -mt-4 flex flex-col gap-3 bg-white px-5 py-6'
+          className='relative z-10 -mt-4 flex flex-col bg-white p-5'
           style={{
             // 계산식: 화면 전체 높이 - 앱바 높이  - 하단 버튼 높이
             minHeight: `calc(100vh - ${appBarHeight}px  - ${bottomHeight}px)`,
@@ -379,14 +379,14 @@ const TaskDetailPage = () => {
           <h1 className='text-heading-xl text-black'>{displayData?.title}</h1>
 
           {/* 모음 제목 */}
-          <p className='text-body-xl text-black'>
+          <p className='mt-1 text-body-xl text-black'>
             {displayCollection?.name ?? '모음 없음'}
           </p>
 
-          <GreyLine width='w-full' />
+          <GreyLine width='w-full my-3' />
 
           {/* 카테고리 */}
-          <div className='flex items-center gap-2'>
+          <div className='mb-2 flex items-center gap-2'>
             <img src={categoryIcon} alt='' className='h-4 w-4 shrink-0' />
             <span className='text-body-md text-grey-700'>
               {categoryLabel || '카테고리 없음'}
