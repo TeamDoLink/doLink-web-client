@@ -216,8 +216,8 @@ const TaskDetailPage = () => {
   };
 
   const handleLinkClick = () => {
-    // inout이 false면 링크 이동 불가
-    if (!isInout) {
+    // inout이 true면 내부 추가 링크이므로 이동 불가
+    if (isInout) {
       return;
     }
 
@@ -431,7 +431,7 @@ const TaskDetailPage = () => {
           <CtaButton
             onClick={handleLinkClick}
             className='flex-1'
-            disabled={!isInout}
+            disabled={isInout}
           >
             링크 바로가기
           </CtaButton>

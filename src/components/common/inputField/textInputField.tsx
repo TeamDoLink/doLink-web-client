@@ -32,6 +32,7 @@ export type TextInputFieldProps = {
   name?: string;
 
   readOnly?: boolean;
+  onBeforeInput?: (e: React.FormEvent<HTMLInputElement>) => void;
 };
 
 export default function TextInputField({
@@ -48,6 +49,7 @@ export default function TextInputField({
   id,
   name,
   readOnly = false,
+  onBeforeInput,
 }: TextInputFieldProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange?.(e.target.value);
@@ -75,13 +77,17 @@ export default function TextInputField({
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onBeforeInput={onBeforeInput}
           placeholder={placeholder}
           readOnly={readOnly}
           className='min-w-0 flex-1 border-none bg-transparent text-body-md text-grey-900 outline-none placeholder:text-grey-400'
         />
 
         <button
-          onClick={onButtonClick}
+          onMouseDown={(e) => {
+            e.preventDefault(); // input blur 방지
+            onButtonClick?.();
+          }}
           className='rounded-[8px] px-[8px] py-[7px] text-body-xs font-medium text-point transition-colors hover:opacity-80'
           style={{ backgroundColor: 'rgba(57, 76, 255, 0.15)' }}
         >
@@ -128,6 +134,7 @@ export default function TextInputField({
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onBeforeInput={onBeforeInput}
           placeholder={placeholder}
           autoFocus
           className='min-w-0 flex-1 border-none bg-transparent text-body-md text-black outline-none placeholder:text-grey-400'
@@ -150,7 +157,9 @@ export default function TextInputField({
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onBeforeInput={onBeforeInput}
           placeholder={placeholder}
+          readOnly={readOnly}
           className='min-w-0 flex-1 border-none bg-transparent text-body-md text-black outline-none placeholder:text-grey-400'
         />
       </div>
@@ -171,6 +180,7 @@ export default function TextInputField({
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={placeholder}
+        readOnly={readOnly}
         className='min-w-0 flex-1 border-none bg-transparent text-body-md text-grey-900 outline-none placeholder:text-grey-400'
       />
     </div>

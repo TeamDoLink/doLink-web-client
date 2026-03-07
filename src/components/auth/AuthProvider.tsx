@@ -1,6 +1,10 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { addTypedMessageListener } from '@/utils/nativeBridge';
+import {
+  addTypedMessageListener,
+  isReactNativeWebView,
+  sendAuthLoginRequest,
+} from '@/utils/nativeBridge';
 import type { AuthTokenPayload, AuthErrorPayload } from '@/types/native';
 
 type AuthProviderProps = {
@@ -14,6 +18,13 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
   const setAuthInitialized = useAuthStore((s) => s.setAuthInitialized);
   const clearAuth = useAuthStore((s) => s.clearAuth);
+
+  // 앱 웹뷰에서 처음 실행 시 앱에 auth:login 요청 → 앱이 reissue 후 access token을 auth:login으로 응답
+  useEffect(() => {
+    if (isReactNativeWebView()) {
+      sendAuthLoginRequest();
+    }
+  }, []);
 
   useEffect(() => {
     let cleanup: (() => void)[] = [];

@@ -23,7 +23,7 @@ export type LinkItemProps = {
   onDeleteClick?: () => void;
   width?: string;
   actionDisabled?: boolean;
-  originalDisabled?: boolean; // inout이 false일 때 원본 버튼 비활성화
+  originalDisabled?: boolean; // inout이 true인 경우 원본 보기 버튼 비활성화
 };
 
 /**

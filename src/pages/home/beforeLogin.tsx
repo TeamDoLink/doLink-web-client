@@ -6,6 +6,7 @@ import heroIllustration from '@/assets/icons/home/beforelogin.svg';
 import moreBlueIcon from '@/assets/icons/common/more-blue.svg';
 import { FloatingButton } from '@/components/common/button';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
+import { useTaskCreateAction } from '@/hooks/useTaskCreateAction';
 import {
   BEFORE_LOGIN_ARCHIVE,
   BEFORE_LOGIN_TODO,
@@ -45,6 +46,7 @@ const HomeBeforeLogin = () => {
   const toastTimerRef = useRef<number | null>(null);
   const todoItems = BEFORE_LOGIN_TODO();
   const archiveItems = BEFORE_LOGIN_ARCHIVE();
+  const { handleFloatingButtonClick, portalNode } = useTaskCreateAction();
 
   // 컴포넌트 언마운트 시 타이머 정리
   useEffect(() => {
@@ -80,10 +82,6 @@ const HomeBeforeLogin = () => {
     if (checked && !suppressCompleteModal) {
       setShowCompleteModal(true);
     }
-  };
-
-  const handleCreateTodo = () => {
-    triggerLoginToast();
   };
 
   const handleTodoClick = () => {
@@ -199,8 +197,9 @@ const HomeBeforeLogin = () => {
         <FloatingButton
           aria-label='새 할 일 추가'
           className='fixed bottom-[104px] right-6 z-40'
-          onClick={handleCreateTodo}
+          onClick={handleFloatingButtonClick}
         />
+        {portalNode}
 
         <footer className='sticky bottom-0 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]'>
           <TabBar.BottomTabBar value='home' onChange={handleTabChange} />
