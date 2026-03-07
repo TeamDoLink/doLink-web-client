@@ -1,8 +1,16 @@
+import { useState } from 'react';
+import AppRouter from '@/routes/router';
+import AuthProvider from '@/components/auth/AuthProvider';
+import SplashScreen from './pages/splashScreen';
+
 function App() {
+  const [splashDone, setSplashDone] = useState(false);
+
   return (
-    <div className="flex h-screen items-center justify-center">
-      <h1 className="text-4xl font-bold">DoLink Web Client</h1>
-    </div>
+    <AuthProvider>
+      {!splashDone && <SplashScreen onFinish={() => setSplashDone(true)} />}
+      <AppRouter />
+    </AuthProvider>
   );
 }
 
