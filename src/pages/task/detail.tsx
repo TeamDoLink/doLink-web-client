@@ -369,7 +369,7 @@ const TaskDetailPage = () => {
 
         {/* 할 일 정보 섹션 */}
         <div
-          className='relative z-10 -mt-4 flex flex-col gap-3 bg-white px-5 py-6'
+          className='relative z-10 -mt-4 flex flex-col bg-white p-5'
           style={{
             // 계산식: 화면 전체 높이 - 앱바 높이  - 하단 버튼 높이
             minHeight: `calc(100vh - ${appBarHeight}px  - ${bottomHeight}px)`,
@@ -379,16 +379,16 @@ const TaskDetailPage = () => {
           <h1 className='text-heading-xl text-black'>{displayData?.title}</h1>
 
           {/* 모음 제목 */}
-          <p className='text-body-xl text-black'>
+          <p className='mt-1 text-body-xl text-black'>
             {displayCollection?.name ?? '모음 없음'}
           </p>
 
-          <GreyLine width='w-full' />
+          <GreyLine width='w-full my-3' />
 
           {/* 카테고리 */}
-          <div className='flex items-center gap-2'>
+          <div className='mb-2 flex items-center gap-2'>
             <img src={categoryIcon} alt='' className='h-4 w-4 shrink-0' />
-            <span className='text-body-md text-grey-700'>
+            <span className='text-sb-body-md text-grey-700'>
               {categoryLabel || '카테고리 없음'}
             </span>
           </div>
@@ -396,26 +396,29 @@ const TaskDetailPage = () => {
           {/* 추가 날짜 */}
           <div className='flex items-center gap-2'>
             <img src={calendarIcon} alt='' className='h-4 w-4 shrink-0' />
-            <span className='text-body-md text-grey-700'>
-              {displayData?.createdAt
-                ? formatRelativeDateLabel(displayData.createdAt)
-                : '날짜 없음'}
-            </span>
+            <div>
+              <span className='text-sb-body-md text-grey-700'>
+                {displayData?.createdAt
+                  ? formatRelativeDateLabel(displayData.createdAt)
+                  : '날짜 없음'}
+              </span>
+              <span className='ml-[3px] text-body-xs text-grey-700'>추가</span>
+            </div>
           </div>
 
           {/* 메모 */}
           {displayData?.memo && (
-            <div className='flex items-start gap-2'>
+            <div className='mt-2 flex items-start gap-2'>
               <img src={memoIcon} alt='' className='mt-0.5 h-4 w-4 shrink-0' />
-              <p className='truncate whitespace-pre-wrap text-body-md text-grey-700'>
-                <span>메모가이드: </span>
+              <p className='truncate whitespace-pre-wrap text-body-xs text-grey-700'>
+                <span className='text-body-xs'>메모가이드: </span>
                 {displayData.memo}
               </p>
             </div>
           )}
 
           {/* 서비스 준비 중 섹션 */}
-          <div className='mt-5 rounded-2xl bg-grey-50 py-12'>
+          <div className='mt-5 flex h-[196px] items-center justify-center rounded-2xl bg-grey-50'>
             <EmptyNotice
               title='서비스 준비 중입니다'
               subtitle='빠른 시일 내에 만나요 :)'

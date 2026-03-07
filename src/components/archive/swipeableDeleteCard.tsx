@@ -299,7 +299,7 @@ export const SwipeableDeleteCard = ({
         }}
       >
         {/* 상단 헤더: 생성 날짜 및 편집 버튼 */}
-        <div className='flex w-full items-center justify-between px-5 pb-2 pt-4 text-caption-md'>
+        <div className='flex w-full items-center justify-between pb-2 pl-5 pr-3 pt-2 text-caption-md'>
           <p className='text-grey-800'>{formatRelativeTime(createdAt)}</p>
           <Button.TextButton
             onClick={handleEditClick}

@@ -108,7 +108,7 @@ export const BackDetailBar = ({
   };
 
   return (
-    <header className='fixed left-0 right-0 top-0 z-50 flex h-14 w-full items-center justify-between gap-2 bg-white px-3 py-3 sm:px-4'>
+    <header className='fixed left-0 right-0 top-0 z-header flex h-14 w-full items-center justify-between gap-2 bg-white px-3 py-3 sm:px-4'>
       {/* 좌측: 뒤로가기 + 제목 */}
       <div className='flex min-w-0 flex-1 items-center gap-2'>
         <button
