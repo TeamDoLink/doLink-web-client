@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { InputField, Button, AppBar, FeedBack } from '@/components/common';
+import Toast from '@/components/common/feedBack/toast';
+import { useToast } from '@/hooks/useToast';
 import { CollectionChipSelector, type CollectionChip } from '@/components/task';
 import { useClipboardBridge } from '@/hooks/useClipboardBridge';
 import { useDraftBridge } from '@/hooks/useDraftBridge';
@@ -16,6 +18,7 @@ import type {
   ApiResponseListCollectionSimpleResponse,
   ApiResponseTaskResponse,
 } from '@/api/generated/models';
+import { isValidUrl } from '@/utils/validation';
 
 // 임시저장 키
 const DRAFT_KEY = 'task-create-draft';
@@ -77,6 +80,7 @@ function TaskFormPage() {
   const [linkFocused, setLinkFocused] = useState(false);
 
   const isPending = isCreating || isUpdating;
+  const linkToast = useToast();
 
   // 수정 모드일 때 API 결과로 초기값 세팅
   useEffect(() => {
@@ -177,18 +181,49 @@ function TaskFormPage() {
     setLinkFocused(false);
   };
 
+  const LINK_MAX_LENGTH = 2048;
+  const checkLinkInputFieldLength = (link: string) => {
+    if (link.length <= LINK_MAX_LENGTH) {
+      setLinkValue(link);
+    } else {
+      linkToast.showToast('링크는 최대 2048자 가능합니다');
+    }
+  };
+
   /**
    * 링크 입력값 변경 핸들러
    */
   const handleLinkChange = (value: string) => {
-    setLinkValue(value);
+    checkLinkInputFieldLength(value);
   };
 
   /**
-   * 클립보드에서 붙여넣기
+   * 클립보드에서 붙여넣기 (버튼)
    */
   const handlePasteFromClipboard = () => {
-    setLinkValue(clipboardLinkValue);
+    checkLinkInputFieldLength(clipboardLinkValue);
+  };
+
+  /**
+   * OS 붙여넣기 감지 (beforeinput 이벤트)
+   * insertFromPaste: 컨텍스트 메뉴 / 키보드 단축키 붙여넣기 모두 감지
+   */
+  const handleLinkBeforeInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const inputEvent = e.nativeEvent as InputEvent;
+    const text = inputEvent.data ?? '';
+
+    // 단일 문자 입력(키보드 타이핑)은 검증 제외
+    // WebView 환경에서는 붙여넣기도 textInput으로 인식되므로
+    // 길이로 paste 여부를 구분
+    if (text.length <= 1) {
+      return;
+    }
+
+    if (!isValidUrl(text)) {
+      e.preventDefault();
+      // test 용
+      // linkToast.showToast('http 또는 https URL만 붙여넣기 가능합니다');
+    }
   };
 
   /**
@@ -339,7 +374,7 @@ function TaskFormPage() {
     | 'Link' => {
     if (error) return 'Error';
     if (linkValue) return 'Activated';
-    if (hasClipboardLink) return 'Link'; // 클립보드에 링크 있으면 버튼 표시
+    if (hasClipboardLink && linkFocused) return 'Link'; // 포커스 상태이고 클립보드에 링크 있으면 버튼 표시
     if (linkFocused) return 'Focused'; // 포커스했지만 클립보드에 링크 없음
     return 'Enabled'; // 기본 상태
   };
@@ -361,6 +396,15 @@ function TaskFormPage() {
 
   return (
     <div>
+      {linkToast.isVisible && (
+        <div className='fixed bottom-[100px] left-1/2 z-50 -translate-x-1/2'>
+          <Toast
+            message={linkToast.message}
+            actionLabel='확인'
+            onClose={linkToast.hideToast}
+          />
+        </div>
+      )}
       {/* TODO 팀 컨벤션에 맞게 전역 state? 내부 state? 결정해 수정  */}
       {/* TODO 임시저장 조건 충족화면 */}
       <ModalLayout
@@ -442,15 +486,21 @@ function TaskFormPage() {
             state={getLinkState()}
             placeholder='링크를 입력해주세요.'
             errorMessage={getErrorMessage()}
-            buttonLabel={hasClipboardLink ? '붙여넣기' : undefined}
+            buttonLabel={
+              hasClipboardLink && linkFocused ? '붙여넣기' : undefined
+            }
             value={linkValue}
             onChange={handleLinkChange}
             onFocus={handleLinkFocus}
             onBlur={handleLinkBlur}
+            onBeforeInput={handleLinkBeforeInput}
             onButtonClick={
-              hasClipboardLink ? handlePasteFromClipboard : undefined
+              hasClipboardLink && linkFocused
+                ? handlePasteFromClipboard
+                : undefined
             }
             width='w-full'
+            readOnly={isEditMode && task?.inout === false}
           />
         </div>
 
