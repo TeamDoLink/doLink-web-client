@@ -220,7 +220,6 @@ const TaskDetailPage = () => {
 
   const handleLinkClick = () => {
     // inout이 true면 내부 추가 링크이므로 이동 불가
-    console.log('isInout:', isInout);
     if (isInout) {
       return;
     }
