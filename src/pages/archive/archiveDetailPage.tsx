@@ -92,6 +92,7 @@ const BEFORE_LOGIN_TASKS: Task[] = [
     isTutorial: true,
     createdAt: '오늘',
     modifiedAt: '오늘',
+    domain: '노션 (Notion)',
   },
 ];
 
@@ -119,6 +120,7 @@ const mapTaskResponseToTask = (task: TaskResponse): Task => {
     createdAt: task.createdAt ?? new Date().toISOString(),
     modifiedAt: task.createdAt ?? new Date().toISOString(),
     thumbnailUrl: task.thumbnailUrl ?? null,
+    domain: task.domain ?? null,
   };
 };
 

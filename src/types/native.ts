@@ -40,6 +40,24 @@ export interface LinkCanOpenPayload {
 }
 
 // ============================================
+// Auth Message Types
+// ============================================
+
+/**
+ * Auth token payload from native - accessToken issued by app
+ */
+export interface AuthTokenPayload {
+  accessToken: string;
+}
+
+/**
+ * Auth error payload from native - reissue failed (e.g. no refreshToken)
+ */
+export interface AuthErrorPayload {
+  message: string;
+}
+
+// ============================================
 // OS Share Message Types
 // ============================================
 
@@ -82,7 +100,8 @@ export type WebToNativeMessage =
   | { type: 'link:open'; payload: LinkPayload }
   | { type: 'link:canOpen'; payload: LinkCanOpenPayload }
   | { type: 'os:share'; payload: OsSharePayload }
-  | NavigateBackExitMessage;
+  | NavigateBackExitMessage
+  | { type: 'auth:logout'; payload: Record<string, never> };
 
 /**
  * All possible messages from Native to Web
@@ -92,7 +111,10 @@ export type NativeToWebMessage =
   | LinkResponse
   | LinkError
   | NavigateMessage
-  | NavigateBackMessage;
+  | NavigateBackMessage
+  | { type: 'auth:token'; payload: AuthTokenPayload }
+  | { type: 'auth:login'; payload: AuthTokenPayload }
+  | { type: 'auth:error'; payload: AuthErrorPayload };
 
 export interface ReactNativeWebView {
   postMessage: (message: string) => void;

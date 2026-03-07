@@ -1,14 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Background,
-  Button,
-  FeedBack,
-  List,
-  TabBar,
-} from '@/components/common';
+import { Background, FeedBack, List, TabBar } from '@/components/common';
 import { HomeAppBar } from '@/components/common/appBar/homeAppBar';
-import heroIllustration from '@/assets/icons/home/home1.svg';
+import heroIllustration from '@/assets/icons/home/beforelogin.svg';
+import moreBlueIcon from '@/assets/icons/common/more-blue.svg';
 import { FloatingButton } from '@/components/common/button';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import {
@@ -19,6 +14,23 @@ import { ROUTES } from '@/constants/routes';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import { formatRelativeDateLabel } from '@/utils/date';
 import { useTutorialTaskStore } from '@/stores/useTutorialTaskStore';
+
+/**
+ * 미로그인 홈화면 전용 로그인 버튼
+ * 86x26 크기의 커스텀 버튼
+ */
+const LoginButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <button
+      type='button'
+      onClick={onClick}
+      className='mt-[10px] inline-flex h-[26px] w-[86px] items-center rounded-[20px] bg-[#394CFF26] pl-3 text-body-sm text-point transition active:bg-[#394CFF4C]'
+    >
+      <span className='text-caption-md'>로그인하기</span>
+      <img src={moreBlueIcon} alt='더보기' className='h-4 w-4' />
+    </button>
+  );
+};
 
 const HomeBeforeLogin = () => {
   const navigate = useNavigate();
@@ -92,25 +104,18 @@ const HomeBeforeLogin = () => {
         <HomeAppBar onClickSearch={handleClickSearch} />
 
         <main className='relative grow pt-14'>
-          <div className='mx-auto flex flex-col px-5 py-2'>
+          <div className='mx-auto flex flex-col px-5'>
             <section className='flex items-center justify-between'>
-              <div className='flex flex-col gap-1'>
-                <p className='text-heading-sm text-grey-500'>
-                  만나서 반가워요 😊
-                </p>
-                <h1 className='text-display-2xl text-black'>
+              <div className='flex flex-col'>
+                <h1 className='text-heading-xl text-black'>
                   두링크가 처음이라면
                 </h1>
-                <Button.IconButton
-                  label='로그인하기'
-                  className='mt-3 text-body-md'
-                  onClick={handleLoginClick}
-                />
+                <LoginButton onClick={handleLoginClick} />
               </div>
               <img
                 src={heroIllustration}
                 alt='홈 일러스트'
-                className='h-[120px] w-[130px] flex-shrink-0 object-contain'
+                className='h-[90px] w-[90px] flex-shrink-0 object-contain'
               />
             </section>
 

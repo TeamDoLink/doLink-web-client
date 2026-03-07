@@ -2,29 +2,40 @@ import heroIllustration from '@/assets/icons/home/home2.svg';
 
 type GreetingSectionProps = {
   memberName: string;
-  greeting: string;
+  mainGreeting?: string;
+  subGreeting?: string;
+  categoryIcon?: string;
 };
 
 export const GreetingSection = ({
   memberName,
-  greeting,
+  mainGreeting = '만나서 반가워요',
+  subGreeting,
+  categoryIcon = heroIllustration,
 }: GreetingSectionProps) => {
   return (
     <section className='flex items-center justify-between'>
       {/* 문구 */}
       <div className='flex flex-col gap-1'>
-        <p className='text-heading-sm text-grey-500'>{greeting}</p>
-        <h1 className='text-display-2xl text-black'>
-          만나서 반가워요
+        <h1 className='text-body-lg text-grey-600'>
+          {mainGreeting}
           <br />
-          <span className='text-display-2xl text-black'>{memberName}님</span>
+          <h2 className='text-heading-xl text-black'>
+            {subGreeting && (
+              <>
+                <span className='text-black'>{subGreeting} </span>
+                <span className='text-point'>{memberName}님</span>
+              </>
+            )}
+            {!subGreeting && <span className='text-black'>{memberName}님</span>}
+          </h2>
         </h1>
       </div>
       {/* 일러스트 */}
       <img
-        src={heroIllustration}
+        src={categoryIcon}
         alt='홈 일러스트'
-        className='h-[120px] w-[130px] flex-shrink-0 object-contain'
+        className='h-[90px] w-[90px] flex-shrink-0 object-contain'
       />
     </section>
   );

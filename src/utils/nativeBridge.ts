@@ -10,6 +10,8 @@ import type {
   LinkError,
   LinkCanOpenPayload,
   OsSharePayload,
+  AuthTokenPayload,
+  AuthErrorPayload,
 } from '@/types/native';
 
 // WebView 메시지 타입 정의
@@ -194,6 +196,17 @@ const setupLinkResponseListener = (() => {
   };
 })();
 
+// ============================================
+// Auth-specific utilities
+// ============================================
+
+/**
+ * 로그아웃/탈퇴 시 Native에 알림 (auth:logout)
+ */
+export const sendAuthLogout = (): void => {
+  sendMessageToRN({ type: 'auth:logout', payload: {} });
+};
+
 /**
  * Native에 URL 열기 요청을 보냄 (Fire-and-Forget)
  * @param url 열 URL
@@ -248,6 +261,53 @@ export const canOpenLink = (
       type: 'link:canOpen',
       payload,
     });
+  });
+};
+
+/**
+ * TODO : 임시로 작성, 추후 리팩터링 시 설계 논의 필요
+ *
+ *
+ * 401 발생 시 앱에 auth:reissue 브릿지 전송 → 앱이 갱신 후 auth:token으로 응답
+ * @param timeout 응답 대기 시간 (기본값: 10000ms)
+ * @returns Promise<string> - 새 accessToken
+ */
+export const requestTokenReissue = (
+  timeout: number = 10000
+): Promise<string> => {
+  return new Promise<string>((resolve, reject) => {
+    let removeTokenListener: (() => void) | null = null;
+    let removeErrorListener: (() => void) | null = null;
+
+    const cleanup = () => {
+      removeTokenListener?.();
+      removeErrorListener?.();
+    };
+
+    const timeoutId = window.setTimeout(() => {
+      cleanup();
+      reject(new Error('auth:reissue timeout'));
+    }, timeout);
+
+    removeTokenListener = addTypedMessageListener<AuthTokenPayload>(
+      'auth:token',
+      (payload) => {
+        clearTimeout(timeoutId);
+        cleanup();
+        resolve(payload.accessToken);
+      }
+    );
+
+    removeErrorListener = addTypedMessageListener<AuthErrorPayload>(
+      'auth:error',
+      (payload) => {
+        clearTimeout(timeoutId);
+        cleanup();
+        reject(new Error(payload.message));
+      }
+    );
+
+    sendMessageToRN({ type: 'auth:reissue' });
   });
 };
 
