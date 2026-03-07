@@ -210,9 +210,14 @@ function TaskFormPage() {
    */
   const handleLinkBeforeInput = (e: React.FormEvent<HTMLInputElement>) => {
     const inputEvent = e.nativeEvent as InputEvent;
-
-    console.log('[beforeinput] 붙여넣기 감지, 값:', inputEvent.data);
     const text = inputEvent.data ?? '';
+
+    // 단일 문자 입력(키보드 타이핑)은 검증 제외
+    // WebView 환경에서는 붙여넣기도 textInput으로 인식되므로
+    // 길이로 paste 여부를 구분
+    if (text.length <= 1) {
+      return;
+    }
 
     if (!isValidUrl(text)) {
       e.preventDefault();
