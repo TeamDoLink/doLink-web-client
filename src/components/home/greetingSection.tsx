@@ -17,19 +17,16 @@ export const GreetingSection = ({
     <section className='flex items-center justify-between'>
       {/* 문구 */}
       <div className='flex flex-col gap-1'>
-        <h1 className='text-body-lg text-grey-600'>
-          {mainGreeting}
-          <br />
-          <h2 className='text-heading-xl text-black'>
-            {subGreeting && (
-              <>
-                <span className='text-black'>{subGreeting} </span>
-                <span className='text-point'>{memberName}님</span>
-              </>
-            )}
-            {!subGreeting && <span className='text-black'>{memberName}님</span>}
-          </h2>
-        </h1>
+        <h1 className='text-body-lg text-grey-600'>{mainGreeting}</h1>
+        <h2 className='text-heading-xl text-black'>
+          {subGreeting && (
+            <>
+              <span className='text-black'>{subGreeting} </span>
+              <span className='text-point'>{memberName}님</span>
+            </>
+          )}
+          {!subGreeting && <span className='text-black'>{memberName}님</span>}
+        </h2>
       </div>
       {/* 일러스트 */}
       <img

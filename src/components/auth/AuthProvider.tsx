@@ -19,13 +19,6 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   const setAuthInitialized = useAuthStore((s) => s.setAuthInitialized);
   const clearAuth = useAuthStore((s) => s.clearAuth);
 
-  // 앱 웹뷰에서 처음 실행 시 앱에 auth:login 요청 → 앱이 reissue 후 access token을 auth:login으로 응답
-  useEffect(() => {
-    if (isReactNativeWebView()) {
-      sendAuthLoginRequest();
-    }
-  }, []);
-
   useEffect(() => {
     let cleanup: (() => void)[] = [];
 
@@ -52,6 +45,8 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
       addTypedMessageListener<AuthErrorPayload>('auth:error', handleError),
       () => clearTimeout(timeoutId),
     ];
+
+    sendAuthLoginRequest();
 
     return () => {
       cleanup.forEach((fn) => fn());

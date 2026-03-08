@@ -13,12 +13,15 @@ import type {
   AuthTokenPayload,
   AuthErrorPayload,
 } from '@/types/native';
+import { detectPlatform } from './webview';
 
 // WebView 메시지 타입 정의
 export interface WebViewMessage {
   type: string;
   payload?: any;
 }
+
+const platformBrowser = detectPlatform() === 'ios' ? window : document;
 
 /**
  * React Native WebView 환경인지 확인
@@ -29,7 +32,7 @@ export interface WebViewMessage {
  * }
  */
 export const isReactNativeWebView = (): boolean => {
-  return typeof window !== 'undefined' && !!window.ReactNativeWebView;
+  return !!window?.ReactNativeWebView;
 };
 
 /**
@@ -63,19 +66,18 @@ export const sendMessageToRN = (message: WebViewMessage): void => {
 export const addReceiveReactNativeMessageListener = (
   callback: (message: MessageEvent) => void
 ) => {
-  const documentListener = (event: any) => {
-    callback(event as MessageEvent);
-  };
-  const windowListener = (event: MessageEvent) => {
-    callback(event);
-  };
-  document.addEventListener('message', documentListener);
-  window.addEventListener('message', windowListener);
+  platformBrowser.addEventListener('message', callback as EventListener);
   return () => {
-    document.removeEventListener('message', documentListener);
-    window.removeEventListener('message', windowListener);
+    platformBrowser.removeEventListener('message', callback as EventListener);
   };
 };
+
+if (import.meta.env.MODE === 'development') {
+  // 개발모드에서 메시지 수신 리스너 등록
+  addReceiveReactNativeMessageListener((event) => {
+    console.log('Received from Native:', event);
+  });
+}
 
 /**
  * RN에서 오는 메시지를 수신하는 리스너 등록
@@ -148,6 +150,11 @@ export const addTypedMessageListener = <T = any>(
 // Window 타입 확장
 declare global {
   interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void;
+    };
+  }
+  interface Document {
     ReactNativeWebView?: {
       postMessage: (message: string) => void;
     };
