@@ -8,7 +8,6 @@ import { ArchiveSearchItem, TaskSearchItem } from '@/components/common/list';
 import { InfiniteScroll } from '@/components/common/infiniteScroll/infiniteScroll';
 import EmptyNotice from '@/components/common/feedBack/emptyNotice';
 import ItemChips from '@/components/common/filter/itemChips';
-import { GreyLine } from '@/components/common/line/greyLine';
 import { formatRelativeDateLabel } from '@/utils/date';
 import { customInstance } from '@/api/axios-instance';
 import { ROUTES } from '@/constants/routes';
@@ -341,34 +340,29 @@ const SearchPage = () => {
       </header>
 
       {/* Tab Section */}
-      <div className='fixed left-0 right-0 top-14 z-40 bg-white'>
-        <div className='flex items-center gap-2 px-5 pt-2'>
-          <ItemChips
-            type='solid'
-            isSelected={selectedTab === '전체'}
-            label='전체'
-            onClick={() => setSelectedTab('전체')}
-          />
-          <ItemChips
-            type='solid'
-            isSelected={selectedTab === '할 일'}
-            label='할 일'
-            onClick={() => setSelectedTab('할 일')}
-          />
-          <ItemChips
-            type='solid'
-            isSelected={selectedTab === '모음'}
-            label='모음'
-            onClick={() => setSelectedTab('모음')}
-          />
-        </div>
-        <div className='mt-3'>
-          <GreyLine />
-        </div>
+      <div className='fixed left-0 right-0 top-14 z-40 flex h-[46px] items-center gap-2 border-b border-grey-100 px-5'>
+        <ItemChips
+          type='solid'
+          isSelected={selectedTab === '전체'}
+          label='전체'
+          onClick={() => setSelectedTab('전체')}
+        />
+        <ItemChips
+          type='solid'
+          isSelected={selectedTab === '할 일'}
+          label='할 일'
+          onClick={() => setSelectedTab('할 일')}
+        />
+        <ItemChips
+          type='solid'
+          isSelected={selectedTab === '모음'}
+          label='모음'
+          onClick={() => setSelectedTab('모음')}
+        />
       </div>
 
-      {/* Content - 헤더 + 탭 + 라인 높이만큼 패딩 추가 */}
-      <div className='flex flex-1 flex-col pt-[calc(56px+38px+12px+1px)]'>
+      {/* Content - 헤더 + 탭 높이만큼 패딩 추가 */}
+      <div className='flex flex-1 flex-col pt-[calc(56px+46px)]'>
         {/* 임시 로딩 화면 */}
         {isLoading && (
           <div className='flex flex-1 items-center justify-center'>
