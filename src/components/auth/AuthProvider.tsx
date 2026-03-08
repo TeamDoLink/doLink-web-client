@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import {
   addTypedMessageListener,
-  isReactNativeWebView,
   sendAuthLoginRequest,
 } from '@/utils/nativeBridge';
 import type { AuthTokenPayload, AuthErrorPayload } from '@/types/native';
