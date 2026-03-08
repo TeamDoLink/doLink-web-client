@@ -72,9 +72,12 @@ export const addReceiveReactNativeMessageListener = (
   };
 };
 
-addReceiveReactNativeMessageListener((event) => {
-  console.log('Received from Native:', event);
-});
+if (import.meta.env.MODE === 'development') {
+  // 개발모드에서 메시지 수신 리스너 등록
+  addReceiveReactNativeMessageListener((event) => {
+    console.log('Received from Native:', event);
+  });
+}
 
 /**
  * RN에서 오는 메시지를 수신하는 리스너 등록
