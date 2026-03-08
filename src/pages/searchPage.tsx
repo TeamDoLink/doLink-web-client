@@ -7,6 +7,7 @@ import { ClearableSearchInputField } from '@/components/common/inputField';
 import { ArchiveSearchItem, TaskSearchItem } from '@/components/common/list';
 import { InfiniteScroll } from '@/components/common/infiniteScroll/infiniteScroll';
 import EmptyNotice from '@/components/common/feedBack/emptyNotice';
+import ItemChips from '@/components/common/filter/itemChips';
 import { formatRelativeDateLabel } from '@/utils/date';
 import { customInstance } from '@/api/axios-instance';
 import { ROUTES } from '@/constants/routes';
@@ -142,6 +143,7 @@ const SearchResults = ({
   tasks,
   archives,
   searchQuery,
+  selectedTab,
   onLoadMoreTasks,
   onLoadMoreArchives,
   hasMoreTasks,
@@ -154,6 +156,7 @@ const SearchResults = ({
   tasks: Task[];
   archives: Archive[];
   searchQuery: string;
+  selectedTab: '전체' | '할 일' | '모음';
   onLoadMoreTasks: () => void;
   onLoadMoreArchives: () => void;
   hasMoreTasks: boolean;
@@ -162,61 +165,69 @@ const SearchResults = ({
   isFetchingMoreArchives: boolean;
   onTaskClick: (taskId: number) => void;
   onArchiveClick: (archiveId: number) => void;
-}) => (
-  <div className='flex flex-1 flex-col px-5 py-6'>
-    {tasks.length > 0 && (
-      <section className='flex flex-col gap-4'>
-        <h2 className='text-body-lg text-grey-600'>할 일</h2>
-        <InfiniteScroll<Task>
-          items={tasks}
-          keyExtractor={(task: Task) => task.id.toString()}
-          renderItem={(task: Task) => (
-            <TaskSearchItem
-              {...task}
-              searchQuery={searchQuery}
-              onClick={() => onTaskClick(task.id)}
-            />
-          )}
-          onLoadMore={onLoadMoreTasks}
-          hasNextPage={hasMoreTasks}
-          isFetchingNextPage={isFetchingMoreTasks}
-          loadingMessage='할 일을 더 불러오는 중입니다'
-          emptyMessage='할 일이 없습니다'
-          className='flex flex-col gap-3'
-        />
-      </section>
-    )}
+}) => {
+  const showTasks = selectedTab === '전체' || selectedTab === '할 일';
+  const showArchives = selectedTab === '전체' || selectedTab === '모음';
 
-    {archives.length > 0 && (
-      <section className='flex flex-col gap-4'>
-        <h2 className='text-body-lg text-grey-600'>모음</h2>
-        <InfiniteScroll<Archive>
-          items={archives}
-          keyExtractor={(archive: Archive) => archive.id.toString()}
-          renderItem={(archive: Archive) => (
-            <ArchiveSearchItem
-              {...archive}
-              searchQuery={searchQuery}
-              onClick={() => onArchiveClick(archive.id)}
-            />
-          )}
-          onLoadMore={onLoadMoreArchives}
-          hasNextPage={hasMoreArchives}
-          isFetchingNextPage={isFetchingMoreArchives}
-          loadingMessage='모음을 더 불러오는 중입니다'
-          emptyMessage='모음이 없습니다'
-          className='flex flex-col gap-3'
-        />
-      </section>
-    )}
-  </div>
-);
+  return (
+    <div className='flex flex-1 flex-col px-5'>
+      {showTasks && tasks.length > 0 && (
+        <section className='flex flex-col gap-4'>
+          <h2 className='text-body-lg text-grey-600'>할 일</h2>
+          <InfiniteScroll<Task>
+            items={tasks}
+            keyExtractor={(task: Task) => task.id.toString()}
+            renderItem={(task: Task) => (
+              <TaskSearchItem
+                {...task}
+                searchQuery={searchQuery}
+                onClick={() => onTaskClick(task.id)}
+              />
+            )}
+            onLoadMore={onLoadMoreTasks}
+            hasNextPage={hasMoreTasks}
+            isFetchingNextPage={isFetchingMoreTasks}
+            loadingMessage='할 일을 더 불러오는 중입니다'
+            emptyMessage='할 일이 없습니다'
+            className='flex flex-col gap-3'
+          />
+        </section>
+      )}
+
+      {showArchives && archives.length > 0 && (
+        <section className='flex flex-col gap-4'>
+          <h2 className='text-body-lg text-grey-600'>모음</h2>
+          <InfiniteScroll<Archive>
+            items={archives}
+            keyExtractor={(archive: Archive) => archive.id.toString()}
+            renderItem={(archive: Archive) => (
+              <ArchiveSearchItem
+                {...archive}
+                searchQuery={searchQuery}
+                onClick={() => onArchiveClick(archive.id)}
+              />
+            )}
+            onLoadMore={onLoadMoreArchives}
+            hasNextPage={hasMoreArchives}
+            isFetchingNextPage={isFetchingMoreArchives}
+            loadingMessage='모음을 더 불러오는 중입니다'
+            emptyMessage='모음이 없습니다'
+            className='flex flex-col gap-3'
+          />
+        </section>
+      )}
+    </div>
+  );
+};
 
 // Main Component
 const SearchPage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [selectedTab, setSelectedTab] = useState<'전체' | '할 일' | '모음'>(
+    '전체'
+  );
 
   // 디바운싱: 검색어 입력이 300ms 동안 없으면 실제 검색 수행
   useEffect(() => {
@@ -319,8 +330,30 @@ const SearchPage = () => {
         />
       </header>
 
-      {/* Content - 헤더 높이만큼 패딩 추가 */}
-      <div className='flex flex-1 flex-col pt-14'>
+      {/* Tab Section */}
+      <div className='fixed left-0 right-0 top-14 z-40 flex h-[46px] items-center gap-2 border-b border-grey-100 px-5'>
+        <ItemChips
+          type='solid'
+          isSelected={selectedTab === '전체'}
+          label='전체'
+          onClick={() => setSelectedTab('전체')}
+        />
+        <ItemChips
+          type='solid'
+          isSelected={selectedTab === '할 일'}
+          label='할 일'
+          onClick={() => setSelectedTab('할 일')}
+        />
+        <ItemChips
+          type='solid'
+          isSelected={selectedTab === '모음'}
+          label='모음'
+          onClick={() => setSelectedTab('모음')}
+        />
+      </div>
+
+      {/* Content - 헤더 + 탭 높이만큼 패딩 추가 */}
+      <div className='flex flex-1 flex-col pt-[calc(56px+46px)]'>
         {/* 임시 로딩 화면 */}
         {isLoading && (
           <div className='flex flex-1 items-center justify-center'>
@@ -337,19 +370,22 @@ const SearchPage = () => {
         )}
 
         {!isLoading && !error && debouncedQuery.trim() && hasResults && (
-          <SearchResults
-            tasks={tasks}
-            archives={archives}
-            searchQuery={searchQuery}
-            onLoadMoreTasks={handleLoadMoreTasks}
-            onLoadMoreArchives={handleLoadMoreArchives}
-            hasMoreTasks={hasMoreTasks}
-            hasMoreArchives={hasMoreArchives}
-            isFetchingMoreTasks={isFetchingMoreTasks}
-            isFetchingMoreArchives={isFetchingMoreArchives}
-            onTaskClick={handleTaskClick}
-            onArchiveClick={handleArchiveClick}
-          />
+          <div className='pt-4'>
+            <SearchResults
+              tasks={tasks}
+              archives={archives}
+              searchQuery={searchQuery}
+              selectedTab={selectedTab}
+              onLoadMoreTasks={handleLoadMoreTasks}
+              onLoadMoreArchives={handleLoadMoreArchives}
+              hasMoreTasks={hasMoreTasks}
+              hasMoreArchives={hasMoreArchives}
+              isFetchingMoreTasks={isFetchingMoreTasks}
+              isFetchingMoreArchives={isFetchingMoreArchives}
+              onTaskClick={handleTaskClick}
+              onArchiveClick={handleArchiveClick}
+            />
+          </div>
         )}
 
         {!isLoading && !error && (!debouncedQuery.trim() || !hasResults) && (

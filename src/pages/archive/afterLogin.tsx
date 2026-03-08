@@ -13,6 +13,7 @@ import {
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import { useToast } from '@/hooks/useToast';
+import { useTaskCreateAction } from '@/hooks/useTaskCreateAction';
 import { ROUTES } from '@/constants/routes';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import {
@@ -69,6 +70,7 @@ const ArchiveAfterLogin = () => {
     number | null
   >(null);
   const tutorialToast = useToast();
+  const { handleFloatingButtonClick, portalNode } = useTaskCreateAction();
 
   const isAll = selectedCategory === 'all';
 
@@ -325,9 +327,10 @@ const ArchiveAfterLogin = () => {
 
       {/* 하단 고정 버튼 */}
       <FloatingButton
-        onClick={() => navigate(ROUTES.taskCreate)}
+        onClick={handleFloatingButtonClick}
         className='fixed bottom-[104px] right-6 z-40'
       />
+      {portalNode}
 
       {/* 바탭탭바 */}
       <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />

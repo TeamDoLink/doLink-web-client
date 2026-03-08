@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { addTypedMessageListener } from '@/utils/nativeBridge';
+import {
+  addTypedMessageListener,
+  sendAuthLoginRequest,
+} from '@/utils/nativeBridge';
 import type { AuthTokenPayload, AuthErrorPayload } from '@/types/native';
 
 type AuthProviderProps = {
@@ -41,6 +44,8 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
       addTypedMessageListener<AuthErrorPayload>('auth:error', handleError),
       () => clearTimeout(timeoutId),
     ];
+
+    sendAuthLoginRequest();
 
     return () => {
       cleanup.forEach((fn) => fn());

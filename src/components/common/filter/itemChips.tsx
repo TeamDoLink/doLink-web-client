@@ -27,7 +27,7 @@ export default function ItemChips({
   return (
     <button
       onClick={onClick}
-      className={`rounded-[20px] px-3 py-2 text-caption-md ${getStyleClass()}`}
+      className={`flex h-[26px] min-w-[45px] items-center justify-center rounded-[20px] px-3 text-caption-md ${getStyleClass()}`}
     >
       {label}
     </button>

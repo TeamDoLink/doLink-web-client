@@ -69,6 +69,27 @@ export interface OsSharePayload {
 }
 
 // ============================================
+// Navigation Message Types
+// ============================================
+
+export interface NavigatePayload {
+  path: string;
+}
+
+export interface NavigateMessage {
+  type: 'navigate:deeplink';
+  payload: NavigatePayload;
+}
+
+export interface NavigateBackMessage {
+  type: 'navigate:back';
+}
+
+export interface NavigateBackExitMessage {
+  type: 'navigate:back:exit';
+}
+
+// ============================================
 // Message Type Union
 // ============================================
 
@@ -79,6 +100,8 @@ export type WebToNativeMessage =
   | { type: 'link:open'; payload: LinkPayload }
   | { type: 'link:canOpen'; payload: LinkCanOpenPayload }
   | { type: 'os:share'; payload: OsSharePayload }
+  | NavigateBackExitMessage
+  | { type: 'auth:login'; payload: Record<string, never> }
   | { type: 'auth:logout'; payload: Record<string, never> };
 
 /**
@@ -88,6 +111,8 @@ export type WebToNativeMessage =
 export type NativeToWebMessage =
   | LinkResponse
   | LinkError
+  | NavigateMessage
+  | NavigateBackMessage
   | { type: 'auth:token'; payload: AuthTokenPayload }
   | { type: 'auth:login'; payload: AuthTokenPayload }
   | { type: 'auth:error'; payload: AuthErrorPayload };

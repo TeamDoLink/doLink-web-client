@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { InputField, Button, AppBar, FeedBack } from '@/components/common';
+import { useToast } from '@/hooks/useToast';
 import { CollectionChipSelector, type CollectionChip } from '@/components/task';
 import { useClipboardBridge } from '@/hooks/useClipboardBridge';
 import { useDraftBridge } from '@/hooks/useDraftBridge';
@@ -16,6 +17,7 @@ import type {
   ApiResponseListCollectionSimpleResponse,
   ApiResponseTaskResponse,
 } from '@/api/generated/models';
+import { isValidUrl } from '@/utils/validation';
 
 // 임시저장 키
 const DRAFT_KEY = 'task-create-draft';
@@ -76,7 +78,18 @@ function TaskFormPage() {
   const [titleFocused, setTitleFocused] = useState(false);
   const [linkFocused, setLinkFocused] = useState(false);
 
+  const titleRef = useRef<HTMLDivElement>(null);
+  const linkRef = useRef<HTMLDivElement>(null);
+  const memoRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
+    setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
+
   const isPending = isCreating || isUpdating;
+  const linkToast = useToast();
 
   // 수정 모드일 때 API 결과로 초기값 세팅
   useEffect(() => {
@@ -153,6 +166,7 @@ function TaskFormPage() {
    */
   const handleTitleFocus = () => {
     setTitleFocused(true);
+    scrollToSection(titleRef);
   };
 
   /**
@@ -168,6 +182,7 @@ function TaskFormPage() {
   const handleLinkFocus = () => {
     setLinkFocused(true);
     requestClipboard();
+    scrollToSection(linkRef);
   };
 
   /**
@@ -177,18 +192,49 @@ function TaskFormPage() {
     setLinkFocused(false);
   };
 
+  const LINK_MAX_LENGTH = 2048;
+  const checkLinkInputFieldLength = (link: string) => {
+    if (link.length <= LINK_MAX_LENGTH) {
+      setLinkValue(link);
+    } else {
+      linkToast.showToast('링크는 최대 2048자 가능합니다');
+    }
+  };
+
   /**
    * 링크 입력값 변경 핸들러
    */
   const handleLinkChange = (value: string) => {
-    setLinkValue(value);
+    checkLinkInputFieldLength(value);
   };
 
   /**
-   * 클립보드에서 붙여넣기
+   * 클립보드에서 붙여넣기 (버튼)
    */
   const handlePasteFromClipboard = () => {
-    setLinkValue(clipboardLinkValue);
+    checkLinkInputFieldLength(clipboardLinkValue);
+  };
+
+  /**
+   * OS 붙여넣기 감지 (beforeinput 이벤트)
+   * insertFromPaste: 컨텍스트 메뉴 / 키보드 단축키 붙여넣기 모두 감지
+   */
+  const handleLinkBeforeInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const inputEvent = e.nativeEvent as InputEvent;
+    const text = inputEvent.data ?? '';
+
+    // 단일 문자 입력(키보드 타이핑)은 검증 제외
+    // WebView 환경에서는 붙여넣기도 textInput으로 인식되므로
+    // 길이로 paste 여부를 구분
+    if (text.length <= 1) {
+      return;
+    }
+
+    if (!isValidUrl(text)) {
+      e.preventDefault();
+      // test 용
+      // linkToast.showToast('http 또는 https URL만 붙여넣기 가능합니다');
+    }
   };
 
   /**
@@ -339,7 +385,7 @@ function TaskFormPage() {
     | 'Link' => {
     if (error) return 'Error';
     if (linkValue) return 'Activated';
-    if (hasClipboardLink) return 'Link'; // 클립보드에 링크 있으면 버튼 표시
+    if (hasClipboardLink && linkFocused) return 'Link'; // 포커스 상태이고 클립보드에 링크 있으면 버튼 표시
     if (linkFocused) return 'Focused'; // 포커스했지만 클립보드에 링크 없음
     return 'Enabled'; // 기본 상태
   };
@@ -360,9 +406,7 @@ function TaskFormPage() {
   };
 
   return (
-    <div>
-      {/* TODO 팀 컨벤션에 맞게 전역 state? 내부 state? 결정해 수정  */}
-      {/* TODO 임시저장 조건 충족화면 */}
+    <div className='flex h-[100dvh] flex-col'>
       <ModalLayout
         open={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}
@@ -389,7 +433,10 @@ function TaskFormPage() {
         onClickBack={handleBackClick}
       />
 
-      <div className='flex h-full flex-col gap-6 overflow-y-auto bg-white px-5 py-4 pt-[calc(56px+16px)]'>
+      {/* fixed AppBar(h-14) 높이만큼 공간 확보 */}
+      <div className='h-14 shrink-0' />
+
+      <div className='flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto bg-white px-5 pb-[30px] pt-4'>
         {/* 담을 모음 선택 섹션 */}
         <CollectionChipSelector
           items={collections}
@@ -399,7 +446,7 @@ function TaskFormPage() {
         />
 
         {/* 제목 섹션 */}
-        <div className='flex flex-col gap-2'>
+        <div ref={titleRef} className='flex flex-col gap-2'>
           <div className='flex items-center justify-between'>
             <label
               htmlFor='task-title'
@@ -429,7 +476,7 @@ function TaskFormPage() {
         </div>
 
         {/* 링크(선택) 섹션 */}
-        <div className='flex flex-col gap-2'>
+        <div ref={linkRef} className='flex flex-col gap-2'>
           <label
             htmlFor='task-link'
             className='text-body-lg font-semibold text-black'
@@ -442,20 +489,26 @@ function TaskFormPage() {
             state={getLinkState()}
             placeholder='링크를 입력해주세요.'
             errorMessage={getErrorMessage()}
-            buttonLabel={hasClipboardLink ? '붙여넣기' : undefined}
+            buttonLabel={
+              hasClipboardLink && linkFocused ? '붙여넣기' : undefined
+            }
             value={linkValue}
             onChange={handleLinkChange}
             onFocus={handleLinkFocus}
             onBlur={handleLinkBlur}
+            onBeforeInput={handleLinkBeforeInput}
             onButtonClick={
-              hasClipboardLink ? handlePasteFromClipboard : undefined
+              hasClipboardLink && linkFocused
+                ? handlePasteFromClipboard
+                : undefined
             }
             width='w-full'
+            readOnly={isEditMode && task?.inout === false}
           />
         </div>
 
         {/* 메모(선택) 섹션 */}
-        <div className='flex flex-col gap-2'>
+        <div ref={memoRef} className='flex flex-col gap-2'>
           <div className='flex items-center justify-between'>
             <label
               htmlFor='task-memo'
@@ -477,11 +530,14 @@ function TaskFormPage() {
             placeholder='메모를 입력해주세요.'
             value={memo}
             onChange={(e) => handleMemoChange(e.target.value)}
+            onFocus={() => scrollToSection(memoRef)}
             className='h-[132px] w-full resize-none rounded-[10px] border border-grey-200 bg-white px-4 py-4 text-body-md text-grey-900 outline-none placeholder:text-grey-400 focus:border-grey-800'
           />
         </div>
+      </div>
 
-        {/* 추가하기 버튼 */}
+      {/* 추가하기 버튼 */}
+      <div className='shrink-0 bg-white px-5 pb-4 pt-2'>
         <Button.CtaButton
           disabled={!isAddButtonEnabled || isPending}
           onClick={handleAddClick}

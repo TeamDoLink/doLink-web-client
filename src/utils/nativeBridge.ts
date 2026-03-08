@@ -13,12 +13,15 @@ import type {
   AuthTokenPayload,
   AuthErrorPayload,
 } from '@/types/native';
+import { detectPlatform } from './webview';
 
 // WebView 메시지 타입 정의
 export interface WebViewMessage {
   type: string;
   payload?: any;
 }
+
+const platformBrowser = detectPlatform() === 'ios' ? window : document;
 
 /**
  * React Native WebView 환경인지 확인
@@ -29,7 +32,7 @@ export interface WebViewMessage {
  * }
  */
 export const isReactNativeWebView = (): boolean => {
-  return typeof window !== 'undefined' && !!window.ReactNativeWebView;
+  return !!window?.ReactNativeWebView;
 };
 
 /**
@@ -51,6 +54,32 @@ export const sendMessageToRN = (message: WebViewMessage): void => {
 };
 
 /**
+ * RN에서 오는 메시지를 수신하는 리스너 등록 (document.addEventListener('message') 대신 사용)
+ * @param callback 메시지 이벤트 핸들러
+ * @returns cleanup 함수 (리스너 제거용)
+ * @example
+ * const cleanup = addReceiveReactNativeMessageListener((event) => {
+ *   console.log('Received from Native:', event.data);
+ * });
+ * return cleanup;
+ */
+export const addReceiveReactNativeMessageListener = (
+  callback: (message: MessageEvent) => void
+) => {
+  platformBrowser.addEventListener('message', callback as EventListener);
+  return () => {
+    platformBrowser.removeEventListener('message', callback as EventListener);
+  };
+};
+
+if (import.meta.env.MODE === 'development') {
+  // 개발모드에서 메시지 수신 리스너 등록
+  addReceiveReactNativeMessageListener((event) => {
+    console.log('Received from Native:', event);
+  });
+}
+
+/**
  * RN에서 오는 메시지를 수신하는 리스너 등록
  * @param handler 메시지 이벤트 핸들러
  * @returns cleanup 함수 (리스너 제거용)
@@ -70,11 +99,7 @@ export const addMessageListener = (
   handler: (event: MessageEvent<any>) => void
 ): (() => void) => {
   if (typeof window !== 'undefined') {
-    window.addEventListener('message', handler);
-    // 리스너 제거를 위한 cleanup 함수 반환
-    return () => {
-      window.removeEventListener('message', handler);
-    };
+    return addReceiveReactNativeMessageListener(handler);
   }
   return () => {};
 };
@@ -129,6 +154,11 @@ declare global {
       postMessage: (message: string) => void;
     };
   }
+  interface Document {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void;
+    };
+  }
 }
 
 // ============================================
@@ -163,6 +193,8 @@ const setupLinkResponseListener = (() => {
           typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 
         if (data.type === 'link:response' || data.type === 'link:error') {
+          // NativeToWebMessage에 NAVIGATE가 추가되어도,
+          // 이 블록에서는 link 응답만 처리하므로 타입을 좁혀준다.
           const message = data as LinkResponse | LinkError;
           const url =
             message.type === 'link:response' ? message.url : message.url || '';
@@ -197,6 +229,13 @@ const setupLinkResponseListener = (() => {
 // ============================================
 // Auth-specific utilities
 // ============================================
+
+/**
+ * 처음 실행 시 Native에 auth:login 요청 (저장된 세션이 있으면 reissue 후 access token을 auth:login으로 응답)
+ */
+export const sendAuthLoginRequest = (): void => {
+  sendMessageToRN({ type: 'auth:login', payload: {} });
+};
 
 /**
  * 로그아웃/탈퇴 시 Native에 알림 (auth:logout)

@@ -9,6 +9,7 @@ import {
 } from '@/components/archive';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { ROUTES } from '@/constants/routes';
+import { useTaskCreateAction } from '@/hooks/useTaskCreateAction';
 import { BEFORE_LOGIN_ARCHIVE } from '@/constants/beforeLoginData';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
@@ -47,6 +48,8 @@ const ArchiveBeforeLogin = () => {
   );
 
   const loginToast = useToast();
+  const { handleFloatingButtonClick: handleTaskCreateClick, portalNode } =
+    useTaskCreateAction();
 
   const archives = BEFORE_LOGIN_ARCHIVE();
 
@@ -60,10 +63,6 @@ const ArchiveBeforeLogin = () => {
   };
 
   const handleAddArchive = () => {
-    triggerLoginToast();
-  };
-
-  const handleFloatingButtonClick = () => {
     triggerLoginToast();
   };
 
@@ -153,8 +152,9 @@ const ArchiveBeforeLogin = () => {
       <FloatingButton
         aria-label='새 할 일 추가'
         className='fixed bottom-[104px] right-6 z-40'
-        onClick={handleFloatingButtonClick}
+        onClick={handleTaskCreateClick}
       />
+      {portalNode}
 
       {/* 바탭탭바 */}
       <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />

@@ -299,7 +299,7 @@ export const SwipeableDeleteCard = ({
         }}
       >
         {/* 상단 헤더: 생성 날짜 및 편집 버튼 */}
-        <div className='flex w-full items-center justify-between px-5 pb-2 pt-4 text-caption-md'>
+        <div className='flex w-full items-center justify-between pb-2 pl-5 pr-3 pt-2 text-caption-md'>
           <p className='text-grey-800'>{formatRelativeTime(createdAt)}</p>
           <Button.TextButton
             onClick={handleEditClick}
@@ -328,7 +328,7 @@ export const SwipeableDeleteCard = ({
               onDeleteClick={() => onDeleteClick(link.id)} // 삭제 클릭 핸들러
               width='w-full' // 전체 너비 사용
               actionDisabled={capsuleDisabled}
-              originalDisabled={!tasks[index].inout} // inout이 false면 원본 버튼 비활성화
+              originalDisabled={tasks[index].inout} // inout이 true면 내부 추가 링크이므로 원본 버튼 비활성화
             />
           ))}
         </div>
