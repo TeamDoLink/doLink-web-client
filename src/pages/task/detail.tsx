@@ -112,7 +112,7 @@ const TaskDetailPage = () => {
     createdAt: new Date().toISOString(),
     collectionName: '두링크(DoLink) 튜토리얼',
     category: '기타',
-    inout: true,
+    inout: false,
     isTutorial: true,
   };
 
@@ -130,7 +130,9 @@ const TaskDetailPage = () => {
   const isCompleted = displayData?.status ?? false;
   const categoryLabel = displayCollection?.category ?? '';
   const categoryIcon = CATEGORY_ICON_MAP[categoryLabel] ?? etcIcon;
-  const isInout = shouldUseMockData ? true : (taskData?.inout ?? false);
+  const isInout = shouldUseMockData
+    ? tutorialMockData.inout
+    : (taskData?.inout ?? false);
   // 튜토리얼 여부: mock 데이터이거나 API 응답의 isTutorial이 true인 경우
   const isTutorial = shouldUseMockData || (taskData?.isTutorial ?? false);
 

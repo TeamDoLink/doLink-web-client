@@ -86,14 +86,14 @@ const BEFORE_LOGIN_TASKS: Task[] = [
   {
     taskId: 1,
     title: '두링크(DoLink) 안내서 📚',
-    link: '노션 (Notion)',
+    link: 'https://www.notion.so/DoLink-30347f96a7fc8039ae52e566e4c26087',
     memo: '',
     status: false,
     inout: false,
     isTutorial: true,
     createdAt: '오늘',
     modifiedAt: '오늘',
-    domain: '노션 (Notion)',
+    domain: 'notion.so',
   },
 ];
 
