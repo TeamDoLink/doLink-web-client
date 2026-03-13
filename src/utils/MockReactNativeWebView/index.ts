@@ -69,7 +69,7 @@ class MockReactNativeWebView {
     console.log('[MockReactNativeWebView] postMessage 수신:', parsed);
 
     const { type, payload } = parsed;
-    const { mockAccessToken, defaultCanOpen, responseDelay } = this.config;
+    const { defaultCanOpen, responseDelay } = this.config;
 
     switch (type) {
       case 'auth:login':
