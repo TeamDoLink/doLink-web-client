@@ -25,7 +25,7 @@ const LoginButton = ({ onClick }: { onClick: () => void }) => {
     <button
       type='button'
       onClick={onClick}
-      className='mt-[10px] inline-flex h-[26px] w-[86px] items-center rounded-[20px] bg-[#394CFF26] pl-3 text-body-sm text-point transition active:bg-[#394CFF4C]'
+      className='mt-[10px] inline-flex h-[26px] items-center rounded-[20px] bg-[#394CFF26] pl-2.5 pr-[6px] text-body-sm text-point transition active:bg-[#394CFF4C]'
     >
       <span className='text-caption-md'>로그인하기</span>
       <img src={moreBlueIcon} alt='더보기' className='h-4 w-4' />
