@@ -46,6 +46,7 @@ function TaskFormPage() {
       ).map((item) => ({
         id: String(item.collectionId),
         label: item.name ?? '',
+        disabled: item.name?.includes('두링크(DoLink) 튜토리얼') ?? false,
       })),
     [collectionsData]
   );
@@ -293,6 +294,7 @@ function TaskFormPage() {
             title,
             link: linkValue || undefined,
             memo: memo || undefined,
+            inout: task.inout ?? true,
           },
         },
         {
@@ -311,6 +313,7 @@ function TaskFormPage() {
           title,
           link: linkValue || undefined,
           memo: memo || undefined,
+          inout: true,
         },
       },
       {
