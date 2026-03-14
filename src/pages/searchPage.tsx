@@ -56,7 +56,7 @@ const mapTaskResponseToTask = (task: TaskResponse): Task => {
   const relative = task.createdAt
     ? formatRelativeDateLabel(task.createdAt)
     : '';
-  const domain = task.domain ?? '';
+  const domain = task.inout ? '직접 추가' : (task.domain ?? '');
   const subtitleParts = [] as string[];
 
   if (relative) subtitleParts.push(relative);
