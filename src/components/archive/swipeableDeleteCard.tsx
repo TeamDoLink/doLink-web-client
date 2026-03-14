@@ -71,8 +71,10 @@ interface SwipeableDeleteCardProps {
   onEditClick: (linkId: number) => void;
   /** '삭제' 버튼 클릭 시 호출되는 콜백 함수 */
   onDeleteClick: (linkId: number) => void;
-  /** 카드 단위 삭제 버튼 클릭 시 호출되는 콜백 함수 (선택) */
+  /** 카드 단위 삭제 버튼 클릭 시 호출되는 콜백 함수 (선택) - 모달 표시 */
   onDeleteGroup?: (linkIds: number[]) => void;
+  /** 스와이프 완료 시 즉시 삭제 콜백 (선택) - 모달 없이 바로 삭제 */
+  onSwipeDeleteGroup?: (linkIds: number[]) => void;
   /** 할 일 카드 클릭 시 호출되는 콜백 함수 (선택) */
   onTaskClick?: (taskId: number) => void;
   /** 캡슐 버튼 및 체크박스 비활성화 여부 */
@@ -126,6 +128,7 @@ export const SwipeableDeleteCard = ({
   onEditClick,
   onDeleteClick,
   onDeleteGroup,
+  onSwipeDeleteGroup,
   onTaskClick,
   capsuleDisabled = false,
 }: SwipeableDeleteCardProps) => {
@@ -133,7 +136,7 @@ export const SwipeableDeleteCard = ({
   const links = tasks.map((task) => ({
     id: task.taskId,
     title: task.title,
-    subtitle: task.domain || '직접 추가',
+    subtitle: task.inout ? '직접 추가' : task.domain || '직접 추가',
     inout: task.inout, // inout 필드 추가
     thumbnail: task.thumbnailUrl ?? undefined,
   }));
@@ -240,14 +243,21 @@ export const SwipeableDeleteCard = ({
 
   /**
    * 터치/마우스 업 핸들러
-   * 스와이프가 임계값을 넘으면 열린 상태 유지, 아니면 원위치
+   * 스와이프가 임계값을 넘으면 즉시 그룹 삭제, 아니면 원위치
    */
   const handleTouchEnd = () => {
     setIsDragging(false);
 
-    // 임계값의 절반 이상 스와이프하면 열림, 아니면 닫힘
     if (swipeOffset > SWIPE_THRESHOLD / 2) {
-      setSwipeOffset(SWIPE_THRESHOLD);
+      // 스와이프 완료 시 즉시 삭제 콜백 호출
+      const ids = links.map((link) => link.id);
+      if (onSwipeDeleteGroup) {
+        onSwipeDeleteGroup(ids);
+      } else {
+        // fallback: 기존 onDeleteGroup (모달 표시)
+        handleDeleteGroup();
+      }
+      setSwipeOffset(0);
     } else {
       setSwipeOffset(0);
     }
