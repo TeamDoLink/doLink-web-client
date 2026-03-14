@@ -9,6 +9,7 @@
 
 import { reissue } from './api';
 import { detectPlatform } from '../webview';
+import { AVAILABLE_WEB_MOCK_BRIDGE } from '@/constants/native';
 
 interface MockConfig {
   /** auth:login 응답 시 사용할 가짜 accessToken */
@@ -180,7 +181,7 @@ class MockReactNativeWebView {
  * import '@/utils/mock-react-native-web-view';
  */
 export function initMockReactNativeWebView(config?: MockConfig): void {
-  if (import.meta.env.MODE !== 'development') return;
+  if (!AVAILABLE_WEB_MOCK_BRIDGE) return;
   if (window.ReactNativeWebView) return;
 
   window.ReactNativeWebView = new MockReactNativeWebView(config);

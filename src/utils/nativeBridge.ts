@@ -14,6 +14,7 @@ import type {
   AuthErrorPayload,
 } from '@/types/native';
 import { detectPlatform } from './webview';
+import { AVAILABLE_WEB_MOCK_BRIDGE } from '@/constants/native';
 
 // WebView 메시지 타입 정의
 export interface WebViewMessage {
@@ -72,7 +73,7 @@ export const addReceiveReactNativeMessageListener = (
   };
 };
 
-if (import.meta.env.MODE === 'development') {
+if (AVAILABLE_WEB_MOCK_BRIDGE) {
   // 개발모드에서 메시지 수신 리스너 등록
   addReceiveReactNativeMessageListener((event) => {
     console.log('Received from Native:', event);
