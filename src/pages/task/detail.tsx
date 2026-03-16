@@ -64,7 +64,7 @@ const TaskDetailPage = () => {
   const queryClient = useQueryClient();
   const taskId = Number(id);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const { isTaskCompleted, toggleTask } = useTutorialTaskStore();
+  const { isTaskCompleted } = useTutorialTaskStore();
 
   // 미로그인 사용자를 위한 특별 경로인지 확인 (mock 데이터 사용)
   const isTutorialPath = location.pathname.includes('/tutorial');
@@ -236,11 +236,11 @@ const TaskDetailPage = () => {
   };
 
   const handleComplete = () => {
-    // 미로그인 상태: 전역 스토어에 저장
-    if (shouldUseMockData) {
-      toggleTask('1');
+    if (!isAuthenticated) {
+      loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
       return;
     }
+
     // 로그인 상태: 튜토리얼 할 일도 완료 가능
     completeTask(
       { taskId },
