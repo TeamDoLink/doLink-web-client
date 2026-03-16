@@ -26,6 +26,7 @@ interface ArchiveBottomSheetProps {
   initialName?: string;
   initialCategory?: ArchiveCategory | null;
   onSubmit?: (payload: { name: string; category: ArchiveCategory }) => void;
+  onClose?: () => void;
 }
 
 const MAX_NAME_LENGTH = 20;
@@ -35,6 +36,7 @@ export const ArchiveBottomSheet = ({
   initialName = '',
   initialCategory = null,
   onSubmit,
+  onClose,
 }: ArchiveBottomSheetProps) => {
   const navigate = useNavigate();
   const preset = MODE_PRESET[mode];
@@ -54,11 +56,18 @@ export const ArchiveBottomSheet = ({
   };
 
   const handleClose = () => {
+    if (onClose) {
+      onClose();
+      return;
+    }
     navigate(-1);
   };
 
   return (
-    <div className='flex min-h-screen w-full items-end bg-black/60'>
+    <div
+      data-testid='bottom-sheet'
+      className='flex min-h-screen w-full items-end bg-black/60'
+    >
       <form
         onSubmit={handleSubmit}
         className='w-full rounded-t-[32px] bg-white px-6 pb-10'
