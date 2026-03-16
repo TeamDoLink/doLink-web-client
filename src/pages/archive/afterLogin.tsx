@@ -295,7 +295,11 @@ const ArchiveAfterLogin = () => {
                 WebkitOverflowScrolling: 'touch',
               }}
             >
-              <div className='flex gap-3 pt-2'>
+              <div
+                role='tablist'
+                aria-label='모음 카테고리'
+                className='flex gap-3 pt-2'
+              >
                 {ARCHIVE_CATEGORIES.map(({ key, label }) => (
                   <CategoryFilterButton
                     key={key}

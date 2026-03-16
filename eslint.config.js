@@ -7,7 +7,7 @@ import prettierConfig from 'eslint-config-prettier';
 import tailwindcss from 'eslint-plugin-tailwindcss';
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'e2e/test-results', 'e2e/playwright-report'] },
   {
     extends: [
       js.configs.recommended,

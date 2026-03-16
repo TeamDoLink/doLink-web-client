@@ -90,6 +90,7 @@ export const ArchiveBottomSheet = ({
 
         <div className='flex flex-col gap-8'>
           <ArchiveInput
+            id='archive-name'
             label='모음 이름'
             value={name}
             onChange={(event) => setName(event.target.value)}

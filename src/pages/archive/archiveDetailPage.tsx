@@ -604,11 +604,6 @@ const ArchiveDetailPage = () => {
     const grouped = new Map<string, Task[]>();
 
     filtered.forEach((link) => {
-      // 삭제된 항목: linkStates에 없으면 스킵 (API 모음용)
-      if (!isBeforeLoginArchive && !(link.taskId in linkStates)) {
-        return;
-      }
-
       // createdAt을 로컬 날짜로 변환하여 날짜만 추출 (yyyy-MM-dd)
       const date = new Date(link.createdAt);
       const year = date.getFullYear();
@@ -745,7 +740,7 @@ const ArchiveDetailPage = () => {
                 onShareClick={(taskId) => {
                   osShareTask(taskId);
                 }}
-                onEditClick={() => {
+                onEditClick={(taskId) => {
                   // 할 일 편집 버튼(연필 아이콘) 클릭 시
                   if (isBeforeLoginArchive) {
                     // 미로그인: 로그인 토스트
@@ -757,8 +752,10 @@ const ArchiveDetailPage = () => {
                     tutorialToast.showToast(
                       '기본 제공 할 일은 수정할 수 없어요'
                     );
+                  } else if (!taskId) {
+                    return;
                   } else {
-                    navigate(`${ROUTES.archiveEdit}/${collectionId}`);
+                    navigate(`${ROUTES.taskEdit}/${taskId}`);
                   }
                 }}
                 onDeleteClick={(taskId) => {

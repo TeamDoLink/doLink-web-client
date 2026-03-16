@@ -28,6 +28,7 @@ export default function TodoItem({
 
   return (
     <div
+      data-testid='task-item'
       role='button'
       tabIndex={0}
       onClick={handleCardClick}
@@ -53,7 +54,15 @@ export default function TodoItem({
       </div>
 
       {/* Checkbox */}
-      <button onClick={handleToggle} className='flex-shrink-0' type='button'>
+      <button
+        type='button'
+        role='checkbox'
+        aria-checked={checked}
+        aria-label={`${title} 완료 여부`}
+        data-testid='task-checkbox'
+        onClick={handleToggle}
+        className='flex-shrink-0'
+      >
         <CheckBox checked={checked} />
       </button>
     </div>

@@ -13,21 +13,11 @@ test.describe('DL_S05 할 일', () => {
   }) => {
     await authPage.goto('/task/create');
 
-    const titleInput = authPage.getByPlaceholder(/제목을 입력해 주세요/i);
-    if ((await titleInput.count()) === 0) {
-      test.skip();
-      return;
-    }
+    const titleInput = authPage.getByLabel('제목');
     await titleInput.fill('테스트 할 일');
 
     // X 버튼 또는 뒤로가기 버튼 클릭
-    const closeBtn = authPage
-      .getByRole('button', { name: /닫기|뒤로|back/i })
-      .first();
-    if ((await closeBtn.count()) === 0) {
-      test.skip();
-      return;
-    }
+    const closeBtn = authPage.getByRole('button', { name: /뒤로/i });
     await closeBtn.click();
 
     // 이탈 확인 팝업이 노출되어야 한다
@@ -48,18 +38,10 @@ test.describe('DL_S05 할 일', () => {
     await authPage.waitForLoadState('networkidle');
 
     const checkbox = authPage.getByRole('checkbox').first();
-    if ((await checkbox.count()) === 0) {
-      test.skip();
-      return;
-    }
     await checkbox.click();
 
     // 완료 모달 대기
     const modal = authPage.getByRole('dialog');
-    if ((await modal.count()) === 0) {
-      test.skip();
-      return;
-    }
     await expect(modal).toBeVisible();
 
     const doNotShowBtn = authPage.getByRole('button', {
@@ -84,32 +66,21 @@ test.describe('DL_S05 할 일', () => {
   }) => {
     await authPage.goto('/task/create');
 
-    const titleInput = authPage.getByPlaceholder(/제목을 입력해 주세요/i);
-    if ((await titleInput.count()) === 0) {
-      test.skip();
-      return;
-    }
+    const titleInput = authPage.getByLabel('제목');
     await titleInput.fill('임시저장 테스트');
+    await authPage.getByTestId('collection-chip').first().click();
 
     // 저장 버튼 클릭
-    const saveBtn = authPage.getByRole('button', { name: /저장|추가/i }).last();
-    if ((await saveBtn.count()) === 0) {
-      test.skip();
-      return;
-    }
+    const saveBtn = authPage.getByRole('button', { name: /추가하기/i });
     await saveBtn.click();
-    await authPage.waitForURL(/\//);
+    await expect(authPage).toHaveURL('/');
 
     // FAB [+] 버튼 클릭
-    const fabBtn = authPage.getByRole('button', { name: /\+|할 일 추가/i });
-    if ((await fabBtn.count()) === 0) {
-      test.skip();
-      return;
-    }
+    const fabBtn = authPage.getByRole('button', { name: /새 할 일 추가/i });
     await fabBtn.click();
 
     // 이전 임시저장 데이터가 없어야 한다 (빈 폼)
-    const inputAfter = authPage.getByPlaceholder(/제목을 입력해 주세요/i);
+    const inputAfter = authPage.getByLabel('제목');
     await expect(inputAfter).toHaveValue('');
   });
 
@@ -123,18 +94,12 @@ test.describe('DL_S05 할 일', () => {
     await authPage.waitForLoadState('networkidle');
 
     const archiveCard = authPage.getByTestId('archive-card').first();
-    if ((await archiveCard.count()) === 0) {
-      test.skip();
-      return;
-    }
     await archiveCard.click();
 
     const originalBtns = authPage.getByRole('button', { name: /원본/i });
+    await expect(originalBtns.first()).toBeVisible();
     const count = await originalBtns.count();
-    if (count === 0) {
-      test.skip();
-      return;
-    }
+    expect(count).toBeGreaterThan(0);
 
     for (let i = 0; i < count; i++) {
       const btn = originalBtns.nth(i);
@@ -146,9 +111,9 @@ test.describe('DL_S05 할 일', () => {
       );
       const isInvalid = await btn.evaluate((el) => {
         const parent = el.closest('[data-link]');
-        if (!parent) return false;
+        if (!parent) return true;
         const link = parent.getAttribute('data-link');
-        return !link || link === '' || link === 'undefined';
+        return !link || link.trim() === '' || link === 'undefined';
       });
       if (isInvalid) {
         expect(isDisabled).toBe(true);
@@ -166,18 +131,13 @@ test.describe('DL_S05 할 일', () => {
     await authPage.waitForLoadState('networkidle');
 
     const archiveCard = authPage.getByTestId('archive-card').first();
-    if ((await archiveCard.count()) === 0) {
-      test.skip();
-      return;
-    }
     await archiveCard.click();
 
-    const editBtn = authPage.getByRole('button', { name: /편집/i }).first();
-    if ((await editBtn.count()) === 0) {
-      test.skip();
-      return;
-    }
-    await editBtn.click();
+    await authPage
+      .getByRole('button', { name: /^편집$/i })
+      .first()
+      .click();
+    await authPage.getByTestId('task-edit-button').first().click();
 
     await expect(authPage).toHaveURL(/task\/edit/);
   });
@@ -192,20 +152,10 @@ test.describe('DL_S05 할 일', () => {
     await authPage.waitForLoadState('networkidle');
 
     const taskItem = authPage.getByTestId('task-item').first();
-    if ((await taskItem.count()) === 0) {
-      test.skip();
-      return;
-    }
     await taskItem.click();
     await authPage.waitForLoadState('networkidle');
 
     const thumbnail = authPage.getByTestId('task-thumbnail');
-    if ((await thumbnail.count()) === 0) {
-      test.skip();
-      return;
-    }
-
-    const isVisible = await thumbnail.isVisible();
-    expect(isVisible).toBe(true);
+    await expect(thumbnail).toBeVisible();
   });
 });

@@ -42,6 +42,8 @@ export const CollectionChipSelector = ({
         {displayedItems.map((item) => (
           <button
             key={item.id}
+            type='button'
+            data-testid='collection-chip'
             onClick={() => onSelect(item.id)}
             className={`rounded-[6px] border px-[12px] py-[8px] text-body-md ${
               selectedId === item.id
@@ -55,6 +57,8 @@ export const CollectionChipSelector = ({
 
         {hasMore && (
           <button
+            type='button'
+            data-testid='collection-chip-toggle'
             onClick={() => setIsExpanded(!isExpanded)}
             className={`rounded-[6px] px-2 py-2 text-body-xs text-grey-500`}
           >

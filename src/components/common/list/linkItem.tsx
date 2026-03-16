@@ -11,6 +11,7 @@ import {
 export type LinkItemProps = {
   title: string;
   subtitle: string;
+  link?: string | null;
   thumbnail?: string;
   checked?: boolean;
   isEditMode?: boolean;
@@ -39,6 +40,7 @@ export type LinkItemProps = {
 export default function LinkItem({
   title,
   subtitle,
+  link,
   thumbnail,
   checked = false,
   isEditMode = false,
@@ -70,6 +72,11 @@ export default function LinkItem({
   return (
     <div
       ref={itemRef}
+      data-testid='archive-task-item'
+      data-link={link ?? ''}
+      data-has-link={Boolean(
+        link && link.trim().length > 0 && !originalDisabled
+      )}
       className={`flex ${width} items-start gap-3 ${!isEditMode && onClick ? 'cursor-pointer' : ''}`}
       onClick={handleCardClick}
     >
@@ -131,6 +138,8 @@ export default function LinkItem({
           {/* Edit Button */}
           <button
             type='button'
+            data-testid='task-edit-button'
+            aria-label='할 일 편집'
             onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
               onEditClick?.();
@@ -141,6 +150,8 @@ export default function LinkItem({
           </button>
           {/* Delete Button */}
           <button
+            data-testid='task-delete-button'
+            aria-label='할 일 삭제'
             onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
               onDeleteClick?.();

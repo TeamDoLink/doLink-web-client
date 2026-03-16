@@ -355,6 +355,7 @@ const TaskDetailPage = () => {
         >
           {!shouldUseMockData && displayData?.thumbnailUrl && !imageError ? (
             <img
+              data-testid='task-thumbnail'
               src={displayData.thumbnailUrl}
               alt='task thumbnail'
               className='h-full w-full object-cover'
@@ -364,7 +365,12 @@ const TaskDetailPage = () => {
             />
           ) : (
             <div className='flex h-full w-full items-center justify-center'>
-              <img src={imgNoData} alt='no image' className='h-auto w-auto' />
+              <img
+                data-testid='task-thumbnail'
+                src={imgNoData}
+                alt='no image'
+                className='h-auto w-auto'
+              />
             </div>
           )}
         </div>
