@@ -68,6 +68,7 @@ export default function ClearableSearchInputField({
 
       <input
         type='text'
+        role='searchbox'
         value={value}
         onChange={handleChange}
         onFocus={handleFocus}
