@@ -6,9 +6,11 @@ import { InfiniteScroll } from '@/components/common/infiniteScroll';
 import { FloatingButton } from '@/components/common/button';
 import { SearchAppBar } from '@/components/common/appBar/searchAppBar';
 import {
+  ArchiveBottomSheet,
   CategoryFilterButton,
   ArchiveSummaryBar,
   type ArchiveCategoryKey,
+  type ArchiveSelectCategory,
 } from '@/components/archive';
 import { useBottomTabNavigation } from '@/hooks/useBottomTabNavigation';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
@@ -19,6 +21,7 @@ import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import {
   listAll1,
   listByCategory,
+  useCreateCollect,
   useDeleteCollect,
   useGetTotalCollectionCount,
   useGetCategoryCounts,
@@ -32,6 +35,7 @@ import type {
   ApiResponseCollectionCountResponse,
   ApiResponseListCollectionCategoryCountResponse,
   CollectionCategoryCountResponse,
+  CollectionCreateRequestCategory,
 } from '@/api/generated/models';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveCategoryKey[] = [
@@ -69,6 +73,7 @@ const ArchiveAfterLogin = () => {
   const [pendingDeleteArchiveId, setPendingDeleteArchiveId] = useState<
     number | null
   >(null);
+  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const tutorialToast = useToast();
   const { handleFloatingButtonClick, portalNode } = useTaskCreateAction();
 
@@ -138,6 +143,7 @@ const ArchiveAfterLogin = () => {
   );
 
   const { data: taskCountsData } = useGetTaskCountsForCollections();
+  const { mutate: createCollection } = useCreateCollect();
 
   const taskCountMap = useMemo(() => {
     const list =
@@ -222,7 +228,39 @@ const ArchiveAfterLogin = () => {
   };
 
   const handleClickAdd = () => {
-    navigate(ROUTES.archiveAdd);
+    setIsAddSheetOpen(true);
+  };
+
+  const handleCloseAddSheet = () => {
+    setIsAddSheetOpen(false);
+  };
+
+  const handleCreateArchive = (payload: {
+    name: string;
+    category: ArchiveSelectCategory;
+  }) => {
+    createCollection(
+      {
+        data: {
+          name: payload.name,
+          category: ARCHIVE_CATEGORY_LABEL[
+            payload.category
+          ] as CollectionCreateRequestCategory,
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['collections'] });
+          queryClient.invalidateQueries({
+            queryKey: ['/api/v1/collect/count'],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ['/api/v1/collect/category-counts'],
+          });
+          setIsAddSheetOpen(false);
+        },
+      }
+    );
   };
 
   const handleEdit = (id: number) => {
@@ -257,7 +295,11 @@ const ArchiveAfterLogin = () => {
                 WebkitOverflowScrolling: 'touch',
               }}
             >
-              <div className='flex gap-3 pt-2'>
+              <div
+                role='tablist'
+                aria-label='모음 카테고리'
+                className='flex gap-3 pt-2'
+              >
                 {ARCHIVE_CATEGORIES.map(({ key, label }) => (
                   <CategoryFilterButton
                     key={key}
@@ -331,6 +373,15 @@ const ArchiveAfterLogin = () => {
         className='fixed bottom-[104px] right-6 z-40'
       />
       {portalNode}
+
+      {isAddSheetOpen && (
+        <div className='fixed inset-0 z-modal-overlay'>
+          <ArchiveBottomSheet
+            onClose={handleCloseAddSheet}
+            onSubmit={handleCreateArchive}
+          />
+        </div>
+      )}
 
       {/* 바탭탭바 */}
       <TabBar.BottomTabBar value='archive' onChange={handleTabChange} />

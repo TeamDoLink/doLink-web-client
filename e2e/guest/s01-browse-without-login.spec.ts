@@ -23,22 +23,16 @@ test.describe('DL_S01 로그인 없이 둘러보기', () => {
   }) => {
     await guestPage.goto('/');
 
-    const checkbox = guestPage.getByRole('checkbox').first();
-    // 체크박스가 있는 경우에만 테스트 (기본 제공 할 일)
-    if ((await checkbox.count()) === 0) {
-      test.skip();
-      return;
-    }
+    const checkbox = guestPage.getByTestId('task-checkbox').first();
 
     await checkbox.click();
 
-    // 로그인 유도 팝업이 노출되어야 한다
     await expect(
-      guestPage.getByText(/로그인 후 간편하게|로그인하기/i)
+      guestPage.getByText('로그인 후 간편하게 DoLink를 이용해보세요.')
     ).toBeVisible();
 
     // 완료 처리가 되어선 안 된다 (checkbox가 checked 상태 X)
-    await expect(checkbox).not.toBeChecked();
+    await expect(checkbox).toHaveAttribute('aria-checked', 'false');
   });
 
   // -------------------------------------------------------
@@ -51,11 +45,6 @@ test.describe('DL_S01 로그인 없이 둘러보기', () => {
     await guestPage.goto('/task/detail/1');
 
     const completeBtn = guestPage.getByRole('button', { name: /완료하기/i });
-    if ((await completeBtn.count()) === 0) {
-      test.skip();
-      return;
-    }
-
     await completeBtn.click();
 
     await expect(
@@ -72,10 +61,6 @@ test.describe('DL_S01 로그인 없이 둘러보기', () => {
     await guestPage.goto('/');
 
     const searchBtn = guestPage.getByRole('button', { name: /검색/i });
-    if ((await searchBtn.count()) === 0) {
-      test.skip();
-      return;
-    }
     await searchBtn.click();
 
     await expect(guestPage).toHaveURL(/search/);
@@ -91,11 +76,6 @@ test.describe('DL_S01 로그인 없이 둘러보기', () => {
     await guestPage.goto('/');
 
     const taskItem = guestPage.getByTestId('task-item').first();
-    if ((await taskItem.count()) === 0) {
-      test.skip();
-      return;
-    }
-
     await taskItem.click();
     await expect(guestPage).toHaveURL(/task\/detail/);
   });
@@ -108,11 +88,7 @@ test.describe('DL_S01 로그인 없이 둘러보기', () => {
   }) => {
     await guestPage.goto('/archives/tutorial');
 
-    const archiveNavBtn = guestPage.getByRole('link', { name: /모음/i });
-    if ((await archiveNavBtn.count()) === 0) {
-      test.skip();
-      return;
-    }
+    const archiveNavBtn = guestPage.getByTestId('bottom-tab-archive');
 
     await archiveNavBtn.click();
     await expect(guestPage).toHaveURL('/archives');
@@ -126,12 +102,11 @@ test.describe('DL_S01 로그인 없이 둘러보기', () => {
   }) => {
     await guestPage.goto('/');
 
+    await guestPage
+      .getByRole('button', { name: /^더보기$/i })
+      .first()
+      .click();
     const deleteBtn = guestPage.getByRole('button', { name: /삭제/i }).first();
-    if ((await deleteBtn.count()) === 0) {
-      test.skip();
-      return;
-    }
-
     await deleteBtn.click();
 
     const loginBtn = guestPage.getByRole('button', { name: /로그인/i });

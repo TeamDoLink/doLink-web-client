@@ -70,6 +70,7 @@ export const BottomTabBar = ({
     // 이미 활성화된 탭을 다시 누르면 스크롤을 맨 위로 이동
     if (key === activeKey) {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      onChange?.(key);
       return;
     }
 
@@ -86,6 +87,8 @@ export const BottomTabBar = ({
             <li key={key}>
               <button
                 type='button'
+                data-testid={`bottom-tab-${key}`}
+                aria-current={active ? 'page' : undefined}
                 onClick={() => handleSelect(key)}
                 className='flex flex-col items-center gap-1'
               >

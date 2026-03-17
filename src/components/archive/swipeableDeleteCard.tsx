@@ -316,6 +316,7 @@ export const SwipeableDeleteCard = ({
             <List.LinkItem
               key={link.id}
               title={link.title} // 링크 제목
+              link={tasks[index].link}
               subtitle={link.subtitle} // 링크 부제목 (URL 등)
               thumbnail={link.thumbnail} // 썸네일 이미지
               checked={linkStates[link.id]} // 체크박스 상태
@@ -328,7 +329,9 @@ export const SwipeableDeleteCard = ({
               onDeleteClick={() => onDeleteClick(link.id)} // 삭제 클릭 핸들러
               width='w-full' // 전체 너비 사용
               actionDisabled={capsuleDisabled}
-              originalDisabled={tasks[index].inout} // inout이 true면 내부 추가 링크이므로 원본 버튼 비활성화
+              originalDisabled={
+                tasks[index].inout || !tasks[index].link?.trim()
+              }
             />
           ))}
         </div>

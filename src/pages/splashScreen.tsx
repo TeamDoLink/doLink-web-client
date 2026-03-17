@@ -30,6 +30,7 @@ const SplashScreen = ({ onFinish, duration = 1500 }: SplashScreenProps) => {
 
   return (
     <div
+      data-testid='splash-screen'
       className={`fixed inset-0 z-[9999] flex items-center justify-center bg-point transition-opacity duration-700 ${
         fadeOut ? 'opacity-0' : 'opacity-100'
       }`}

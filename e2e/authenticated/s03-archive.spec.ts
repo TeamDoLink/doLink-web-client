@@ -13,11 +13,7 @@ test.describe('DL_S03 모음', () => {
   }) => {
     await authPage.goto('/archives/tutorial');
 
-    const archiveTab = authPage.getByRole('link', { name: /모음/i });
-    if ((await archiveTab.count()) === 0) {
-      test.skip();
-      return;
-    }
+    const archiveTab = authPage.getByTestId('bottom-tab-archive');
 
     await archiveTab.click();
     await expect(authPage).toHaveURL('/archives');
@@ -33,10 +29,6 @@ test.describe('DL_S03 모음', () => {
     await authPage.waitForLoadState('networkidle');
 
     const allTab = authPage.getByRole('tab', { name: /전체/i });
-    if ((await allTab.count()) === 0) {
-      test.skip();
-      return;
-    }
     await allTab.click();
 
     // 실제 모음 카드 수를 세어 전체 카운트와 비교
@@ -57,23 +49,12 @@ test.describe('DL_S03 모음', () => {
   }) => {
     await authPage.goto('/archives');
 
-    const addBtn = authPage.getByRole('button', { name: /모음 추가/i });
-    if ((await addBtn.count()) === 0) {
-      test.skip();
-      return;
-    }
+    const addBtn = authPage.getByTestId('archive-add-button');
     await addBtn.click();
 
     // 바텀시트가 열려야 한다
     const bottomSheet = authPage.getByTestId('bottom-sheet');
-    if ((await bottomSheet.count()) === 0) {
-      // fallback: 제목 입력 필드로 확인
-      await expect(
-        authPage.getByPlaceholder(/제목을 입력해 주세요/i)
-      ).toBeVisible();
-    } else {
-      await expect(bottomSheet).toBeVisible();
-    }
+    await expect(bottomSheet).toBeVisible();
 
     // URL이 변경되지 않아야 한다 (별도 화면이 아닌 바텀시트)
     await expect(authPage).toHaveURL('/archives');
@@ -87,11 +68,7 @@ test.describe('DL_S03 모음', () => {
   }) => {
     await authPage.goto('/archives/add');
 
-    const titleInput = authPage.getByPlaceholder(/제목을 입력해 주세요/i);
-    if ((await titleInput.count()) === 0) {
-      test.skip();
-      return;
-    }
+    const titleInput = authPage.getByTestId('archive-name-input');
 
     const longText = 'a'.repeat(25);
     await titleInput.fill(longText);
@@ -110,10 +87,6 @@ test.describe('DL_S03 모음', () => {
     await authPage.goto('/archives/add');
 
     const selfDevBtn = authPage.getByRole('button', { name: /자기개발/i });
-    if ((await selfDevBtn.count()) === 0) {
-      test.skip();
-      return;
-    }
     await expect(selfDevBtn).toBeVisible();
 
     const isOneLine = await selfDevBtn.evaluate((el) => {
@@ -133,19 +106,13 @@ test.describe('DL_S03 모음', () => {
 
     // 첫 번째 모음 상세 진입
     const archiveCard = authPage.getByTestId('archive-card').first();
-    if ((await archiveCard.count()) === 0) {
-      test.skip();
-      return;
-    }
     await archiveCard.click();
     await authPage.waitForLoadState('networkidle');
 
     const originalBtns = authPage.getByRole('button', { name: /원본/i });
+    await expect(originalBtns.first()).toBeVisible();
     const count = await originalBtns.count();
-    if (count === 0) {
-      test.skip();
-      return;
-    }
+    expect(count).toBeGreaterThan(0);
 
     // 각 원본 버튼의 disabled 상태 확인
     for (let i = 0; i < count; i++) {
@@ -156,9 +123,10 @@ test.describe('DL_S03 모음', () => {
           (el as HTMLButtonElement).disabled ||
           el.getAttribute('aria-disabled') === 'true'
       );
-      const hasLink = await btn
-        .locator('closest [data-has-link="true"]')
-        .count();
+      const hasLink = await btn.evaluate((el) => {
+        const parent = el.closest('[data-has-link]');
+        return parent?.getAttribute('data-has-link') === 'true';
+      });
       if (!hasLink) {
         expect(isDisabled).toBe(true);
       }
@@ -175,18 +143,13 @@ test.describe('DL_S03 모음', () => {
     await authPage.waitForLoadState('networkidle');
 
     const archiveCard = authPage.getByTestId('archive-card').first();
-    if ((await archiveCard.count()) === 0) {
-      test.skip();
-      return;
-    }
     await archiveCard.click();
 
-    const editBtn = authPage.getByRole('button', { name: /편집/i }).first();
-    if ((await editBtn.count()) === 0) {
-      test.skip();
-      return;
-    }
-    await editBtn.click();
+    await authPage
+      .getByRole('button', { name: /^편집$/i })
+      .first()
+      .click();
+    await authPage.getByTestId('task-edit-button').first().click();
 
     // task/edit 으로 이동해야 한다 (archives/edit 이 아님)
     await expect(authPage).toHaveURL(/task\/edit/);

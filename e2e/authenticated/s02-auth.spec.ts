@@ -14,15 +14,7 @@ test.describe('DL_S02 로그인 / 설정', () => {
     await authPage.goto('/');
     await authPage.waitForLoadState('networkidle');
 
-    // 개인화 메시지 영역이 있어야 한다
     const greeting = authPage.getByTestId('personalized-message');
-    if ((await greeting.count()) === 0) {
-      // fallback: 텍스트 기반 탐색
-      const greetingText =
-        authPage.getByText(/만나서 반가워요|안녕하세요|호기심/i);
-      await expect(greetingText).toBeVisible();
-      return;
-    }
     await expect(greeting).toBeVisible();
   });
 
@@ -36,11 +28,6 @@ test.describe('DL_S02 로그인 / 설정', () => {
     await authPage.waitForLoadState('networkidle');
 
     const profileImg = authPage.getByRole('img', { name: /프로필/i });
-    if ((await profileImg.count()) === 0) {
-      test.skip();
-      return;
-    }
-
     // 이미지가 정상적으로 로드됐는지 확인 (naturalWidth > 0)
     const isLoaded = await profileImg.evaluate(
       (el) => (el as HTMLImageElement).naturalWidth > 0
@@ -82,11 +69,7 @@ test.describe('DL_S02 로그인 / 설정', () => {
     await authPage.goto('/settings/withdrawal');
 
     // '기타' 옵션 선택
-    const etcOption = authPage.getByText(/기타/i).first();
-    if ((await etcOption.count()) === 0) {
-      test.skip();
-      return;
-    }
+    const etcOption = authPage.getByRole('radio', { name: /기타/i });
     await etcOption.click();
 
     const sendBtn = authPage.getByTestId('submit-button');
@@ -102,10 +85,6 @@ test.describe('DL_S02 로그인 / 설정', () => {
     await authPage.goto('/settings/withdrawal');
 
     const sendBtn = authPage.getByTestId('submit-button');
-    if ((await sendBtn.count()) === 0) {
-      test.skip();
-      return;
-    }
     await expect(sendBtn).toBeVisible();
 
     const lineCount = await sendBtn.evaluate((el) => {
