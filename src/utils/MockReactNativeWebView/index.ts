@@ -16,6 +16,10 @@ interface MockConfig {
   mockAccessToken?: string;
   /** link:canOpen 응답 시 사용할 기본값 */
   defaultCanOpen?: boolean;
+  /** app:getInfo 응답 시 사용할 version */
+  mockAppVersion?: string;
+  /** app:getInfo 응답 시 사용할 runtimeVersion */
+  mockRuntimeVersion?: string;
   /** 응답 지연 시간 (ms) */
   responseDelay?: number;
 }
@@ -23,6 +27,8 @@ interface MockConfig {
 const DEFAULT_CONFIG: Required<MockConfig> = {
   mockAccessToken: 'mock-access-token-for-dev',
   defaultCanOpen: true,
+  mockAppVersion: '0.0.0-dev',
+  mockRuntimeVersion: '0.0.0-dev',
   responseDelay: 300,
 };
 
@@ -177,6 +183,28 @@ class MockReactNativeWebView {
           '[MockReactNativeWebView] os:share 수신 (응답 없음):',
           payload
         );
+        break;
+
+      case 'app:getInfo':
+        (async () => {
+          await sleep(responseDelay);
+
+          const e2eAppVersion = import.meta.env.VITE_E2E_APP_VERSION as
+            | string
+            | undefined;
+          const e2eRuntimeVersion = import.meta.env.VITE_E2E_RUNTIME_VERSION as
+            | string
+            | undefined;
+
+          const version = e2eAppVersion || this.config.mockAppVersion;
+          const runtimeVersion =
+            e2eRuntimeVersion || this.config.mockRuntimeVersion;
+
+          dispatchBridgeResponse({
+            type: 'app:info',
+            payload: { version, runtimeVersion },
+          });
+        })();
         break;
 
       case 'SAVE_DRAFT': {
