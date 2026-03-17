@@ -11,7 +11,11 @@
     "preview": "vite preview",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "prepare": "husky",
-    "generate:api": "orval --config orval.config.js"
+    "generate:api": "orval --config orval.config.js",
+    "test:e2e": "dotenv -e .env.e2e -- playwright test",
+    "test:e2e:ui": "dotenv -e .env.e2e -- playwright test --ui",
+    "test:e2e:headed": "dotenv -e .env.e2e -- playwright test --headed",
+    "test:e2e:report": "playwright show-report e2e/playwright-report"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -33,14 +37,15 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "orval": "^8.2.0",
     "@eslint/js": "^9.36.0",
+    "@playwright/test": "^1.58.2",
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@types/semver": "^7.7.1",
     "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.21",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -49,6 +54,7 @@
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.11",
+    "orval": "^8.2.0",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.10",

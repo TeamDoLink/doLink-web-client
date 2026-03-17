@@ -105,6 +105,7 @@ const WithdrawalReasonPage = () => {
 
       <footer className='px-5 pb-[calc(24px+env(safe-area-inset-bottom))] pt-4'>
         <Button.CtaButton
+          data-testid='submit-button'
           type='button'
           disabled={!isSubmittable}
           onClick={handleSubmit}
