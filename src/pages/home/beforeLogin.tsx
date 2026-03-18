@@ -14,7 +14,6 @@ import {
 import { ROUTES } from '@/constants/routes';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import { formatRelativeDateLabel } from '@/utils/date';
-import { useTutorialTaskStore } from '@/stores/useTutorialTaskStore';
 
 /**
  * 미로그인 홈화면 전용 로그인 버튼
@@ -40,9 +39,6 @@ const HomeBeforeLogin = () => {
   const [toastType, setToastType] = useState<'login' | 'defaultArchive' | null>(
     null
   );
-  const [showCompleteModal, setShowCompleteModal] = useState(false);
-  const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
-  const { isTaskCompleted, toggleTask } = useTutorialTaskStore();
   const toastTimerRef = useRef<number | null>(null);
   const todoItems = BEFORE_LOGIN_TODO();
   const archiveItems = BEFORE_LOGIN_ARCHIVE();
@@ -78,9 +74,8 @@ const HomeBeforeLogin = () => {
   };
 
   const handleTodoCheckbox = (id: string, checked: boolean) => {
-    toggleTask(id);
-    if (checked && !suppressCompleteModal) {
-      setShowCompleteModal(true);
+    if (id && checked) {
+      triggerLoginToast();
     }
   };
 
@@ -97,7 +92,10 @@ const HomeBeforeLogin = () => {
   };
 
   return (
-    <div className='relative flex min-h-screen flex-col'>
+    <div
+      data-testid='home-before-login'
+      className='relative flex min-h-screen flex-col'
+    >
       <Background.GradientBackground className='flex min-h-0 flex-1 flex-col'>
         <HomeAppBar onClickSearch={handleClickSearch} />
 
@@ -125,7 +123,7 @@ const HomeBeforeLogin = () => {
                     key={id}
                     title={title}
                     subtitle={`${formatRelativeDateLabel(createdAt)} · ${platform}`}
-                    checked={isTaskCompleted(id)}
+                    checked={false}
                     onChange={(newChecked) =>
                       handleTodoCheckbox(id, newChecked)
                     }
@@ -171,26 +169,6 @@ const HomeBeforeLogin = () => {
               onClose={() => setShowToast(false)}
             />
           </div>
-        )}
-
-        {/* 완료 모달 */}
-        {showCompleteModal && (
-          <FeedBack.ModalLayout
-            open={showCompleteModal}
-            onClose={() => setShowCompleteModal(false)}
-          >
-            <FeedBack.AlertDialog
-              title='할 일을 완료했어요'
-              subtitle='완료한 일들은 해당 모음에서 확인할 수 있어요.'
-              primaryLabel='확인'
-              secondaryLabel='다시 보지 않기'
-              onPrimary={() => setShowCompleteModal(false)}
-              onSecondary={() => {
-                setSuppressCompleteModal(true);
-                setShowCompleteModal(false);
-              }}
-            />
-          </FeedBack.ModalLayout>
         )}
 
         {/* 하단 고정 버튼 */}

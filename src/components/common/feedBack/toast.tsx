@@ -20,7 +20,7 @@ export default function Toast({
   return (
     <div className='flex w-[335px] items-center justify-between rounded-full bg-black/70 px-5 py-2 shadow-lg backdrop-blur-sm'>
       {/* Message Text */}
-      <p className='text-body-xs text-white'>{message}</p>
+      <p className='whitespace-pre-line text-body-xs text-white'>{message}</p>
 
       {/* Action Button */}
       <button

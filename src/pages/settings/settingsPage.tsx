@@ -20,6 +20,7 @@ import { fetchAppVersionInfo } from '@/api/appVersion';
 import { isLatestVersion } from '@/utils/versionCompare';
 import { openExternalLink } from '@/utils/openExternalLink';
 import { sendAuthLogout } from '@/utils/nativeBridge';
+import { useAppInfoStore } from '@/stores/useAppInfoStore';
 
 const SettingsPage = () => {
   const { handleTabChange } = useBottomTabNavigation();
@@ -38,6 +39,8 @@ const SettingsPage = () => {
   const memberName =
     userResponse?.nickname ?? userResponse?.socialName ?? '사용자';
   const profileImage = userResponse?.profileImageUrl;
+  const appVersion = useAppInfoStore((s) => s.version);
+  const runtimeVersion = useAppInfoStore((s) => s.runtimeVersion);
   const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [versionFetchState, setVersionFetchState] = useState<
     'loading' | 'success' | 'error'
@@ -69,7 +72,8 @@ const SettingsPage = () => {
     };
   }, []);
 
-  const versionLabel = `버전 ${APP_VERSION}`;
+  const displayedAppVersion = appVersion ?? APP_VERSION;
+  const versionLabel = `버전 ${displayedAppVersion}`;
   let versionRightText = '확인 불가';
 
   if (versionFetchState === 'loading') {
@@ -77,7 +81,7 @@ const SettingsPage = () => {
   } else if (versionFetchState === 'error') {
     versionRightText = '확인 불가';
   } else if (latestVersion) {
-    const latestCheck = isLatestVersion(APP_VERSION, latestVersion);
+    const latestCheck = isLatestVersion(displayedAppVersion, latestVersion);
     versionRightText =
       latestCheck === null
         ? '확인 불가'
@@ -175,6 +179,13 @@ const SettingsPage = () => {
               leftText={versionLabel}
               rightText={versionRightText}
               showArrow={false}
+              data-testid='settings-app-version'
+            />
+            <SettingMenuItem
+              leftText='runtimeVersion'
+              rightText={runtimeVersion ?? '-'}
+              showArrow={false}
+              data-testid='settings-runtime-version'
             />
           </div>
         </div>

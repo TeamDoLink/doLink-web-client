@@ -47,6 +47,7 @@ import careerIcon from '@/assets/icons/home/career.svg';
 import studyIcon from '@/assets/icons/home/study.svg';
 import tipsIcon from '@/assets/icons/home/tips.svg';
 import etcIcon from '@/assets/icons/home/etc.svg';
+import nodataIcon from '@/assets/icons/home/nodata.svg';
 import defaultIcon from '@/assets/icons/home/home2.svg';
 
 // Korean category label → English key 역매핑
@@ -86,7 +87,7 @@ const getCategoryGreeting = (categoryKorean: string | null | undefined) => {
 // 카테고리별 아이콘 매핑
 const getCategoryIcon = (categoryKorean: string | null | undefined) => {
   if (!categoryKorean) {
-    return defaultIcon;
+    return nodataIcon;
   }
 
   const iconMap: Record<string, string> = {
@@ -109,6 +110,8 @@ const HomeAfterLogin = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { handleTabChange } = useBottomTabNavigation();
+  const BASIC_ITEM_COMPLETE_BLOCK_MESSAGE =
+    '기본 항목은 완료할 수 없어요.\n새로 추가한 항목만 완료할 수 있어요.';
   const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
   const [todoOverrides, setTodoOverrides] = useState<Record<string, boolean>>(
     {}
@@ -156,11 +159,17 @@ const HomeAfterLogin = () => {
 
   // 카테고리 기반 문구 생성
   const categoryGreeting = useMemo(() => {
+    if ((mostTasksCategory?.taskCount ?? 0) === 0) {
+      return getCategoryGreeting(null);
+    }
     return getCategoryGreeting(mostTasksCategory?.categoryKorean);
   }, [mostTasksCategory]);
 
   // 카테고리 기반 아이콘 생성
   const categoryIcon = useMemo(() => {
+    if ((mostTasksCategory?.taskCount ?? 0) === 0) {
+      return getCategoryIcon(null);
+    }
     return getCategoryIcon(mostTasksCategory?.categoryKorean);
   }, [mostTasksCategory]);
 
@@ -191,6 +200,14 @@ const HomeAfterLogin = () => {
   }, [archiveContent]);
 
   const handleToggleTodo = (id: string, nextChecked: boolean) => {
+    const targetTask = recentTasks.find(
+      (task) => String(task.taskId ?? 0) === id
+    );
+    if (targetTask?.isTutorial) {
+      tutorialToast.showToast(BASIC_ITEM_COMPLETE_BLOCK_MESSAGE);
+      return;
+    }
+
     setTodoOverrides((prev) => ({ ...prev, [id]: nextChecked }));
     completeTask(
       { taskId: Number(id) },

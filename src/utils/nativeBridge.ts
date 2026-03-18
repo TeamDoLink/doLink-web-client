@@ -15,6 +15,7 @@ import type {
 } from '@/types/native';
 import { detectPlatform } from './webview';
 import { AVAILABLE_WEB_MOCK_BRIDGE } from '@/constants/native';
+import { useAppInfoStore } from '@/stores/useAppInfoStore';
 
 // WebView 메시지 타입 정의
 export interface WebViewMessage {
@@ -146,6 +147,52 @@ export const addTypedMessageListener = <T = any>(
   };
 
   return addMessageListener(messageHandler);
+};
+
+// ============================================
+// App info utilities
+// ============================================
+
+let isAppInfoBridgeInitialized = false;
+
+export type AppInfoMessagePayload = {
+  version: string;
+  runtimeVersion: string;
+};
+
+/**
+ * Native에 앱 정보 요청(app:getInfo)을 전송합니다.
+ */
+export const sendAppInfoRequest = (): void => {
+  sendMessageToRN({ type: 'app:getInfo', payload: {} });
+};
+
+/**
+ * app:info 수신 리스너를 1회 등록하고, 즉시 app:getInfo를 요청합니다.
+ *
+ * - 개발 환경에서는 MockReactNativeWebView가 응답을 만들어줍니다.
+ * - RN WebView가 없는 환경에서는 경고만 찍고 종료합니다.
+ */
+export const initAppInfoBridge = (): void => {
+  if (isAppInfoBridgeInitialized) return;
+  isAppInfoBridgeInitialized = true;
+
+  addTypedMessageListener<AppInfoMessagePayload>('app:info', (payload) => {
+    if (
+      !payload ||
+      typeof payload.version !== 'string' ||
+      typeof payload.runtimeVersion !== 'string'
+    ) {
+      return;
+    }
+
+    useAppInfoStore.getState().setAppInfo({
+      version: payload.version,
+      runtimeVersion: payload.runtimeVersion,
+    });
+  });
+
+  sendAppInfoRequest();
 };
 
 // Window 타입 확장

@@ -1,6 +1,7 @@
 import type { ChangeEventHandler } from 'react';
 
 interface ArchiveInputProps {
+  id?: string;
   label: string;
   value: string;
   onChange: ChangeEventHandler<HTMLInputElement>;
@@ -13,6 +14,7 @@ interface ArchiveInputProps {
  * 레이블과 길이 카운터를 함께 표시
  */
 export const ArchiveInput = ({
+  id = 'archive-name',
   label,
   value,
   onChange,
@@ -26,7 +28,9 @@ export const ArchiveInput = ({
   return (
     <div className='flex flex-col'>
       <div className='flex items-center justify-between'>
-        <span className='text-body-xl text-black'>{label}</span>
+        <label htmlFor={id} className='text-body-xl text-black'>
+          {label}
+        </label>
         {counter && (
           <span
             className={`text-caption-sm ${
@@ -39,6 +43,9 @@ export const ArchiveInput = ({
       </div>
 
       <input
+        id={id}
+        data-testid='archive-name-input'
+        aria-label={label}
         type='text'
         value={value}
         onChange={onChange}

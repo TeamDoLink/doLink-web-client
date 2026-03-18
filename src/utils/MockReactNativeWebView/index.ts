@@ -16,6 +16,10 @@ interface MockConfig {
   mockAccessToken?: string;
   /** link:canOpen 응답 시 사용할 기본값 */
   defaultCanOpen?: boolean;
+  /** app:getInfo 응답 시 사용할 version */
+  mockAppVersion?: string;
+  /** app:getInfo 응답 시 사용할 runtimeVersion */
+  mockRuntimeVersion?: string;
   /** 응답 지연 시간 (ms) */
   responseDelay?: number;
 }
@@ -23,10 +27,30 @@ interface MockConfig {
 const DEFAULT_CONFIG: Required<MockConfig> = {
   mockAccessToken: 'mock-access-token-for-dev',
   defaultCanOpen: true,
+  mockAppVersion: '0.0.0-dev',
+  mockRuntimeVersion: '0.0.0-dev',
   responseDelay: 300,
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getDraftPayload = (
+  payload: unknown
+): { key: string; data?: unknown } | null => {
+  if (typeof payload !== 'object' || payload === null) {
+    return null;
+  }
+
+  const draftPayload = payload as { key?: unknown; data?: unknown };
+  if (typeof draftPayload.key !== 'string' || draftPayload.key.length === 0) {
+    return null;
+  }
+
+  return {
+    key: draftPayload.key,
+    data: draftPayload.data,
+  };
+};
 
 // nativeBridge.ts 의 platformBrowser 와 동일한 기준 사용
 const platformBrowser: EventTarget =
@@ -160,6 +184,133 @@ class MockReactNativeWebView {
           payload
         );
         break;
+
+      case 'app:getInfo':
+        (async () => {
+          await sleep(responseDelay);
+
+          const e2eAppVersion = import.meta.env.VITE_E2E_APP_VERSION as
+            | string
+            | undefined;
+          const e2eRuntimeVersion = import.meta.env.VITE_E2E_RUNTIME_VERSION as
+            | string
+            | undefined;
+
+          const version = e2eAppVersion || this.config.mockAppVersion;
+          const runtimeVersion =
+            e2eRuntimeVersion || this.config.mockRuntimeVersion;
+
+          dispatchBridgeResponse({
+            type: 'app:info',
+            payload: { version, runtimeVersion },
+          });
+        })();
+        break;
+
+      case 'SAVE_DRAFT': {
+        const draftPayload = getDraftPayload(payload);
+
+        (async () => {
+          await sleep(responseDelay);
+
+          if (!draftPayload) {
+            dispatchBridgeResponse({
+              type: 'SAVE_DRAFT',
+              success: false,
+              error: 'Invalid draft payload',
+            });
+            return;
+          }
+
+          try {
+            window.localStorage.setItem(
+              draftPayload.key,
+              JSON.stringify(draftPayload.data ?? null)
+            );
+            dispatchBridgeResponse({
+              type: 'SAVE_DRAFT',
+              success: true,
+            });
+          } catch (error: unknown) {
+            dispatchBridgeResponse({
+              type: 'SAVE_DRAFT',
+              success: false,
+              error:
+                error instanceof Error ? error.message : 'Failed to save draft',
+            });
+          }
+        })();
+        break;
+      }
+
+      case 'LOAD_DRAFT': {
+        const draftPayload = getDraftPayload(payload);
+
+        (async () => {
+          await sleep(responseDelay);
+
+          if (!draftPayload) {
+            dispatchBridgeResponse({
+              type: 'LOAD_DRAFT',
+              success: false,
+              error: 'Invalid draft payload',
+            });
+            return;
+          }
+
+          try {
+            const rawDraft = window.localStorage.getItem(draftPayload.key);
+            dispatchBridgeResponse({
+              type: 'LOAD_DRAFT',
+              success: true,
+              data: rawDraft ? JSON.parse(rawDraft) : null,
+            });
+          } catch (error: unknown) {
+            dispatchBridgeResponse({
+              type: 'LOAD_DRAFT',
+              success: false,
+              error:
+                error instanceof Error ? error.message : 'Failed to load draft',
+            });
+          }
+        })();
+        break;
+      }
+
+      case 'DELETE_DRAFT': {
+        const draftPayload = getDraftPayload(payload);
+
+        (async () => {
+          await sleep(responseDelay);
+
+          if (!draftPayload) {
+            dispatchBridgeResponse({
+              type: 'DELETE_DRAFT',
+              success: false,
+              error: 'Invalid draft payload',
+            });
+            return;
+          }
+
+          try {
+            window.localStorage.removeItem(draftPayload.key);
+            dispatchBridgeResponse({
+              type: 'DELETE_DRAFT',
+              success: true,
+            });
+          } catch (error: unknown) {
+            dispatchBridgeResponse({
+              type: 'DELETE_DRAFT',
+              success: false,
+              error:
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to delete draft',
+            });
+          }
+        })();
+        break;
+      }
 
       default:
         console.warn(

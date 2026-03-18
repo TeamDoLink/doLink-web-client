@@ -102,6 +102,8 @@ export const CategoryFilterButton = ({
   return (
     <button
       type='button'
+      role='tab'
+      aria-selected={selected}
       className={`mb-4 flex w-14 shrink-0 flex-col items-center justify-start gap-2 bg-transparent ${
         className ? ` ${className}` : ''
       }`}

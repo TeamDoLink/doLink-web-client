@@ -99,6 +99,17 @@ export default function ArchiveCard({
     onClick();
   };
 
+  const handleCardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!onClick) {
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleCardClick();
+    }
+  };
+
   // 항상 4개의 슬롯을 생성 (이미지가 있으면 표시, 없으면 배경만)
   const slots = Array.from({ length: 4 }, (_, index) => images[index]);
   const displayType = isOpen ? 'edit' : type;
@@ -106,8 +117,12 @@ export default function ArchiveCard({
   return (
     <div
       ref={cardRef}
+      data-testid='archive-card'
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
       className={`flex ${width} items-start gap-3 rounded-xl bg-white p-3 pl-3 pr-4 shadow-sm`}
       onClick={onClick ? handleCardClick : undefined}
+      onKeyDown={onClick ? handleCardKeyDown : undefined}
     >
       <div className='flex min-h-0 min-w-0 flex-1 items-center gap-4'>
         <div className='grid size-[60px] shrink-0 grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden rounded-[9.6px]'>
@@ -139,6 +154,8 @@ export default function ArchiveCard({
 
       {displayType === 'default' ? (
         <button
+          type='button'
+          aria-label='더보기'
           onClick={(event) => {
             event.stopPropagation();
             handleMoreClick();
@@ -150,6 +167,8 @@ export default function ArchiveCard({
       ) : (
         <div className='flex flex-shrink-0 items-center gap-2.5 pt-[7px]'>
           <button
+            type='button'
+            aria-label='편집'
             onClick={(event) => {
               event.stopPropagation();
               onEditClick?.();
@@ -159,6 +178,8 @@ export default function ArchiveCard({
             <img alt='edit' className='h-5 w-5' src={imgEditIcon} />
           </button>
           <button
+            type='button'
+            aria-label='삭제'
             onClick={(event) => {
               event.stopPropagation();
               onDeleteClick?.();

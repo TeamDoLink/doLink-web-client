@@ -90,6 +90,15 @@ export interface NavigateBackExitMessage {
 }
 
 // ============================================
+// App Info Message Types
+// ============================================
+
+export interface AppInfoPayload {
+  version: string;
+  runtimeVersion: string;
+}
+
+// ============================================
 // Message Type Union
 // ============================================
 
@@ -102,7 +111,8 @@ export type WebToNativeMessage =
   | { type: 'os:share'; payload: OsSharePayload }
   | NavigateBackExitMessage
   | { type: 'auth:login'; payload: Record<string, never> }
-  | { type: 'auth:logout'; payload: Record<string, never> };
+  | { type: 'auth:logout'; payload: Record<string, never> }
+  | { type: 'app:getInfo'; payload: Record<string, never> };
 
 /**
  * All possible messages from Native to Web
@@ -115,7 +125,8 @@ export type NativeToWebMessage =
   | NavigateBackMessage
   | { type: 'auth:token'; payload: AuthTokenPayload }
   | { type: 'auth:login'; payload: AuthTokenPayload }
-  | { type: 'auth:error'; payload: AuthErrorPayload };
+  | { type: 'auth:error'; payload: AuthErrorPayload }
+  | { type: 'app:info'; payload: AppInfoPayload };
 
 export interface ReactNativeWebView {
   postMessage: (message: string) => void;

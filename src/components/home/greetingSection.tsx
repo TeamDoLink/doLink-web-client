@@ -14,7 +14,10 @@ export const GreetingSection = ({
   categoryIcon = heroIllustration,
 }: GreetingSectionProps) => {
   return (
-    <section className='flex items-center justify-between'>
+    <section
+      data-testid='personalized-message'
+      className='flex items-center justify-between'
+    >
       {/* 문구 */}
       <div className='flex flex-col gap-1'>
         <h1 className='text-body-lg text-grey-600'>{mainGreeting}</h1>

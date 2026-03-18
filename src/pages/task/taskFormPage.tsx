@@ -17,6 +17,7 @@ import type {
   ApiResponseListCollectionSimpleResponse,
   ApiResponseTaskResponse,
 } from '@/api/generated/models';
+import { ROUTES } from '@/constants/routes';
 import { isValidUrl } from '@/utils/validation';
 
 // 임시저장 키
@@ -46,6 +47,7 @@ function TaskFormPage() {
       ).map((item) => ({
         id: String(item.collectionId),
         label: item.name ?? '',
+        disabled: item.name?.includes('두링크(DoLink) 튜토리얼') ?? false,
       })),
     [collectionsData]
   );
@@ -69,6 +71,17 @@ function TaskFormPage() {
   const [linkValue, setLinkValue] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+
+  const navigateBackOrHome = () => {
+    const historyIndex = window.history.state?.idx;
+
+    if (typeof historyIndex === 'number' && historyIndex > 0) {
+      navigate(-1);
+      return;
+    }
+
+    navigate(ROUTES.home);
+  };
 
   // 선택된 아카이브 모음 상태
   const [selectedArchiveCollection, setSelectedArchiveCollection] = useState<{
@@ -293,11 +306,12 @@ function TaskFormPage() {
             title,
             link: linkValue || undefined,
             memo: memo || undefined,
+            inout: task.inout ?? true,
           },
         },
         {
           onSuccess: () => {
-            navigate(-1);
+            navigate(ROUTES.home);
           },
         }
       );
@@ -311,11 +325,12 @@ function TaskFormPage() {
           title,
           link: linkValue || undefined,
           memo: memo || undefined,
+          inout: true,
         },
       },
       {
         onSuccess: () => {
-          navigate(-1);
+          navigate(ROUTES.home);
         },
       }
     );
@@ -330,7 +345,7 @@ function TaskFormPage() {
       setShowConfirmDialog(true);
     } else {
       // 입력된 내용이 없으면 바로 이동
-      navigate(-1);
+      navigateBackOrHome();
     }
   };
 
@@ -340,7 +355,7 @@ function TaskFormPage() {
   const handleSave = async () => {
     try {
       await handleSaveDraft();
-      navigate(-1);
+      navigateBackOrHome();
     } catch (err) {
       console.error('저장 후 나가기 실패:', err);
     }
@@ -420,7 +435,7 @@ function TaskFormPage() {
           subtitle={isEditMode ? '수정한 내용은 저장되지 않아요.' : undefined}
           positiveLabel={isEditMode ? '그만두기' : '저장하고 나가기'}
           negativeLabel={isEditMode ? '계속 수정하기' : '취소'}
-          onPositive={isEditMode ? () => navigate(-1) : handleSave}
+          onPositive={isEditMode ? navigateBackOrHome : handleSave}
           onNegative={hanldeCancel}
         />
       </ModalLayout>
