@@ -111,7 +111,7 @@ const HomeAfterLogin = () => {
   const queryClient = useQueryClient();
   const { handleTabChange } = useBottomTabNavigation();
   const BASIC_ITEM_COMPLETE_BLOCK_MESSAGE =
-    '기본 항목은 완료할 수 없어요.\n새로 추가한 항목만 완료할 수 있어요';
+    '기본 항목은 완료할 수 없어요.\n새로 추가한 항목만 완료할 수 있어요.';
   const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
   const [todoOverrides, setTodoOverrides] = useState<Record<string, boolean>>(
     {}
