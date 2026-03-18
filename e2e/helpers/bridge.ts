@@ -50,6 +50,18 @@ export function authenticatedBridgeScript(accessToken = 'mock-access-token') {
           document.dispatchEvent(event);
           window.dispatchEvent(event);
         }
+
+        if (msg.type === 'app:getInfo') {
+          var event = new MessageEvent('message', {
+            data: JSON.stringify({
+              type: 'app:info',
+              payload: { version: '9.9.9-test', runtimeVersion: '9.9.9-runtime' }
+            }),
+            bubbles: true,
+          });
+          document.dispatchEvent(event);
+          window.dispatchEvent(event);
+        }
       }
     };
   `;
