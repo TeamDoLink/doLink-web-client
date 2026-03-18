@@ -66,7 +66,7 @@ export const ArchiveBottomSheet = ({
   return (
     <div
       data-testid='bottom-sheet'
-      className='flex min-h-screen w-full items-end bg-black/60'
+      className='fixed inset-0 z-modal-content flex min-h-screen w-full items-end bg-black/60'
     >
       <form
         onSubmit={handleSubmit}

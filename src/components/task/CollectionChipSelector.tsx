@@ -3,6 +3,7 @@ import { useState } from 'react';
 export type CollectionChip = {
   id: string;
   label: string;
+  disabled?: boolean;
 };
 
 export type CollectionChipSelectorProps = {
@@ -42,13 +43,14 @@ export const CollectionChipSelector = ({
         {displayedItems.map((item) => (
           <button
             key={item.id}
-            type='button'
-            data-testid='collection-chip'
-            onClick={() => onSelect(item.id)}
+            onClick={() => !item.disabled && onSelect(item.id)}
+            disabled={item.disabled}
             className={`rounded-[6px] border px-[12px] py-[8px] text-body-md ${
-              selectedId === item.id
-                ? 'border-point bg-white text-point'
-                : 'border-transparent bg-[#f3f4f7] text-grey-600'
+              item.disabled
+                ? 'border-transparent bg-[#f3f4f7] text-grey-300'
+                : selectedId === item.id
+                  ? 'border-point bg-white text-point'
+                  : 'border-transparent bg-[#f3f4f7] text-grey-600'
             }`}
           >
             {item.label}
