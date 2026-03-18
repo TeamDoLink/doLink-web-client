@@ -128,6 +128,8 @@ const TaskDetailPage = () => {
     : collectionData;
 
   const isCompleted = displayData?.status ?? false;
+  const BASIC_ITEM_COMPLETE_BLOCK_MESSAGE =
+    '기본 항목은 완료할 수 없어요.\n새로 추가한 항목만 완료할 수 있어요.';
   const categoryLabel = displayCollection?.category ?? '';
   const categoryIcon = CATEGORY_ICON_MAP[categoryLabel] ?? etcIcon;
   const isInout = shouldUseMockData
@@ -241,7 +243,11 @@ const TaskDetailPage = () => {
       return;
     }
 
-    // 로그인 상태: 튜토리얼 할 일도 완료 가능
+    if (isTutorial) {
+      tutorialToast.showToast(BASIC_ITEM_COMPLETE_BLOCK_MESSAGE);
+      return;
+    }
+
     completeTask(
       { taskId },
       {

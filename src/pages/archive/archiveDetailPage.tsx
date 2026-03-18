@@ -168,6 +168,8 @@ const fetchTasksFromServer = async (
 };
 
 const ArchiveDetailPage = () => {
+  const BASIC_ITEM_COMPLETE_BLOCK_MESSAGE =
+    '기본 항목은 완료할 수 없어요.\n새로 추가한 항목만 완료할 수 있어요.';
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
@@ -175,7 +177,7 @@ const ArchiveDetailPage = () => {
 
   const queryClient = useQueryClient();
   const collectionId = id ? Number(id) : 0;
-  const { isTaskCompleted, toggleTask } = useTutorialTaskStore();
+  const { isTaskCompleted } = useTutorialTaskStore();
 
   // API 연결 시 사용: 페이지네이션 파라미터를 전달해야 함
   // const { data: taskData } = useListByCollection(
@@ -352,19 +354,19 @@ const ArchiveDetailPage = () => {
   }, [apiTaskList, isBeforeLoginArchive]);
 
   const handleLinkCheck = (taskId: number, checked: boolean) => {
-    setLinkStates((prev) => ({ ...prev, [taskId]: checked }));
-
     if (isBeforeLoginArchive) {
-      // 미로그인: 전역 스토어에 저장
-      toggleTask(taskId.toString());
+      loginToast.showToast('로그인 후 간편하게 DoLink를 이용해보세요');
       return;
     }
 
     // 튜토리얼 할 일이면 API 호출 X
     const task = taskList.find((t) => t.taskId === taskId);
     if (task?.isTutorial) {
+      tutorialToast.showToast(BASIC_ITEM_COMPLETE_BLOCK_MESSAGE);
       return;
     }
+
+    setLinkStates((prev) => ({ ...prev, [taskId]: checked }));
 
     completeTask(
       { taskId },
