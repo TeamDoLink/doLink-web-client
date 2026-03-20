@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import closeIcon from '@/assets/icons/common/close-36.svg';
 import { Button } from '@/components/common';
@@ -63,6 +63,11 @@ export const ArchiveBottomSheet = ({
     navigate(-1);
   };
 
+  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextValue = event.target.value;
+    setName(nextValue.slice(0, MAX_NAME_LENGTH));
+  };
+
   return (
     <div
       data-testid='bottom-sheet'
@@ -102,7 +107,7 @@ export const ArchiveBottomSheet = ({
             id='archive-name'
             label='모음 이름'
             value={name}
-            onChange={(event) => setName(event.target.value)}
+            onChange={handleNameChange}
             placeholder='모음명을 입력해주세요.'
             maxLength={MAX_NAME_LENGTH}
           />
