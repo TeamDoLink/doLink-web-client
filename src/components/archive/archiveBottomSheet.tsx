@@ -70,6 +70,15 @@ export const ArchiveBottomSheet = ({
     >
       <form
         onSubmit={handleSubmit}
+        // 엔터로 제출 차단
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            const target = event.target as HTMLElement;
+            if (target.tagName === 'INPUT') {
+              event.preventDefault();
+            }
+          }
+        }}
         className='w-full rounded-t-[32px] bg-white px-6 pb-10'
         style={{ paddingBottom: 'calc(40px + env(safe-area-inset-bottom))' }}
       >
