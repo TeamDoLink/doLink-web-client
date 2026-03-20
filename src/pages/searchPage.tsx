@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import backIcon from '@/assets/icons/common/back.svg';
@@ -11,6 +11,12 @@ import ItemChips from '@/components/common/filter/itemChips';
 import { formatRelativeDateLabel } from '@/utils/date';
 import { customInstance } from '@/api/axios-instance';
 import { ROUTES } from '@/constants/routes';
+import {
+  BEFORE_LOGIN_ARCHIVE,
+  BEFORE_LOGIN_TODO,
+} from '@/constants/beforeLoginData';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import {
   getSearchTasksUrl,
   getSearchCollectionsUrl,
@@ -26,7 +32,7 @@ import type {
 
 // Types
 interface Task {
-  id: number;
+  id: number | string;
   title: string;
   subtitle: string;
   thumbnail?: string;
@@ -34,7 +40,7 @@ interface Task {
 }
 
 interface Archive {
-  id: number;
+  id: number | string;
   title: string;
   category: string;
   itemCount: number;
@@ -163,8 +169,8 @@ const SearchResults = ({
   hasMoreArchives: boolean;
   isFetchingMoreTasks: boolean;
   isFetchingMoreArchives: boolean;
-  onTaskClick: (taskId: number) => void;
-  onArchiveClick: (archiveId: number) => void;
+  onTaskClick: (taskId: number | string) => void;
+  onArchiveClick: (archiveId: number | string) => void;
 }) => {
   const showTasks = selectedTab === '전체' || selectedTab === '할 일';
   const showArchives = selectedTab === '전체' || selectedTab === '모음';
@@ -223,6 +229,7 @@ const SearchResults = ({
 // Main Component
 const SearchPage = () => {
   const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedTab, setSelectedTab] = useState<'전체' | '할 일' | '모음'>(
@@ -249,7 +256,7 @@ const SearchPage = () => {
     queryKey: ['searchTasks', debouncedQuery],
     queryFn: ({ pageParam = 0 }) =>
       searchTasksFromApi(debouncedQuery, pageParam as number, PAGE_SIZE),
-    enabled: !!debouncedQuery.trim(),
+    enabled: isAuthenticated && !!debouncedQuery.trim(),
     initialPageParam: 0,
     getNextPageParam: (
       lastPage: PagedTaskResult,
@@ -269,7 +276,7 @@ const SearchPage = () => {
     queryKey: ['searchArchives', debouncedQuery],
     queryFn: ({ pageParam = 0 }) =>
       searchArchivesFromApi(debouncedQuery, pageParam as number, PAGE_SIZE),
-    enabled: !!debouncedQuery.trim(),
+    enabled: isAuthenticated && !!debouncedQuery.trim(),
     initialPageParam: 0,
     getNextPageParam: (
       lastPage: PagedArchiveResult,
@@ -277,10 +284,57 @@ const SearchPage = () => {
     ) => (lastPage.hasMore ? allPages.length : undefined),
   });
 
-  const tasks = taskData?.pages.flatMap((page) => page.tasks) ?? [];
-  const archives = archiveData?.pages.flatMap((page) => page.archives) ?? [];
-  const isLoading = isLoadingTasks || isLoadingArchives;
-  const error = taskError || archiveError;
+  const normalizedQuery = debouncedQuery.trim().toLowerCase();
+
+  const guestTasks = useMemo<Task[]>(() => {
+    if (isAuthenticated || !normalizedQuery) return [];
+
+    return BEFORE_LOGIN_TODO()
+      .filter(
+        (item) =>
+          item.title.toLowerCase().includes(normalizedQuery) ||
+          item.platform.toLowerCase().includes(normalizedQuery)
+      )
+      .map((item) => ({
+        id: item.id,
+        title: item.title,
+        subtitle: `${formatRelativeDateLabel(item.createdAt)} · ${item.platform}`,
+        thumbnail: '',
+        isCompleted: item.checked,
+      }));
+  }, [isAuthenticated, normalizedQuery]);
+
+  const guestArchives = useMemo<Archive[]>(() => {
+    if (isAuthenticated || !normalizedQuery) return [];
+
+    return BEFORE_LOGIN_ARCHIVE()
+      .map((item) => {
+        const categoryLabel =
+          ARCHIVE_CATEGORY_LABEL[item.category] ?? item.category;
+
+        return {
+          id: item.id,
+          title: item.title,
+          category: categoryLabel,
+          itemCount: item.itemCount,
+          images: item.images,
+        };
+      })
+      .filter(
+        (item) =>
+          item.title.toLowerCase().includes(normalizedQuery) ||
+          item.category.toLowerCase().includes(normalizedQuery)
+      );
+  }, [isAuthenticated, normalizedQuery]);
+
+  const tasks = isAuthenticated
+    ? (taskData?.pages.flatMap((page) => page.tasks) ?? [])
+    : guestTasks;
+  const archives = isAuthenticated
+    ? (archiveData?.pages.flatMap((page) => page.archives) ?? [])
+    : guestArchives;
+  const isLoading = isAuthenticated && (isLoadingTasks || isLoadingArchives);
+  const error = isAuthenticated ? taskError || archiveError : null;
 
   const handleLoadMoreTasks = () => {
     if (hasMoreTasks && !isFetchingMoreTasks) {
@@ -294,11 +348,21 @@ const SearchPage = () => {
     }
   };
 
-  const handleTaskClick = (taskId: number) => {
+  const handleTaskClick = (taskId: number | string) => {
+    if (!isAuthenticated) {
+      navigate(`${ROUTES.taskDetail}/tutorial`);
+      return;
+    }
+
     navigate(`${ROUTES.taskDetail}/${taskId}`);
   };
 
-  const handleArchiveClick = (archiveId: number) => {
+  const handleArchiveClick = (archiveId: number | string) => {
+    if (!isAuthenticated) {
+      navigate(ROUTES.archiveTutorial);
+      return;
+    }
+
     navigate(`${ROUTES.archiveDetail}/${archiveId}`);
   };
 
