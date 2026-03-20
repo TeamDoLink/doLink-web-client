@@ -102,9 +102,7 @@ export default function LinkItem({
           <div className='flex w-full flex-col items-start gap-0.5'>
             <p
               className={`w-full truncate text-body-lg ${
-                checked && !isEditMode
-                  ? 'text-grey-500 line-through'
-                  : 'text-black'
+                checked ? 'text-grey-500 line-through' : 'text-black'
               }`}
             >
               {title}
