@@ -88,9 +88,7 @@ const ArchiveEditPage = () => {
           queryClient.invalidateQueries({
             queryKey: getGetCollectDetailQueryKey(collectionId),
           });
-          navigate(`${ROUTES.archiveDetail}/${collectionId}`, {
-            replace: true,
-          });
+          navigate(-1);
         },
       }
     );

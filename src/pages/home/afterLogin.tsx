@@ -50,6 +50,8 @@ import etcIcon from '@/assets/icons/home/etc.svg';
 import nodataIcon from '@/assets/icons/home/nodata.svg';
 import defaultIcon from '@/assets/icons/home/home2.svg';
 
+const COMPLETE_MODAL_SUPPRESS_KEY = 'home-complete-modal-suppress';
+
 // Korean category label → English key 역매핑
 const CATEGORY_LABEL_TO_KEY = Object.fromEntries(
   Object.entries(ARCHIVE_CATEGORY_LABEL)
@@ -112,7 +114,10 @@ const HomeAfterLogin = () => {
   const { handleTabChange } = useBottomTabNavigation();
   const BASIC_ITEM_COMPLETE_BLOCK_MESSAGE =
     '기본 항목은 완료할 수 없어요.\n새로 추가한 항목만 완료할 수 있어요.';
-  const [suppressCompleteModal, setSuppressCompleteModal] = useState(false);
+  const [suppressCompleteModal, setSuppressCompleteModal] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem(COMPLETE_MODAL_SUPPRESS_KEY) === 'true';
+  });
   const [todoOverrides, setTodoOverrides] = useState<Record<string, boolean>>(
     {}
   );
@@ -242,7 +247,7 @@ const HomeAfterLogin = () => {
               subtitle: '완료한 일들은 해당 모음에서 확인할 수 있어요.',
               primaryLabel: '확인',
               secondaryLabel: '다시 보지 않기',
-              onSecondary: () => setSuppressCompleteModal(true),
+              onSecondary: handleSuppressCompleteModal,
             });
           }
         },
@@ -316,6 +321,13 @@ const HomeAfterLogin = () => {
 
   const handleTaskClick = (id: string) => {
     navigate(`${ROUTES.taskDetail}/${id}`);
+  };
+
+  const handleSuppressCompleteModal = () => {
+    setSuppressCompleteModal(true);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(COMPLETE_MODAL_SUPPRESS_KEY, 'true');
+    }
   };
 
   return (
