@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import closeIcon from '@/assets/icons/common/close-36.svg';
 import { Button } from '@/components/common';
@@ -48,10 +48,8 @@ export const ArchiveBottomSheet = ({
   const trimmedName = name.trim();
   const isSubmittable = trimmedName.length > 0 && selectedCategory !== null;
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleConfirm = () => {
     if (!isSubmittable || selectedCategory === null) return;
-
     onSubmit?.({ name: trimmedName, category: selectedCategory });
   };
 
@@ -73,17 +71,7 @@ export const ArchiveBottomSheet = ({
       data-testid='bottom-sheet'
       className='fixed inset-0 z-modal-content flex min-h-screen w-full items-end bg-black/60'
     >
-      <form
-        onSubmit={handleSubmit}
-        // 엔터로 제출 차단
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') {
-            const target = event.target as HTMLElement;
-            if (target.tagName === 'INPUT') {
-              event.preventDefault();
-            }
-          }
-        }}
+      <div
         className='w-full rounded-t-[32px] bg-white px-6 pb-10'
         style={{ paddingBottom: 'calc(40px + env(safe-area-inset-bottom))' }}
       >
@@ -119,13 +107,14 @@ export const ArchiveBottomSheet = ({
         </div>
 
         <Button.CtaButton
-          type='submit'
+          type='button'
           disabled={!isSubmittable}
           className='mt-8'
+          onClick={handleConfirm}
         >
           {preset.submit}
         </Button.CtaButton>
-      </form>
+      </div>
     </div>
   );
 };
