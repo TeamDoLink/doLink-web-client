@@ -29,6 +29,9 @@ export default {
       backgroundImage: {
         'gradient-primary': 'linear-gradient(to right, #394CFF, #C539DE)',
       },
+      boxShadow: {
+        card: '0 4px 12px 0 rgba(0, 0, 0, 0.03)',
+      },
       fontSize: {
         // display
         'display-2xl': ['22px', { lineHeight: '30px', fontWeight: '600' }],
