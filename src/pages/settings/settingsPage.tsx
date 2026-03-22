@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -16,8 +16,6 @@ import { logout, useGetUser } from '@/api/generated/endpoints/user/user';
 import type { ApiResponseUserResponse } from '@/api/generated/models';
 import { APP_VERSION } from '@/constants/appVersion';
 import { ROUTES } from '@/constants/routes';
-import { fetchAppVersionInfo } from '@/api/appVersion';
-import { isLatestVersion } from '@/utils/versionCompare';
 import { openExternalLink } from '@/utils/openExternalLink';
 import { sendAuthLogout } from '@/utils/nativeBridge';
 import { useAppInfoStore } from '@/stores/useAppInfoStore';
@@ -43,9 +41,6 @@ const SettingsPage = () => {
     'https://'
   );
   const appVersion = useAppInfoStore((s) => s.version);
-  const [versionFetchState, setVersionFetchState] = useState<
-    'loading' | 'success' | 'error'
-  >('loading');
 
   const displayedAppVersion = appVersion ?? APP_VERSION;
   const versionLabel = `버전`;
