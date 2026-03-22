@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react';
+import { useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import closeIcon from '@/assets/icons/common/close-36.svg';
 import { Button } from '@/components/common';
@@ -41,6 +41,7 @@ export const ArchiveBottomSheet = ({
 }: ArchiveBottomSheetProps) => {
   const navigate = useNavigate();
   const preset = MODE_PRESET[mode];
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   const [name, setName] = useState(initialName);
   const [selectedCategory, setSelectedCategory] =
@@ -62,6 +63,13 @@ export const ArchiveBottomSheet = ({
     navigate(-1);
   };
 
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === overlayRef.current) {
+      handleClose();
+      return;
+    }
+  };
+
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
     setName(nextValue.slice(0, MAX_NAME_LENGTH));
@@ -71,6 +79,8 @@ export const ArchiveBottomSheet = ({
     <div
       data-testid='bottom-sheet'
       className='flex h-full flex-col items-end justify-end bg-black/60'
+      onClick={handleOverlayClick}
+      ref={overlayRef}
     >
       <KeyboardAware className='relative flex w-full flex-col rounded-t-[32px] bg-white px-6 pb-6'>
         {/* header */}
