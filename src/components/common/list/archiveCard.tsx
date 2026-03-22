@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import imgEditIcon from '@/assets/icons/common/edit-24.svg';
 import imgDeleteIcon from '@/assets/icons/common/delete-24.svg';
 import imgMoreIcon from '@/assets/icons/common/option-24.svg';
+import Card from '@/components/card';
 
 export type ArchiveCardProps = {
   type?: 'default' | 'edit';
@@ -115,12 +116,12 @@ export default function ArchiveCard({
   const displayType = isOpen ? 'edit' : type;
 
   return (
-    <div
+    <Card
       ref={cardRef}
       data-testid='archive-card'
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      className={`flex ${width} items-start gap-3 rounded-xl bg-white p-3 pl-3 pr-4 shadow-sm`}
+      className={`flex ${width} items-start gap-3 rounded-xl bg-white p-3 pl-3 pr-4`}
       onClick={onClick ? handleCardClick : undefined}
       onKeyDown={onClick ? handleCardKeyDown : undefined}
     >
@@ -190,6 +191,6 @@ export default function ArchiveCard({
           </button>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
