@@ -22,17 +22,18 @@ const KeyboardAware = ({ children, ...props }: KeyboardAwareProps) => {
   const webviewHeight = useRef<number>(document.documentElement.clientHeight);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const getMaxHeight = useCallback(() => {
+  // webview의 높이 - keyboard의 높이 = 남은 영역의 높이
+  const maxHeight = useMemo(() => {
     return webviewHeight.current - keyboardInsetBottom;
   }, [keyboardInsetBottom]);
 
   const style = useMemo(() => {
     return {
       ...(props.style ?? {}),
-      maxHeight: `${getMaxHeight()}px`,
-      transform: `translateY(${-keyboardInsetBottom}px)`,
+      maxHeight: `${maxHeight}px`,
+      overflow: 'hidden',
     };
-  }, [getMaxHeight, keyboardInsetBottom, props.style]);
+  }, [maxHeight, props.style]);
 
   return (
     <div {...props} ref={contentRef} style={style}>

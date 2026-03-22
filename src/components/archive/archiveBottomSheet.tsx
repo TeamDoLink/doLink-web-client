@@ -4,6 +4,7 @@ import closeIcon from '@/assets/icons/common/close-36.svg';
 import { Button } from '@/components/common';
 import { ArchiveInput } from './archiveInput';
 import { ArchiveSelect, type ArchiveCategory } from './archiveSelect';
+import KeyboardAware from '../common/KeyboardAware';
 
 type ArchiveBottomSheetMode = 'create' | 'edit';
 
@@ -69,12 +70,10 @@ export const ArchiveBottomSheet = ({
   return (
     <div
       data-testid='bottom-sheet'
-      className='fixed inset-0 z-modal-content flex min-h-screen w-full items-end bg-black/60'
+      className='flex h-full flex-col items-end justify-end bg-black/60'
     >
-      <div
-        className='w-full rounded-t-[32px] bg-white px-6 pb-10'
-        style={{ paddingBottom: 'calc(40px + env(safe-area-inset-bottom))' }}
-      >
+      <KeyboardAware className='relative flex w-full flex-col rounded-t-[32px] bg-white px-6 pb-6'>
+        {/* header */}
         <div className='flex h-[76px] items-center justify-between'>
           <h1 className='text-heading-xl font-semibold text-black'>
             {preset.title}
@@ -90,7 +89,8 @@ export const ArchiveBottomSheet = ({
           </button>
         </div>
 
-        <div className='flex flex-col gap-8'>
+        {/* content */}
+        <div className='flex flex-1 flex-col gap-8 overflow-y-auto'>
           <ArchiveInput
             id='archive-name'
             label='모음 이름'
@@ -109,12 +109,12 @@ export const ArchiveBottomSheet = ({
         <Button.CtaButton
           type='button'
           disabled={!isSubmittable}
-          className='mt-8'
+          className='mt-8 w-full'
           onClick={handleConfirm}
         >
           {preset.submit}
         </Button.CtaButton>
-      </div>
+      </KeyboardAware>
     </div>
   );
 };
