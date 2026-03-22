@@ -38,7 +38,10 @@ const SettingsPage = () => {
   const userResponse = (userData as unknown as ApiResponseUserResponse)?.result;
   const memberName =
     userResponse?.nickname ?? userResponse?.socialName ?? '사용자';
-  const profileImage = userResponse?.profileImageUrl;
+  const profileImage = userResponse?.profileImageUrl?.replace(
+    'http://',
+    'https://'
+  );
   const appVersion = useAppInfoStore((s) => s.version);
   const [versionFetchState, setVersionFetchState] = useState<
     'loading' | 'success' | 'error'
