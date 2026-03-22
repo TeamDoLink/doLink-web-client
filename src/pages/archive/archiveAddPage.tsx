@@ -43,7 +43,11 @@ const ArchiveAddPage = () => {
     );
   };
 
-  return <ArchiveBottomSheet onSubmit={handleSubmit} />;
+  return (
+    <div className='absolute inset-0 z-50'>
+      <ArchiveBottomSheet onSubmit={handleSubmit} />
+    </div>
+  );
 };
 
 export default ArchiveAddPage;

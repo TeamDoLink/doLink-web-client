@@ -375,7 +375,7 @@ const TaskDetailPage = () => {
                 data-testid='task-thumbnail'
                 src={imgNoData}
                 alt='no image'
-                className='h-auto w-auto'
+                className='h-auto w-32'
               />
             </div>
           )}

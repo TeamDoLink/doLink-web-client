@@ -1,6 +1,7 @@
 import { List } from '@/components/common';
 import type { TodoItem } from '@/types';
 import { formatRelativeDateLabel } from '@/utils/date';
+import Card from '../card';
 
 type TodoSectionProps = {
   className?: string;
@@ -21,7 +22,7 @@ export const TodoSection = ({
   return (
     <section className={`mb-5 ${className}`}>
       <h2 className='mb-2 py-2 text-heading-sm text-black'>할 일</h2>
-      <div className='space-y-4 rounded-2xl bg-white py-5 shadow-[0_12px_24px_rgba(18,30,64,0.08)]'>
+      <Card className='space-y-4 rounded-2xl bg-white py-5'>
         {items.map(({ id, title, platform, checked, createdAt }) => (
           <List.TodoItem
             key={id}
@@ -32,7 +33,7 @@ export const TodoSection = ({
             onClick={() => onTaskClick?.(id)}
           />
         ))}
-      </div>
+      </Card>
     </section>
   );
 };

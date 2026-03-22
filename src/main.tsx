@@ -6,6 +6,7 @@ import '@/styles/global.css';
 import { initMockReactNativeWebView } from '@/utils/MockReactNativeWebView';
 import { initAppInfoBridge } from '@/utils/nativeBridge';
 import App from './App';
+import KeyboardAwareProvider from '@/components/providers/KeyboardAwareProvider';
 
 initMockReactNativeWebView();
 initAppInfoBridge();
@@ -23,7 +24,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <App />
+        <KeyboardAwareProvider>
+          <App />
+        </KeyboardAwareProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>

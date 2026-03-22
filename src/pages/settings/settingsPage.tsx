@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -16,8 +16,6 @@ import { logout, useGetUser } from '@/api/generated/endpoints/user/user';
 import type { ApiResponseUserResponse } from '@/api/generated/models';
 import { APP_VERSION } from '@/constants/appVersion';
 import { ROUTES } from '@/constants/routes';
-import { fetchAppVersionInfo } from '@/api/appVersion';
-import { isLatestVersion } from '@/utils/versionCompare';
 import { openExternalLink } from '@/utils/openExternalLink';
 import { sendAuthLogout } from '@/utils/nativeBridge';
 import { useAppInfoStore } from '@/stores/useAppInfoStore';
@@ -38,58 +36,14 @@ const SettingsPage = () => {
   const userResponse = (userData as unknown as ApiResponseUserResponse)?.result;
   const memberName =
     userResponse?.nickname ?? userResponse?.socialName ?? '사용자';
-  const profileImage = userResponse?.profileImageUrl;
+  const profileImage = userResponse?.profileImageUrl?.replace(
+    'http://',
+    'https://'
+  );
   const appVersion = useAppInfoStore((s) => s.version);
-  const runtimeVersion = useAppInfoStore((s) => s.runtimeVersion);
-  const [latestVersion, setLatestVersion] = useState<string | null>(null);
-  const [versionFetchState, setVersionFetchState] = useState<
-    'loading' | 'success' | 'error'
-  >('loading');
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadVersionInfo = async () => {
-      try {
-        const data = await fetchAppVersionInfo();
-
-        if (!isMounted) return;
-
-        setLatestVersion(data.latest);
-        setVersionFetchState('success');
-      } catch (error) {
-        if (!isMounted) return;
-
-        console.error('Failed to fetch version info', error);
-        setVersionFetchState('error');
-      }
-    };
-
-    loadVersionInfo();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const displayedAppVersion = appVersion ?? APP_VERSION;
-  const versionLabel = `버전 ${displayedAppVersion}`;
-  let versionRightText = '확인 불가';
-
-  if (versionFetchState === 'loading') {
-    versionRightText = '확인 중…';
-  } else if (versionFetchState === 'error') {
-    versionRightText = '확인 불가';
-  } else if (latestVersion) {
-    const latestCheck = isLatestVersion(displayedAppVersion, latestVersion);
-    versionRightText =
-      latestCheck === null
-        ? '확인 불가'
-        : latestCheck
-          ? '최신 버전입니다'
-          : '최신 버전이 아닙니다';
-  }
-
+  const versionLabel = `버전`;
   const handleLogoutClick = () => {
     setIsLogoutConfirmOpen(true);
   };
@@ -177,16 +131,16 @@ const SettingsPage = () => {
             />
             <SettingMenuItem
               leftText={versionLabel}
-              rightText={versionRightText}
+              rightText={displayedAppVersion}
               showArrow={false}
               data-testid='settings-app-version'
             />
-            <SettingMenuItem
+            {/* <SettingMenuItem
               leftText='runtimeVersion'
               rightText={runtimeVersion ?? '-'}
               showArrow={false}
               data-testid='settings-runtime-version'
-            />
+            /> */}
           </div>
         </div>
         {isAuthenticated && (

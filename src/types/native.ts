@@ -126,7 +126,15 @@ export type NativeToWebMessage =
   | { type: 'auth:token'; payload: AuthTokenPayload }
   | { type: 'auth:login'; payload: AuthTokenPayload }
   | { type: 'auth:error'; payload: AuthErrorPayload }
-  | { type: 'app:info'; payload: AppInfoPayload };
+  | { type: 'app:info'; payload: AppInfoPayload }
+  | {
+      type: 'keyboard:state';
+      payload: {
+        visible: boolean;
+        height: number;
+        duration?: number;
+      };
+    };
 
 export interface ReactNativeWebView {
   postMessage: (message: string) => void;

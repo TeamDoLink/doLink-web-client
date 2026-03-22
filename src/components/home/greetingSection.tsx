@@ -21,7 +21,7 @@ export const GreetingSection = ({
       {/* 문구 */}
       <div className='flex flex-col gap-1'>
         <h1 className='text-body-lg text-grey-600'>{mainGreeting}</h1>
-        <h2 className='text-heading-xl text-black'>
+        <h2 className='text-heading-2xl text-black'>
           {subGreeting && (
             <>
               <span className='text-black'>{subGreeting} </span>

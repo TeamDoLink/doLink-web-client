@@ -1,8 +1,13 @@
+import defaultTheme from 'tailwindcss/defaultTheme';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Pretendard', ...defaultTheme.fontFamily.sans],
+      },
       colors: {
         grey: {
           50: '#F2F3F7',
@@ -23,6 +28,9 @@ export default {
       },
       backgroundImage: {
         'gradient-primary': 'linear-gradient(to right, #394CFF, #C539DE)',
+      },
+      boxShadow: {
+        card: '0 4px 12px 0 rgba(0, 0, 0, 0.03)',
       },
       fontSize: {
         // display
