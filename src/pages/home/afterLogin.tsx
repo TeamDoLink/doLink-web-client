@@ -183,7 +183,7 @@ const HomeAfterLogin = () => {
     return recentTasks.map((t) => ({
       id: String(t.taskId ?? 0),
       title: t.title ?? '',
-      platform: t.domain ?? '',
+      platform: t.domain || (t.inout ? '직접 추가' : ''),
       checked: todoOverrides[String(t.taskId ?? 0)] ?? t.status ?? false,
       createdAt: t.createdAt ?? new Date().toISOString(),
     }));
@@ -323,6 +323,7 @@ const HomeAfterLogin = () => {
     navigate(`${ROUTES.taskDetail}/${id}`);
   };
 
+  // TODO: 함수가 호출되지않음. 그래서 다시 보지 않기를 해도 모달이 계속 뜸.
   const handleSuppressCompleteModal = () => {
     setSuppressCompleteModal(true);
     if (typeof window !== 'undefined') {

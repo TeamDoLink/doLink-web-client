@@ -2,6 +2,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useGlobalLoadingStore } from '@/stores/useGlobalLoadingStore';
 import ArchiveAfterLogin from './afterLogin';
 import ArchiveBeforeLogin from './beforeLogin';
+import { Outlet } from 'react-router-dom';
 
 const ArchivePage = () => {
   const { isAuthenticated } = useAuthStore();
@@ -15,7 +16,12 @@ const ArchivePage = () => {
     );
   }
 
-  return isAuthenticated ? <ArchiveAfterLogin /> : <ArchiveBeforeLogin />;
+  return (
+    <>
+      {isAuthenticated ? <ArchiveAfterLogin /> : <ArchiveBeforeLogin />}
+      <Outlet />
+    </>
+  );
 };
 
 export default ArchivePage;

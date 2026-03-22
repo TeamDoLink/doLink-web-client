@@ -20,7 +20,7 @@ const DEFAULT_ITEMS: OptionMenuItem[] = [
 ];
 
 const ITEM_CLASS =
-  'flex h-12 w-full items-center gap-2 px-4 text-center text-body-sm font-medium text-grey-500 transition-colors';
+  'flex w-full items-center gap-1 px-4 py-[9px] text-center text-body-sm font-medium text-grey-500 transition-colors';
 const SELECTED_CLASS = 'bg-grey-100';
 const IDLE_CLASS = 'bg-transparent hover:bg-grey-50';
 
@@ -48,7 +48,7 @@ export const OptionMenu = ({
     };
 
   return (
-    <div className='flex w-[96px] flex-col overflow-hidden rounded-2xl bg-white py-2 shadow-[0_12px_24px_rgba(18,30,64,0.08)]'>
+    <div className='flex flex-col overflow-hidden rounded-2xl bg-white py-2 shadow-[0_12px_24px_rgba(18,30,64,0.08)]'>
       {items.map(({ key, label, iconSrc }) => {
         const isSelected = selectedKey === key;
         return (
@@ -59,7 +59,7 @@ export const OptionMenu = ({
             className={`${ITEM_CLASS} ${isSelected ? SELECTED_CLASS : IDLE_CLASS}`}
           >
             <img src={iconSrc} alt='' className='h-4 w-4' aria-hidden />
-            <span className='mx-auto'>{label}</span>
+            <span>{label}</span>
           </button>
         );
       })}
