@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   addTypedMessageListener,
   isReactNativeWebView,
@@ -32,11 +32,6 @@ export default function KeyboardAwareProvider({
         console.log('payload', payload);
         const visible = Boolean(payload?.visible);
         const height = Number(payload?.height) || 0;
-        const rawDuration = payload?.duration;
-        const ms =
-          typeof rawDuration === 'number' && rawDuration >= 0
-            ? rawDuration
-            : 250;
 
         setIsKeyboardVisible(visible);
         setKeyboardInsetBottom(visible ? Math.max(0, height) : 0);

@@ -1,11 +1,5 @@
 import { useKeyboardAware } from '@/components/providers/keyboardAwareContext';
-import {
-  useCallback,
-  useDeferredValue,
-  useMemo,
-  useRef,
-  type HTMLAttributes,
-} from 'react';
+import { useMemo, useRef, type HTMLAttributes } from 'react';
 
 /**
  * content의 높이가 webView의 높이 - keyboard의 높이 값을 초과하지 않도록 제한합니다
