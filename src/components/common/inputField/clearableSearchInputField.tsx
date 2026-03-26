@@ -60,7 +60,7 @@ export default function ClearableSearchInputField({
 
   return (
     <div
-      className={`flex items-center gap-3 overflow-hidden rounded-[12px] bg-white px-4 ${height} ${className} ${
+      className={`flex items-center gap-3 rounded-[12px] bg-white px-4 ${height} ${className} ${
         isFocused ? 'border-[1px] border-grey-800' : 'border border-grey-200'
       }`}
     >
@@ -77,7 +77,7 @@ export default function ClearableSearchInputField({
         placeholder={placeholder}
         disabled={disabled}
         aria-label={ariaLabel}
-        className={`min-w-0 flex-1 border-none bg-transparent text-body-md text-grey-900 outline-none placeholder:text-grey-400 ${
+        className={`w-0 min-w-0 flex-1 border-none bg-transparent text-body-md text-grey-900 outline-none placeholder:text-grey-400 ${
           disabled ? 'cursor-not-allowed opacity-60' : ''
         }`}
       />
