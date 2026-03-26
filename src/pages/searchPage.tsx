@@ -17,6 +17,7 @@ import {
 } from '@/constants/beforeLoginData';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
+import { useGetTaskCountsForCollections } from '@/api/generated/endpoints/collection/collection';
 import {
   getSearchTasksUrl,
   getSearchCollectionsUrl,
@@ -284,7 +285,26 @@ const SearchPage = () => {
     ) => (lastPage.hasMore ? allPages.length : undefined),
   });
 
+  const { data: taskCountsData } = useGetTaskCountsForCollections({
+    query: {
+      enabled: isAuthenticated && !!debouncedQuery.trim(),
+    },
+  });
+
   const normalizedQuery = debouncedQuery.trim().toLowerCase();
+
+  const taskCountMap = useMemo(() => {
+    const list =
+      (
+        taskCountsData as {
+          result?: { collectionId: number; taskCount: number }[];
+        }
+      )?.result ?? [];
+
+    return Object.fromEntries(
+      list.map((item) => [item.collectionId, item.taskCount])
+    ) as Record<number, number>;
+  }, [taskCountsData]);
 
   const guestTasks = useMemo<Task[]>(() => {
     if (isAuthenticated || !normalizedQuery) return [];
@@ -327,12 +347,26 @@ const SearchPage = () => {
       );
   }, [isAuthenticated, normalizedQuery]);
 
+  const authenticatedArchives = useMemo<Archive[]>(() => {
+    const searchArchives =
+      archiveData?.pages.flatMap((page) => page.archives) ?? [];
+
+    return searchArchives.map((archive) => {
+      if (typeof archive.id !== 'number') {
+        return archive;
+      }
+
+      return {
+        ...archive,
+        itemCount: taskCountMap[archive.id] ?? archive.itemCount,
+      };
+    });
+  }, [archiveData, taskCountMap]);
+
   const tasks = isAuthenticated
     ? (taskData?.pages.flatMap((page) => page.tasks) ?? [])
     : guestTasks;
-  const archives = isAuthenticated
-    ? (archiveData?.pages.flatMap((page) => page.archives) ?? [])
-    : guestArchives;
+  const archives = isAuthenticated ? authenticatedArchives : guestArchives;
   const isLoading = isAuthenticated && (isLoadingTasks || isLoadingArchives);
   const error = isAuthenticated ? taskError || archiveError : null;
 
