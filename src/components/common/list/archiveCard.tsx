@@ -144,8 +144,10 @@ export default function ArchiveCard({
         </div>
 
         <div className='flex min-h-0 min-w-0 flex-1 flex-col items-start justify-center gap-1'>
-          <p className='w-full truncate text-body-lg text-black'>{title}</p>
-          <div className='flex w-full min-w-0 items-center gap-1 text-caption-sm text-grey-500'>
+          <p className='w-full truncate text-body-lg font-semibold text-black'>
+            {title}
+          </p>
+          <div className='flex w-full min-w-0 items-center gap-1 text-caption-sm font-medium text-grey-500'>
             <p className='min-w-0 truncate'>{category}</p>
             <p className='shrink-0'>·</p>
             <p className='min-w-0 truncate'>할 일 {itemCount}개</p>
