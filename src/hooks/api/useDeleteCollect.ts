@@ -3,7 +3,7 @@ import { getDeleteCollectMutationOptions } from '@/api/generated/endpoints/colle
 
 export const deleteCollectMutationOptions = mutationOptions({
   ...getDeleteCollectMutationOptions(),
-  onSuccess: (data, variables, result, context) => {
+  onSuccess: (_data, _variables, _result, context) => {
     if (!context?.client) return;
     context?.client.invalidateQueries({
       queryKey: ['collections'],

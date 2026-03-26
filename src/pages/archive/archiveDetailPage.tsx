@@ -24,7 +24,6 @@ import {
   useDeleteTask,
 } from '@/api/generated/endpoints/task/task';
 import {
-  useDeleteCollect,
   useGetCollectDetail,
   getListAll1QueryKey as getListAllQueryKey,
   getListByCategoryQueryKey,
