@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import EmptyNotice from '../feedBack/emptyNotice';
 
 interface InfiniteScrollProps<T> {
   items: T[];
@@ -8,6 +9,7 @@ interface InfiniteScrollProps<T> {
   isFetchingNextPage?: boolean;
   isLoading?: boolean;
   isError?: boolean;
+  EmptyComponent?: React.ReactElement;
   emptyMessage?: string;
   loadingMessage?: string;
   errorMessage?: string;
@@ -26,6 +28,7 @@ export const InfiniteScroll = <T,>({
   emptyMessage = '항목이 없습니다',
   loadingMessage = '불러오는 중...',
   errorMessage = '에러가 발생했습니다',
+  EmptyComponent = <EmptyNotice title={emptyMessage} />,
   keyExtractor,
   className = '',
 }: InfiniteScrollProps<T>) => {
@@ -74,8 +77,8 @@ export const InfiniteScroll = <T,>({
 
   if (items.length === 0) {
     return (
-      <div className='flex items-center justify-center py-8'>
-        <p className='text-body-md text-gray-500'>{emptyMessage}</p>
+      <div className='flex flex-1 items-center justify-center'>
+        {EmptyComponent}
       </div>
     );
   }

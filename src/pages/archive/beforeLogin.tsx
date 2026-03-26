@@ -14,6 +14,7 @@ import { BEFORE_LOGIN_ARCHIVE } from '@/constants/beforeLoginData';
 import { useArchiveUIStore } from '@/stores/useArchiveUIStore';
 import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import { useToast } from '@/hooks/useToast';
+import { EmptyNotice } from '@/components/common/feedBack';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveCategoryKey[] = [
   'all',
@@ -83,8 +84,8 @@ const ArchiveBeforeLogin = () => {
       <SearchAppBar title='모음' onClickSearch={handleClickSearch} />
 
       {/* 메인 컨텐츠 - 바텀탭바 높이만큼만 패딩 */}
-      <main className='flex-1 pb-[86px]'>
-        <section className='bg-white pt-14'>
+      <main className='flex flex-1 flex-col pb-[86px]'>
+        <section className='flex flex-col bg-white pt-14'>
           <div className='relative'>
             <div
               className='overflow-x-auto px-5'
@@ -121,7 +122,7 @@ const ArchiveBeforeLogin = () => {
             onClickAdd={handleAddArchive}
           />
         </section>
-        <section className='space-y-3 bg-grey-50 px-5 pb-24 pt-6'>
+        <section className='flex flex-col space-y-3 bg-grey-50 px-5 pb-24 pt-6'>
           {filteredArchives.map((archive) => {
             const previewImages = Array.isArray(archive.images)
               ? archive.images.slice(0, 4)
@@ -145,9 +146,12 @@ const ArchiveBeforeLogin = () => {
           })}
 
           {filteredArchives.length === 0 && (
-            <p className='text-center text-body-md text-grey-500'>
-              선택한 카테고리에 표시할 모음이 없어요.
-            </p>
+            <div className='flex flex-1 items-center justify-center'>
+              <EmptyNotice
+                title='선택한 카테고리에 표시할 모음이 없어요.'
+                subtitle='우측 상단 모음 추가 버튼으로 추가할 수 있어요.'
+              />
+            </div>
           )}
         </section>
       </main>

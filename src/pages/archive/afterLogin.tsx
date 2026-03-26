@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import { TabBar, List, FeedBack } from '@/components/common';
+import { EmptyNotice } from '@/components/common/feedBack';
 import { InfiniteScroll } from '@/components/common/infiniteScroll';
 import { FloatingButton } from '@/components/common/button';
 import { SearchAppBar } from '@/components/common/appBar/searchAppBar';
@@ -19,7 +20,6 @@ import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import {
   listAll1,
   listByCategory,
-  useDeleteCollect,
   useGetTotalCollectionCount,
   useGetCategoryCounts,
   useGetTaskCountsForCollections,
@@ -33,6 +33,7 @@ import type {
   ApiResponseListCollectionCategoryCountResponse,
   CollectionCategoryCountResponse,
 } from '@/api/generated/models';
+import { deleteCollectMutationOptions } from '@/hooks/api/useDeleteCollect';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveCategoryKey[] = [
   'all',
@@ -58,7 +59,6 @@ const PAGE_SIZE = 10;
 const ArchiveAfterLogin = () => {
   const { handleTabChange } = useBottomTabNavigation();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const handleClickSearch = () => {
     navigate(ROUTES.search);
@@ -183,7 +183,7 @@ const ArchiveAfterLogin = () => {
     return matched?.count ?? 0;
   }, [isAll, totalCountData, categoryCountsData, selectedCategory]);
 
-  const { mutate: deleteCollect } = useDeleteCollect();
+  const { mutate: deleteCollect } = useMutation(deleteCollectMutationOptions);
 
   const handleRequestDelete = (id: number) => {
     // 튜토리얼 모음이면 토스트만 표시
@@ -202,16 +202,10 @@ const ArchiveAfterLogin = () => {
       { collectId: pendingDeleteArchiveId },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: ['collections'],
-          });
-          queryClient.invalidateQueries({
-            queryKey: ['/api/v1/collect/count'],
-          });
-          queryClient.invalidateQueries({
-            queryKey: ['/api/v1/collect/category-counts'],
-          });
           setPendingDeleteArchiveId(null);
+        },
+        onError: (error) => {
+          console.error('Failed to delete collection:', error);
         },
       }
     );
@@ -245,7 +239,7 @@ const ArchiveAfterLogin = () => {
       <SearchAppBar title='모음' onClickSearch={handleClickSearch} />
 
       {/* 메인 컨텐츠 - 바텀탭바 높이만큼만 패딩 */}
-      <main className='flex-1 pb-[86px]'>
+      <main className='flex flex-1 flex-col pb-[86px]'>
         <section className='bg-white pt-14'>
           {/* 스크롤바 없애기 */}
           <div className='relative'>
@@ -287,11 +281,17 @@ const ArchiveAfterLogin = () => {
             onClickAdd={handleClickAdd}
           />
         </section>
-        <section className='bg-grey-50 px-5 pb-[26px] pt-6'>
+        <section className='flex flex-1 flex-col bg-grey-50 px-5 pb-[26px] pt-6'>
           <InfiniteScroll<CollectionResponse>
             items={archives}
             keyExtractor={(archive: CollectionResponse) =>
               archive.collectionId?.toString() ?? `collection-${archive.name}`
+            }
+            EmptyComponent={
+              <EmptyNotice
+                title='아직 모음이 없어요'
+                subtitle='우측 상단 모음 추가 버튼으로 추가할 수 있어요.'
+              />
             }
             renderItem={(archive: CollectionResponse) => {
               const previewImages = Array.isArray(archive.thumbnails)
@@ -321,7 +321,6 @@ const ArchiveAfterLogin = () => {
             isFetchingNextPage={isFetchingNextPage}
             isLoading={isLoading}
             isError={isError}
-            emptyMessage='아직 모음이 없어요'
             loadingMessage='모음을 불러오는 중입니다'
             errorMessage='모음을 불러오는 데 실패했습니다'
             className='space-y-3'
