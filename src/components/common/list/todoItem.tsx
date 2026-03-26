@@ -43,11 +43,13 @@ export default function TodoItem({
       {/* Content */}
       <div className='flex min-w-0 flex-1 flex-col items-start gap-0'>
         <div className='flex w-full items-center gap-1 overflow-hidden px-0 py-0.5'>
-          <p className='truncate text-body-lg text-black'>{title}</p>
+          <p className='truncate text-body-lg font-semibold text-black'>
+            {title}
+          </p>
         </div>
 
         {subtitle && (
-          <div className='flex items-center gap-1 text-caption-sm text-grey-500'>
+          <div className='flex items-center gap-1 text-caption-sm font-medium text-grey-500'>
             <p className='shrink-0'>{subtitle}</p>
           </div>
         )}
