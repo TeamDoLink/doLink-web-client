@@ -1,10 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import { TabBar, List, FeedBack } from '@/components/common';
 import { EmptyNotice } from '@/components/common/feedBack';
 import { InfiniteScroll } from '@/components/common/infiniteScroll';
@@ -63,7 +59,6 @@ const PAGE_SIZE = 10;
 const ArchiveAfterLogin = () => {
   const { handleTabChange } = useBottomTabNavigation();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const handleClickSearch = () => {
     navigate(ROUTES.search);
@@ -326,7 +321,6 @@ const ArchiveAfterLogin = () => {
             isFetchingNextPage={isFetchingNextPage}
             isLoading={isLoading}
             isError={isError}
-            emptyMessage='아직 모음이 없어요'
             loadingMessage='모음을 불러오는 중입니다'
             errorMessage='모음을 불러오는 데 실패했습니다'
             className='space-y-3'

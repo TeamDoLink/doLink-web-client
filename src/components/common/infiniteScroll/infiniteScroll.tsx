@@ -28,7 +28,7 @@ export const InfiniteScroll = <T,>({
   emptyMessage = '항목이 없습니다',
   loadingMessage = '불러오는 중...',
   errorMessage = '에러가 발생했습니다',
-  EmptyComponent = <EmptyNotice />,
+  EmptyComponent = <EmptyNotice title={emptyMessage} />,
   keyExtractor,
   className = '',
 }: InfiniteScrollProps<T>) => {
