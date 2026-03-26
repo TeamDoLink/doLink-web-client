@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import closeIcon from '@/assets/icons/common/close-36.svg';
@@ -31,6 +32,13 @@ interface ArchiveBottomSheetProps {
 }
 
 const MAX_NAME_LENGTH = 20;
+
+const OVERLAY_TRANSITION = { duration: 0.3, ease: [0.32, 0.72, 0, 1] as const };
+const SHEET_TRANSITION = {
+  type: 'spring' as const,
+  duration: 0.3,
+  bounce: 0.22,
+};
 
 export const ArchiveBottomSheet = ({
   mode = 'create',
@@ -78,53 +86,67 @@ export const ArchiveBottomSheet = ({
   return (
     <div
       data-testid='bottom-sheet'
-      className='flex h-full flex-col items-end justify-end bg-black/60'
+      className='relative flex h-full flex-col items-end justify-end'
       onClick={handleOverlayClick}
       ref={overlayRef}
     >
-      <KeyboardAware className='relative flex w-full flex-col rounded-t-[32px] bg-white px-6 pb-6'>
-        {/* header */}
-        <div className='flex h-[76px] items-center justify-between'>
-          <h1 className='text-heading-xl font-semibold text-black'>
-            {preset.title}
-          </h1>
-          <button
+      <motion.div
+        aria-hidden
+        className='pointer-events-none absolute inset-0 z-0 bg-black'
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.6 }}
+        transition={OVERLAY_TRANSITION}
+      />
+      <motion.div
+        className='relative z-10 w-full'
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        transition={SHEET_TRANSITION}
+      >
+        <KeyboardAware className='relative flex w-full flex-col rounded-t-[32px] bg-white px-6 pb-6'>
+          {/* header */}
+          <div className='flex h-[76px] items-center justify-between'>
+            <h1 className='text-heading-xl font-semibold text-black'>
+              {preset.title}
+            </h1>
+            <button
+              type='button'
+              aria-label='닫기'
+              onClick={handleClose}
+              className='flex h-9 w-9 items-center justify-center'
+              style={{ color: '#212121' }}
+            >
+              <img src={closeIcon} alt='' className='h-9 w-9' />
+            </button>
+          </div>
+
+          {/* content */}
+          <div className='flex flex-1 flex-col gap-8 overflow-y-auto'>
+            <ArchiveInput
+              id='archive-name'
+              label='모음 이름'
+              value={name}
+              onChange={handleNameChange}
+              placeholder='모음명을 입력해주세요.'
+              maxLength={MAX_NAME_LENGTH}
+            />
+
+            <ArchiveSelect
+              selected={selectedCategory}
+              onSelect={setSelectedCategory}
+            />
+          </div>
+
+          <Button.CtaButton
             type='button'
-            aria-label='닫기'
-            onClick={handleClose}
-            className='flex h-9 w-9 items-center justify-center'
-            style={{ color: '#212121' }}
+            disabled={!isSubmittable}
+            className='mt-8 w-full'
+            onClick={handleConfirm}
           >
-            <img src={closeIcon} alt='' className='h-9 w-9' />
-          </button>
-        </div>
-
-        {/* content */}
-        <div className='flex flex-1 flex-col gap-8 overflow-y-auto'>
-          <ArchiveInput
-            id='archive-name'
-            label='모음 이름'
-            value={name}
-            onChange={handleNameChange}
-            placeholder='모음명을 입력해주세요.'
-            maxLength={MAX_NAME_LENGTH}
-          />
-
-          <ArchiveSelect
-            selected={selectedCategory}
-            onSelect={setSelectedCategory}
-          />
-        </div>
-
-        <Button.CtaButton
-          type='button'
-          disabled={!isSubmittable}
-          className='mt-8 w-full'
-          onClick={handleConfirm}
-        >
-          {preset.submit}
-        </Button.CtaButton>
-      </KeyboardAware>
+            {preset.submit}
+          </Button.CtaButton>
+        </KeyboardAware>
+      </motion.div>
     </div>
   );
 };

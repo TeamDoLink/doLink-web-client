@@ -103,7 +103,7 @@ const HomeBeforeLogin = () => {
           <div className='mx-auto flex flex-col px-5'>
             <section className='flex items-center justify-between'>
               <div className='flex flex-col items-start'>
-                <h1 className='text-heading-xl text-black'>
+                <h1 className='text-heading-2xl text-black'>
                   두링크가 처음이라면
                 </h1>
                 <LoginButton onClick={handleLoginClick} />
