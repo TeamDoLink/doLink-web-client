@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { BackDetailBar } from '@/components/common/appBar';
 import { EmptyNotice } from '@/components/common/feedBack';
 import { FloatingButton } from '@/components/common/button/floatingButton';
@@ -48,6 +52,7 @@ import studyIcon from '@/assets/icons/category/detail/study.svg';
 import tipsIcon from '@/assets/icons/category/detail/tips.svg';
 import etcIcon from '@/assets/icons/category/detail/etc.svg';
 import todoIcon from '@/assets/icons/category/detail/todo.svg';
+import { deleteCollectMutationOptions } from '@/hooks/api/useDeleteCollect';
 
 const CATEGORY_ICON_MAP: Record<string, string> = {
   맛집: restaurantIcon,
@@ -192,7 +197,7 @@ const ArchiveDetailPage = () => {
 
   const { mutate: completeTask } = useCompleteTask();
   const { mutateAsync: deleteTask } = useDeleteTask();
-  const { mutate: deleteCollect } = useDeleteCollect();
+  const { mutate: deleteCollect } = useMutation(deleteCollectMutationOptions);
 
   // API 데이터만 사용
   const apiCollectionData =

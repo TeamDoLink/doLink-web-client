@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { TabBar, List, FeedBack } from '@/components/common';
 import { EmptyNotice } from '@/components/common/feedBack';
 import { InfiniteScroll } from '@/components/common/infiniteScroll';
@@ -20,7 +24,6 @@ import { ARCHIVE_CATEGORY_LABEL } from '@/utils/archiveCategory';
 import {
   listAll1,
   listByCategory,
-  useDeleteCollect,
   useGetTotalCollectionCount,
   useGetCategoryCounts,
   useGetTaskCountsForCollections,
@@ -34,6 +37,7 @@ import type {
   ApiResponseListCollectionCategoryCountResponse,
   CollectionCategoryCountResponse,
 } from '@/api/generated/models';
+import { deleteCollectMutationOptions } from '@/hooks/api/useDeleteCollect';
 
 const ARCHIVE_CATEGORY_KEYS: ArchiveCategoryKey[] = [
   'all',
@@ -184,7 +188,7 @@ const ArchiveAfterLogin = () => {
     return matched?.count ?? 0;
   }, [isAll, totalCountData, categoryCountsData, selectedCategory]);
 
-  const { mutate: deleteCollect } = useDeleteCollect();
+  const { mutate: deleteCollect } = useMutation(deleteCollectMutationOptions);
 
   const handleRequestDelete = (id: number) => {
     // 튜토리얼 모음이면 토스트만 표시
@@ -203,16 +207,10 @@ const ArchiveAfterLogin = () => {
       { collectId: pendingDeleteArchiveId },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: ['collections'],
-          });
-          queryClient.invalidateQueries({
-            queryKey: ['/api/v1/collect/count'],
-          });
-          queryClient.invalidateQueries({
-            queryKey: ['/api/v1/collect/category-counts'],
-          });
           setPendingDeleteArchiveId(null);
+        },
+        onError: (error) => {
+          console.error('Failed to delete collection:', error);
         },
       }
     );
