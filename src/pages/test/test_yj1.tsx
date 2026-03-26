@@ -149,7 +149,7 @@ function ClearableSearchInputDemo() {
         value={val}
         onChange={setVal}
         leadingIcon={<img src={searchIcon} alt='search' className='h-5 w-5' />}
-        width='w-full'
+        className='w-full'
       />
 
       <p className='text-sm text-grey-600'>
@@ -244,7 +244,7 @@ const Test_yj1 = () => {
                   leadingIcon={
                     <img src={searchIcon} alt='search' className='h-5 w-5' />
                   }
-                  width='w-full'
+                  className='w-full'
                 />
 
                 {searchLinkQuery && (
