@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { TabBar, List, FeedBack } from '@/components/common';
+import { EmptyNotice } from '@/components/common/feedBack';
 import { InfiniteScroll } from '@/components/common/infiniteScroll';
 import { FloatingButton } from '@/components/common/button';
 import { SearchAppBar } from '@/components/common/appBar/searchAppBar';
@@ -245,7 +246,7 @@ const ArchiveAfterLogin = () => {
       <SearchAppBar title='모음' onClickSearch={handleClickSearch} />
 
       {/* 메인 컨텐츠 - 바텀탭바 높이만큼만 패딩 */}
-      <main className='flex-1 pb-[86px]'>
+      <main className='flex flex-1 flex-col pb-[86px]'>
         <section className='bg-white pt-14'>
           {/* 스크롤바 없애기 */}
           <div className='relative'>
@@ -287,11 +288,17 @@ const ArchiveAfterLogin = () => {
             onClickAdd={handleClickAdd}
           />
         </section>
-        <section className='bg-grey-50 px-5 pb-[26px] pt-6'>
+        <section className='flex flex-1 flex-col bg-grey-50 px-5 pb-[26px] pt-6'>
           <InfiniteScroll<CollectionResponse>
             items={archives}
             keyExtractor={(archive: CollectionResponse) =>
               archive.collectionId?.toString() ?? `collection-${archive.name}`
+            }
+            EmptyComponent={
+              <EmptyNotice
+                title='아직 모음이 없어요'
+                subtitle='우측 상단 모음 추가 버튼으로 추가할 수 있어요.'
+              />
             }
             renderItem={(archive: CollectionResponse) => {
               const previewImages = Array.isArray(archive.thumbnails)
