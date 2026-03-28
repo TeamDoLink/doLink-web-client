@@ -128,10 +128,7 @@ export default function ArchiveCard({
       <div className='flex min-h-0 min-w-0 flex-1 items-center gap-4'>
         <div className='grid size-[60px] shrink-0 grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden rounded-[9.6px]'>
           {slots.map((imageSrc, index) => (
-            <div
-              key={index}
-              className='relative overflow-hidden rounded-[4px] bg-black/20'
-            >
+            <div key={index} className='relative overflow-hidden bg-black/20'>
               {imageSrc && (
                 <img
                   alt={`thumbnail-${index}`}

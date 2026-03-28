@@ -122,7 +122,7 @@ const ArchiveBeforeLogin = () => {
             onClickAdd={handleAddArchive}
           />
         </section>
-        <section className='flex flex-col space-y-3 bg-grey-50 px-5 pb-24 pt-6'>
+        <section className='flex flex-1 flex-col bg-grey-50 px-5 pb-[26px] pt-6'>
           {filteredArchives.map((archive) => {
             const previewImages = Array.isArray(archive.images)
               ? archive.images.slice(0, 4)
@@ -148,7 +148,7 @@ const ArchiveBeforeLogin = () => {
           {filteredArchives.length === 0 && (
             <div className='flex flex-1 items-center justify-center'>
               <EmptyNotice
-                title='선택한 카테고리에 표시할 모음이 없어요.'
+                title='아직 모음이 없어요'
                 subtitle='우측 상단 모음 추가 버튼으로 추가할 수 있어요.'
               />
             </div>
