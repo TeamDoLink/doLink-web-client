@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { BackDetailBar } from '@/components/common/appBar';
 import { API_BASE_URL } from '@/api/axios-instance';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
+import googleIcon from '@/assets/icons/auth/google.svg';
 // import naverIcon from '@/assets/icons/auth/naver.svg';
 // import appleIcon from '@/assets/icons/auth/apple.svg';
 import logo from '@/assets/logos/logo.svg';
@@ -17,6 +18,10 @@ const LoginPage = () => {
 
   const handleKakaoLogin = () => {
     window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
   };
 
   return (
@@ -42,6 +47,14 @@ const LoginPage = () => {
               onClick={handleKakaoLogin}
             >
               <img src={kakaoIcon} alt='' className={SOCIAL_BUTTON_SIZE} />
+            </button>
+            <button
+              type='button'
+              className={`flex ${SOCIAL_BUTTON_SIZE} items-center justify-center rounded-full bg-transparent`}
+              aria-label='구글로 로그인'
+              onClick={handleGoogleLogin}
+            >
+              <img src={googleIcon} alt='' className={SOCIAL_BUTTON_SIZE} />
             </button>
             {/* <button
               type='button'
