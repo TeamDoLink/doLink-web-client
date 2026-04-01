@@ -1,26 +1,25 @@
-interface GradientBackgroundProps {
-  className?: string;
-  children?: React.ReactNode;
-}
+import { cn } from '@/lib/cn';
 
-/**
- * 배경 그라데이션 컴포넌트
- */
+type BackgroundProps = React.HTMLAttributes<HTMLDivElement>;
+
 export const GradientBackground = ({
-  className = '',
-  children,
-}: GradientBackgroundProps) => {
+  className,
+  ...props
+}: BackgroundProps) => {
+  const { style, ...restProps } = props;
+
   return (
-    <div className={`relative flex min-h-screen flex-col ${className}`}>
-      <div
-        className='pointer-events-none absolute inset-0 -z-10'
-        aria-hidden
-        style={{
-          background:
-            'linear-gradient(180deg, #FFFFFF 0%, #F8F9FC 35%, #EEF1F8 70%, #E5E9F3 100%)',
-        }}
-      />
-      {children}
-    </div>
+    <div
+      className={cn('relative flex min-h-screen flex-col', className)}
+      style={{
+        backgroundColor: '#F2F3F7',
+        backgroundImage:
+          'linear-gradient(180deg, rgba(255, 255, 255, 0.36) 0%, rgba(255, 255, 255, 0) 100%)',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: '100% 275px',
+        ...style,
+      }}
+      {...restProps}
+    />
   );
 };
