@@ -10,13 +10,13 @@ import type { PageableObject } from './pageableObject';
 import type { SortObject } from './sortObject';
 
 export interface SliceCollectionResponse {
-  first?: boolean;
-  last?: boolean;
+  pageable?: PageableObject;
   size?: number;
   content?: CollectionResponse[];
   number?: number;
   sort?: SortObject;
-  pageable?: PageableObject;
   numberOfElements?: number;
+  first?: boolean;
+  last?: boolean;
   empty?: boolean;
 }
