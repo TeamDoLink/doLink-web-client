@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { BackDetailBar } from '@/components/common/appBar/backDetailAppBar';
 import { GreyLine } from '@/components/common/line/greyLine';
@@ -16,7 +16,6 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useTutorialTaskStore } from '@/stores/useTutorialTaskStore';
 import { useToast } from '@/hooks/useToast';
 import {
-  useGetTask,
   useCompleteTask,
   useDeleteTask,
   getGetTaskQueryKey,
@@ -24,10 +23,8 @@ import {
 } from '@/api/generated/endpoints/task/task';
 import { formatRelativeDateLabel } from '@/utils/date';
 import { useGetCollectDetail } from '@/api/generated/endpoints/collection/collection';
-import type {
-  ApiResponseTaskResponse,
-  ApiResponseCollectionDetailResponse,
-} from '@/api/generated/models';
+import { useTaskDetailNavigation } from '@/hooks/useTaskDetailNavigation';
+import type { ApiResponseCollectionDetailResponse } from '@/api/generated/models';
 
 // 아이콘
 import imgNoData from '@/assets/icons/common/no-img-data.svg';
@@ -59,10 +56,8 @@ const CATEGORY_ICON_MAP: Record<string, string> = {
 
 const TaskDetailPage = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const taskId = Number(id);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { isTaskCompleted } = useTutorialTaskStore();
 
@@ -70,12 +65,13 @@ const TaskDetailPage = () => {
   const isTutorialPath = location.pathname.includes('/tutorial');
   const shouldUseMockData = !isAuthenticated && isTutorialPath;
 
-  // API 호출 (로그인 상태일 때는 항상 호출)
-  const { data: taskResponse, isLoading: isLoadingTask } = useGetTask(taskId, {
-    query: { enabled: isAuthenticated },
-  });
-  const apiTaskResponse = taskResponse as unknown as ApiResponseTaskResponse;
-  const taskData = shouldUseMockData ? null : apiTaskResponse?.result;
+  // URL에 따라 task/detail 또는 share 데이터 패치
+  const {
+    taskData: fetchedTaskData,
+    isLoading: isLoadingTask,
+    isShareMode,
+  } = useTaskDetailNavigation();
+  const taskData = shouldUseMockData ? null : fetchedTaskData;
   const collectionId = taskData?.collectionId;
 
   const { data: collectionResponse, isLoading: isLoadingCollection } =
@@ -172,7 +168,7 @@ const TaskDetailPage = () => {
         setIsOptionMenuOpen(false);
         return;
       }
-      navigate(`${ROUTES.taskEdit}/${taskId}`);
+      navigate(`${ROUTES.taskEdit}/${taskData?.taskId}`);
     } else if (key === 'delete') {
       if (isTutorial) {
         // 튜토리얼 할 일: 로그인 상태에 따라 다른 토스트 표시
@@ -193,7 +189,7 @@ const TaskDetailPage = () => {
 
   const handleConfirmDelete = () => {
     deleteTask(
-      { taskId },
+      { taskId: taskData?.taskId ?? 0 },
       {
         onSuccess: () => {
           // 모음 관련 태스크 목록 캐시 무효화
@@ -248,6 +244,7 @@ const TaskDetailPage = () => {
       return;
     }
 
+    const taskId = taskData?.taskId ?? 0;
     completeTask(
       { taskId },
       {
@@ -310,14 +307,14 @@ const TaskDetailPage = () => {
       <div className='fixed left-0 right-0 top-0 z-header' ref={appBarRef}>
         <BackDetailBar
           title='할 일 상세'
-          rightIcons='option'
+          rightIcons={taskData?.isOwner ? 'option' : []}
           onClickBack={handleBack}
           onClickOption={handleOption}
         />
       </div>
 
       {/* 옵션 메뉴 */}
-      {isOptionMenuOpen && (
+      {taskData?.isOwner && isOptionMenuOpen && (
         <>
           <div
             className='fixed inset-0 z-modal-overlay'
@@ -452,19 +449,21 @@ const TaskDetailPage = () => {
             링크 바로가기
           </CtaButton>
 
-          <button
-            onClick={handleComplete}
-            className='flex w-[49px] shrink-0 flex-col items-center'
-          >
-            <CheckIcon
-              className={`h-8 w-8 ${isCompleted ? 'text-point' : 'text-grey-400'}`}
-            />
-            <span
-              className={`text-body-lg ${isCompleted ? 'text-point' : 'text-grey-400'}`}
+          {!isShareMode && (
+            <button
+              onClick={handleComplete}
+              className='flex w-[49px] shrink-0 flex-col items-center'
             >
-              완료하기
-            </span>
-          </button>
+              <CheckIcon
+                className={`h-8 w-8 ${isCompleted ? 'text-point' : 'text-grey-400'}`}
+              />
+              <span
+                className={`text-body-lg ${isCompleted ? 'text-point' : 'text-grey-400'}`}
+              >
+                완료하기
+              </span>
+            </button>
+          )}
         </div>
       </main>
 
