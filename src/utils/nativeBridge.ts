@@ -405,7 +405,7 @@ export const requestTokenReissue = (
  * @param taskId 공유할 태스크 ID
  */
 export const osShareTask = (taskId: number): void => {
-  const url = `dolink://task/detail/${taskId}`;
+  const url = `https://app.dolink.team/task/detail/${taskId}`;
   const payload: OsSharePayload = { url };
   sendMessageToRN({
     type: 'os:share',
