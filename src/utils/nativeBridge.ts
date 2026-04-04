@@ -13,6 +13,8 @@ import type {
   AuthTokenPayload,
   AuthErrorPayload,
 } from '@/types/native';
+import { createShareToken } from '@/api/generated/endpoints/share/share';
+import type { ApiResponseShareTokenResponse } from '@/api/generated/models';
 import { detectPlatform } from './webview';
 import { AVAILABLE_WEB_MOCK_BRIDGE } from '@/constants/native';
 import { useAppInfoStore } from '@/stores/useAppInfoStore';
@@ -401,11 +403,16 @@ export const requestTokenReissue = (
 // ============================================
 
 /**
- * OS 네이티브 Share Sheet를 통해 dolink:// 딥링크 공유
+ * OS 네이티브 Share Sheet를 통해 공유 토큰 기반 링크 공유
  * @param taskId 공유할 태스크 ID
  */
-export const osShareTask = (taskId: number): void => {
-  const url = `https://app.dolink.team/task/detail/${taskId}`;
+export const osShareTask = async (taskId: number): Promise<void> => {
+  const response = await createShareToken(taskId);
+  const data = response as unknown as ApiResponseShareTokenResponse;
+  const shareToken = data?.result?.shareToken;
+  if (!shareToken) return;
+
+  const url = `https://app.dolink.team/share/${shareToken}`;
   const payload: OsSharePayload = { url };
   sendMessageToRN({
     type: 'os:share',
