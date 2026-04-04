@@ -6,14 +6,6 @@
  * OpenAPI spec version: v1.0.0
  */
 
-export interface TaskCreateRequest {
-  collectionId: number;
-  /**
-   * @minLength 0
-   * @maxLength 100
-   */
-  title?: string;
-  link?: string;
-  memo?: string;
-  inout?: boolean;
+export interface ShareTokenResponse {
+  shareToken?: string;
 }
