@@ -46,6 +46,7 @@ const AppRouter = () => {
       />
       <Route path={ROUTES.login} element={<LoginPage />} />
       <Route path={`${ROUTES.taskDetail}/:id`} element={<TaskDetailPage />} />
+      <Route path={`${ROUTES.shareTask}/:token`} element={<TaskDetailPage />} />
       <Route path={`${ROUTES.taskEdit}/:id`} element={<TaskFormPage />} />
       <Route path={ROUTES.taskCreate} element={<TaskFormPage />} />
       <Route path={ROUTES.search} element={<SearchPage />} />
