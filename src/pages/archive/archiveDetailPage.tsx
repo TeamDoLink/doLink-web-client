@@ -403,6 +403,10 @@ const ArchiveDetailPage = () => {
     navigate(ROUTES.search);
   };
 
+  const handleShareTask = async (taskId: number) => {
+    await osShareTask(taskId);
+  };
+
   const handleTaskClick = (taskId: number) => {
     if (isBeforeLoginArchive) {
       navigate(ROUTES.taskDetail + '/tutorial');
@@ -744,7 +748,7 @@ const ArchiveDetailPage = () => {
                   }
                 }}
                 onShareClick={(taskId) => {
-                  osShareTask(taskId);
+                  void handleShareTask(taskId);
                 }}
                 onEditClick={(taskId) => {
                   // 할 일 편집 버튼(연필 아이콘) 클릭 시
