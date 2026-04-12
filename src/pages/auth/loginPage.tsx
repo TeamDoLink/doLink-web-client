@@ -3,6 +3,10 @@ import { BackDetailBar } from '@/components/common/appBar';
 import { API_BASE_URL } from '@/api/axios-instance';
 import kakaoIcon from '@/assets/icons/auth/kakao.svg';
 import googleIcon from '@/assets/icons/auth/google.svg';
+import {
+  isReactNativeWebView,
+  sendGoogleLoginRequest,
+} from '@/utils/nativeBridge';
 // import naverIcon from '@/assets/icons/auth/naver.svg';
 // import appleIcon from '@/assets/icons/auth/apple.svg';
 import logo from '@/assets/logos/logo.svg';
@@ -21,7 +25,11 @@ const LoginPage = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+    if (isReactNativeWebView()) {
+      sendGoogleLoginRequest();
+    } else {
+      window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+    }
   };
 
   return (

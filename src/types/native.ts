@@ -112,6 +112,7 @@ export type WebToNativeMessage =
   | NavigateBackExitMessage
   | { type: 'auth:login'; payload: Record<string, never> }
   | { type: 'auth:logout'; payload: Record<string, never> }
+  | { type: 'auth:google-login'; payload: Record<string, never> }
   | { type: 'app:getInfo'; payload: Record<string, never> };
 
 /**
