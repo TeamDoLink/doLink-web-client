@@ -295,6 +295,14 @@ export const sendAuthLogout = (): void => {
 };
 
 /**
+ * Native에 Google 로그인 요청 (auth:google-login)
+ * 앱에서 Google Sign-In 진행 후 auth:login으로 accessToken 응답
+ */
+export const sendGoogleLoginRequest = (): void => {
+  sendMessageToRN({ type: 'auth:google-login', payload: {} });
+};
+
+/**
  * Native에 URL 열기 요청을 보냄 (Fire-and-Forget)
  * @param url 열 URL
  * @example
